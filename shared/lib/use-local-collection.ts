@@ -1,0 +1,3 @@
+'use client';
+import { useEffect,useState } from 'react';import { toast } from 'sonner';
+export function useLocalCollection<T>(key:string,initial:T[]){const [items,setItems]=useState(initial),[loaded,setLoaded]=useState(false);useEffect(()=>{try{const raw=localStorage.getItem(key);if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))setItems(parsed);}}catch{toast.error('Não foi possível recuperar os dados salvos neste navegador.');}setLoaded(true);},[key]);function save(next:T[]){try{localStorage.setItem(key,JSON.stringify(next));setItems(next);return true;}catch{toast.error('Não foi possível salvar neste navegador.');return false;}}return {items,save,loaded};}

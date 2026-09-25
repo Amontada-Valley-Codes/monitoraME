@@ -1,0 +1,2 @@
+import type { ReactNode } from 'react';
+export function PageHeader({eyebrow,title,description,actions}:{eyebrow?:string;title:string;description:string;actions?:ReactNode}){return <div className="flex flex-wrap justify-between items-end gap-4 mb-6"><div>{eyebrow&&<p className="eyebrow text-primary mb-2">{eyebrow}</p>}<h1 className="font-semibold text-2xl sm:text-3xl">{title}</h1><p className="text-sm sm:text-base text-muted-foreground mt-2">{description}</p></div><div className="flex flex-wrap items-center gap-2 no-print">{actions}</div></div>;}

@@ -1,0 +1,22 @@
+'use client';
+import { useState } from 'react';
+import { AreaChart } from '@/components/charts/area-chart';
+import { Area } from '@/components/charts/area';
+import { Grid } from '@/components/charts/grid';
+import { XAxis } from '@/components/charts/x-axis';
+import { YAxis } from '@/components/charts/y-axis';
+import { ChartTooltip } from '@/components/charts/tooltip';
+import { BarChart } from '@/components/charts/bar-chart';
+import { Bar } from '@/components/charts/bar';
+import { BarXAxis } from '@/components/charts/bar-x-axis';
+import { PieChart } from '@/components/charts/pie-chart';
+import { PieSlice } from '@/components/charts/pie-slice';
+import { PieCenter } from '@/components/charts/pie-center';
+import { Button } from '@/components/ui/button';
+import { compactMoney,money,percent,ratio } from '@/shared/lib/format';
+export type Series={key:string;label:string;color:string};
+export function TrendChart({data,series}:{data:Record<string,unknown>[];series:Series[]}){return <div className="chart-box"><AreaChart data={data} className="h-full w-full" style={{height:'100%'}} margin={{top:16,right:20,bottom:36,left:72}} animationDuration={500}><Grid horizontal numTicksRows={4}/>{series.map(s=><Area key={s.key} dataKey={s.key} fill={s.color} stroke={s.color} fillOpacity={.15} strokeWidth={2.5}/>)}<XAxis numTicks={6}/><YAxis numTicks={4} formatValue={v=>compactMoney(v)}/><ChartTooltip showDatePill={false} content={({point})=><div className="p-3 text-sm"><p className="font-medium mb-2">{String(point.label??'')}</p>{series.map(s=><div key={s.key} className="flex justify-between gap-6 py-1"><span>{s.label}</span><span className="font-mono">{money(Number(point[s.key]))}</span></div>)}</div>}/></AreaChart></div>;}
+export function BarsChart({data,series,percentage=false}:{data:Record<string,unknown>[];series:Series[];percentage?:boolean}){return <div className="chart-box"><BarChart data={data} xDataKey="name" className="h-full w-full" margin={{top:16,right:16,bottom:44,left:percentage?48:72}} animationDuration={450} barGap={.4}><Grid horizontal numTicksRows={4}/>{series.map(s=><Bar key={s.key} dataKey={s.key} fill={s.color}/>)}<BarXAxis/><YAxis formatValue={v=>percentage?percent(v):compactMoney(v)} numTicks={4}/><ChartTooltip showDatePill={false} content={({point})=><div className="p-3 text-sm"><p className="font-semibold mb-2">{String(point.name)}</p>{series.map(s=><p key={s.key}>{s.label}: {percentage?percent(Number(point[s.key])):money(Number(point[s.key]))}</p>)}</div>}/></BarChart></div>;}
+export function DonutChart({data,total,center,onSelect}:{data:{name:string;key:string;value:number;color:string}[];total:number;center?:string;onSelect?:(key:string)=>void}){
+ const [hover,setHover]=useState<number|null>(null);const values=data.map(d=>({label:d.name,value:d.value,color:d.color}));return <div className="flex flex-col sm:flex-row items-center gap-5"><div className="size-48 shrink-0"><PieChart data={values} innerRadius={64} padAngle={.025} hoveredIndex={hover} onHoverChange={setHover}><PieCenter>{({value,label,isHovered})=><div className="text-center px-2"><p className="metric text-xl text-primary">{isHovered?percent(ratio(value,total)):center??'100%'}</p><p className="text-xs text-muted-foreground mt-1">{isHovered?label:'do valor considerado'}</p></div>}</PieCenter>{values.map((_,i)=><PieSlice key={i} index={i} showGlow={false} hoverEffect="grow"/>)}</PieChart></div><div className="w-full space-y-1">{data.map((d,i)=><Button key={d.key} variant="ghost" onClick={()=>onSelect?.(d.key)} onMouseEnter={()=>setHover(i)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(i)} onBlur={()=>setHover(null)} className="flex w-full h-auto min-h-11 items-center justify-between px-2 text-left font-normal"><span className="flex items-center gap-2 min-w-0"><span className="size-2.5 rounded-sm shrink-0" style={{background:d.color}}/><span className="text-sm whitespace-normal">{d.name}</span></span><span className="text-right pl-2"><span className="block text-sm data-value">{percent(ratio(d.value,total))}</span><span className="block text-xs text-muted-foreground">{compactMoney(d.value)}</span></span></Button>)}</div></div>;
+}

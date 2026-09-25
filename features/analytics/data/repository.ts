@@ -1,0 +1,17 @@
+import { isMpe } from '@/shared/config/access';
+import type { Aggregate,Expense,Filters } from './types';
+import { CATEGORIES,EXPENSES,ORIGINS,SIZES,SUPPLIERS,MUNICIPALITIES } from './fixtures';
+export function selectExpenses(filters:Filters, input=EXPENSES):Expense[]{return input.filter(r=>filters.uf==='CE'&&(filters.municipality==='all'||r.municipality===filters.municipality)&&r.date>=filters.start&&r.date<=filters.end&&(filters.size==='all'||r.size===filters.size)&&(filters.origin==='all'||r.origin===filters.origin)&&filters.categories.includes(r.category));}
+const sum=(rs:Expense[])=>rs.reduce((total,r)=>total+r.net,0);
+export function aggregate(rows:Expense[]):Aggregate{
+ const buckets=new Map<string,{date:Date;label:string;total:number;mpe:number;local:number}>();
+ rows.forEach(r=>{const key=r.date.slice(0,7);const date=new Date(key+'-15T12:00:00');const a=buckets.get(key)??{date,label:date.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}),total:0,mpe:0,local:0};a.total+=r.net;if(isMpe(r.size))a.mpe+=r.net;if(r.origin==='LOCAL')a.local+=r.net;buckets.set(key,a);});
+ return {total:sum(rows),mpe:sum(rows.filter(r=>isMpe(r.size))),me:sum(rows.filter(r=>r.size==='ME')),mei:sum(rows.filter(r=>r.size==='MEI')),local:sum(rows.filter(r=>r.origin==='LOCAL')),external:sum(rows.filter(r=>r.origin==='ESTADO'||r.origin==='FORA')),unknown:sum(rows.filter(r=>r.origin==='NI')),mpeLocal:sum(rows.filter(r=>(isMpe(r.size))&&r.origin==='LOCAL')),suppliers:new Set(rows.filter(r=>r.size!=='NI').map(r=>r.supplier)).size,count:rows.length,bySize:SIZES.map(s=>({name:s.name,key:s.id as Expense['size'],color:s.color,value:sum(rows.filter(r=>r.size===s.id))})),byOrigin:ORIGINS.map(o=>({name:o.name,key:o.id as Expense['origin'],color:o.color,value:sum(rows.filter(r=>r.origin===o.id))})),byCategory:CATEGORIES.map(c=>({name:c.name,key:c.id,value:sum(rows.filter(r=>r.category===c.id))})).sort((a,b)=>b.value-a.value),monthly:Array.from(buckets.entries()).sort(([a],[b])=>a.localeCompare(b)).map(([,a])=>a)};
+}
+export const previousYear=(filters:Filters):Filters=>({...filters,start:shiftYear(filters.start),end:shiftYear(filters.end)});
+function shiftYear(s:string){const [y,m,d]=s.split('-').map(Number);const date=new Date(y-1,m-1,1);date.setDate(Math.min(d,new Date(y-1,m,0).getDate()));return `${date.getFullYear()}-${String(m).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+export function municipalityRows(rows:Expense[]){return MUNICIPALITIES.map(m=>({...m,...aggregate(rows.filter(r=>r.municipality===m.id))}));}
+export function supplierRows(rows:Expense[]){return SUPPLIERS.map(s=>{const subset=rows.filter(r=>r.supplier===s.id);return {...s,total:sum(subset),count:subset.length,municipalities:new Set(subset.map(r=>r.municipality)).size};}).filter(s=>s.count);}
+/** Substitua este adaptador pelo proxy do backend. O frontend recebe agregados. */
+export const mockAnalyticsRepository={query:async(filters:Filters,signal?:AbortSignal)=>{await new Promise<void>((resolve,reject)=>{const timer=setTimeout(resolve,180);signal?.addEventListener('abort',()=>{clearTimeout(timer);reject(new DOMException('Aborted','AbortError'));},{once:true});});if(signal?.aborted)throw new DOMException('Aborted','AbortError');const rows=selectExpenses(filters);return {rows,summary:aggregate(rows),previous:aggregate(selectExpenses(previousYear(filters))),municipalities:municipalityRows(rows),suppliers:supplierRows(rows)};}};
+export type AnalyticsResult=Awaited<ReturnType<typeof mockAnalyticsRepository.query>>;

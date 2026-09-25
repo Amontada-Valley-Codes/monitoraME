@@ -1,0 +1,62 @@
+[
+  {
+    "name": "area-chart",
+    "source": "https://bklit.com/r/area-chart.json"
+  },
+  {
+    "name": "bar-chart",
+    "source": "https://bklit.com/r/bar-chart.json"
+  },
+  {
+    "name": "pie-chart",
+    "source": "https://bklit.com/r/pie-chart.json"
+  },
+  {
+    "name": "y-axis",
+    "source": "https://bklit.com/r/y-axis.json"
+  },
+  {
+    "name": "chart-animation",
+    "source": "https://bklit.com/r/chart-animation.json"
+  },
+  {
+    "name": "chart-context",
+    "source": "https://bklit.com/r/chart-context.json"
+  },
+  {
+    "name": "chart-series",
+    "source": "https://bklit.com/r/chart-series.json"
+  },
+  {
+    "name": "chart-tooltip",
+    "source": "https://bklit.com/r/chart-tooltip.json"
+  },
+  {
+    "name": "grid",
+    "source": "https://bklit.com/r/grid.json"
+  },
+  {
+    "name": "shimmering-text",
+    "source": "https://bklit.com/r/shimmering-text.json"
+  },
+  {
+    "name": "utils",
+    "source": "https://bklit.com/r/utils.json"
+  },
+  {
+    "name": "x-axis",
+    "source": "https://bklit.com/r/x-axis.json"
+  },
+  {
+    "name": "chart-tooltip",
+    "source": "https://bklit.com/r/chart-tooltip.json"
+  },
+  {
+    "name": "chart-utils",
+    "source": "https://bklit.com/r/chart-utils.json"
+  },
+  {
+    "name": "utils",
+    "source": "https://bklit.com/r/utils.json"
+  }
+]
