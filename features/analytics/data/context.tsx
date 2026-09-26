@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  startTransition,
   useState,
   type ReactNode,
 } from 'react';
@@ -88,21 +89,20 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [localFilters, setLocalFilters] = useState<Filters>(() => {
-    if (typeof window === 'undefined') return DEFAULT_FILTERS;
-
-    const currentSearchParams = new URLSearchParams(window.location.search);
-    if (currentSearchParams.has('start')) return parseFilters(currentSearchParams);
+  const [localFilters, setLocalFilters] = useState<Filters>(DEFAULT_FILTERS);
+  useEffect(() => {
+    if (searchParams.has('start')) return;
 
     try {
       const saved = localStorage.getItem('monitorame.filters.v1');
-      if (saved) return parseFilters(new URLSearchParams(saved));
+      if (saved) {
+        const savedFilters = parseFilters(new URLSearchParams(saved));
+        startTransition(() => setLocalFilters(savedFilters));
+      }
     } catch {
-      // Fallback to default filters if localStorage access fails
+      // Keep the default filters if localStorage access fails
     }
-
-    return DEFAULT_FILTERS;
-  });
+  }, [searchParams]);
   const filters = searchParams.has('start')
     ? parseFilters(new URLSearchParams(searchParams.toString()))
     : localFilters;

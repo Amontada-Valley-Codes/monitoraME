@@ -166,7 +166,7 @@ export default function Dashboard() {
               <DonutChart
                 data={a.bySize}
                 total={a.total}
-                center={percent(ratio(a.mpe, a.total))}
+                fillVerticalSpace
                 onSelect={(size) => setFilters({ size })}
               />
             </ChartPanel>
