@@ -86,7 +86,7 @@ export default function SupplierDetail({ id }: { id: string }) {
           </p>
           <p className="metric mt-5 text-2xl">{compactMoney(summary.total)}</p>
           <p className="mt-3 text-xs text-muted-foreground">
-            Porte: {s.size} · Origem: filtro global
+            Porte: {s.size}
           </p>
         </div>
         <div className="panel p-6">
@@ -102,7 +102,7 @@ export default function SupplierDetail({ id }: { id: string }) {
         <>
           <ChartPanel
             title="Evolução dos valores empenhados"
-            description="Porte: declarado do fornecedor · origem: seleção global"
+            description="Porte: declarado do fornecedor"
             legend={series.map((s) => ({ label: s.label, color: s.color }))}
             rows={summary.monthly.map((m) => ({
               label: m.label,

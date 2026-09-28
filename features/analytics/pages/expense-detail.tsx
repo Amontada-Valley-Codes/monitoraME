@@ -30,7 +30,7 @@ export default function ExpenseDetail({ id }: { id: string }) {
   const facts = [
     ['Data do empenho', dateLabel(row.date)],
     [
-      'Natureza',
+      'Elemento de despesa',
       `${row.category} · ${CATEGORIES.find((c) => c.id === row.category)?.name}`,
     ],
     [
