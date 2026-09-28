@@ -109,7 +109,7 @@ export default function MunicipalityDetail({ id }: { id: string }) {
             <TabsContent value="overview" className="space-y-6">
               <ChartPanel
                 title={`Evolução das compras de ${municipality.name}`}
-                description="Porte: todos no recorte · origem: seleção global"
+                description="Porte: todos no recorte"
                 legend={series.map((s) => ({ label: s.label, color: s.color }))}
                 rows={summary.monthly.map((m) => ({
                   label: m.label,

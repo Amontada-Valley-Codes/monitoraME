@@ -302,11 +302,8 @@ export default function Goals() {
                 </Badge>
                 <p className="mt-4 text-sm text-muted-foreground">{g.notes}</p>
                 <p className="mt-5 border-t pt-3 text-xs text-muted-foreground">
-                  Exercício completo · sete naturezas ·{' '}
-                  {g.indicator === 'local' ? 'porte: todos' : 'porte: ME'} ·{' '}
-                  {g.indicator === 'mpe'
-                    ? 'origem: todas'
-                    : 'origem: município comprador'}
+                  Exercício completo · sete elementos de despesas ·{' '}
+                  {g.indicator === 'local' ? 'porte: todos' : 'porte: ME'}
                   {g.year === '2026' ? ' · base parcial até agosto' : ''}
                 </p>
               </section>

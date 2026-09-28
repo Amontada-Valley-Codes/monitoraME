@@ -5,6 +5,11 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+// import {
+//   HoverCard,
+//   HoverCardContent,
+//   HoverCardTrigger,
+// } from '@/components/ui/hover-card';
 
 import { PageHeader } from '../components/page-header';
 import { SummaryKpis } from '../components/summary-kpis';
@@ -76,16 +81,63 @@ export default function Dashboard() {
         <EmptyState onReset={reset} />
       ) : (
         <>
-          <SummaryKpis
-            summary={a}
-            previous={data!.previous}
-            filters={filters}
-          />
+          <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <SummaryKpis
+              summary={a}
+              previous={data!.previous}
+              filters={filters}
+              compact
+            />
+            <ChartPanel
+              className="flex flex-col"
+              contentClassName="flex min-h-0 flex-1"
+              title="Elementos de despesas"
+              description="Sete elementos de despesas considerados · porte: seleção global"
+              legend={[
+                {
+                  label: 'Valor empenhado líquido',
+                  color: 'var(--chart-1)',
+                },
+              ]}
+              rows={a.byCategory.map((c) => ({
+                label: c.name,
+                values: [money(c.value)],
+              }))}
+            >
+              <div className="flex h-full min-h-0 flex-col">
+                <div className="min-h-0 flex-1 [&_.chart-box]:h-full">
+                  <BarsChart
+                    data={a.byCategory.map((c) => ({
+                      name: c.key.slice(-2),
+                      label: c.name,
+                      value: c.value,
+                    }))}
+                    series={[
+                      {
+                        key: 'value',
+                        label: 'Valor considerado',
+                        color: 'var(--chart-1)',
+                      },
+                    ]}
+                    fullWidth
+                  />
+                </div>
+                <Button
+                  variant="link"
+                  className="h-auto min-h-0 self-start p-0 text-xs"
+                  onClick={() => navigate('/analitico/despesas')}
+                >
+                  Explorar elementos de despesas e empenhos
+                  <ArrowRight className="size-3" />
+                </Button>
+              </div>
+            </ChartPanel>
+          </div>
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
             <ChartPanel
               className="xl:col-span-2"
               title="Evolução das compras consideradas"
-              description="Empenho líquido por mês · porte: todos no recorte · origem: seleção global"
+              description="Empenho líquido por mês · porte: todos no recorte"
               legend={series.map((s) => ({
                 label: s.label,
                 color: s.color,
@@ -156,8 +208,9 @@ export default function Dashboard() {
           </div>
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
             <ChartPanel
+              className={filters.origin === 'all' ? '' : 'xl:col-span-2'}
               title="Participação por porte empresarial"
-              description="Percentual do valor considerado · origem: seleção global"
+              description="Percentual do valor considerado"
               rows={a.bySize.map((s) => ({
                 label: s.name,
                 values: [money(s.value)],
@@ -170,45 +223,7 @@ export default function Dashboard() {
                 onSelect={(size) => setFilters({ size })}
               />
             </ChartPanel>
-            <ChartPanel
-              title="Naturezas de despesas"
-              description="Sete naturezas consideradas · porte e origem: seleção global"
-              legend={[
-                {
-                  label: 'Valor empenhado líquido',
-                  color: 'var(--chart-1)',
-                },
-              ]}
-              rows={a.byCategory.map((c) => ({
-                label: c.name,
-                values: [money(c.value)],
-              }))}
-            >
-              <BarsChart
-                data={a.byCategory.map((c) => ({
-                  name: c.key.slice(-2),
-                  value: c.value,
-                }))}
-                series={[
-                  {
-                    key: 'value',
-                    label: 'Valor considerado',
-                    color: 'var(--chart-1)',
-                  },
-                ]}
-              />
-              <Button
-                variant="link"
-                className="h-auto min-h-0 p-0 text-xs"
-                onClick={() => navigate('/analitico/despesas')}
-              >
-                Explorar naturezas e empenhos
-                <ArrowRight className="size-3" />
-              </Button>
-            </ChartPanel>
-          </div>
-          {filters.origin === 'all' && (
-            <div className="mb-6">
+            {filters.origin === 'all' && (
               <ChartPanel
                 title="Destino dos recursos"
                 description="Origem do estabelecimento em relação ao município comprador · porte: seleção global"
@@ -216,35 +231,42 @@ export default function Dashboard() {
                   label: o.name,
                   values: [money(o.value)],
                 }))}
-              >
-                <div className="grid items-center gap-6 xl:grid-cols-2">
-                  <DonutChart
+                >
+                  <div className="grid items-center gap-6">
+                    <DonutChart
                     data={a.byOrigin}
                     total={a.total}
                     onSelect={(origin) => setFilters({ origin })}
-                  />
-                  <div className="rounded-lg bg-muted/60 p-5">
-                    <h3 className="text-sm font-semibold">
-                      O que significa evasão municipal?
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      Soma dos valores destinados a estabelecimentos em outros
-                      municípios do Ceará e fora do estado. A origem não
-                      identificada permanece separada e no denominador.
-                    </p>
+                    />
+                    {/* <div className="rounded-lg bg-muted/60 p-5">
+                    <HoverCard openDelay={100} closeDelay={100}>
+                      <HoverCardTrigger asChild>
+                        <button
+                          type="button"
+                          className="text-sm font-semibold text-primary underline decoration-dotted underline-offset-4"
+                        >
+                          O que é evasão municipal?
+                        </button>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-80 text-sm leading-relaxed">
+                        Soma dos valores destinados a estabelecimentos em outros
+                        municípios do Ceará e fora do estado. A origem não
+                        identificada permanece separada e no denominador.
+                      </HoverCardContent>
+                    </HoverCard>
                     <Button
                       variant="link"
-                      className="px-0"
+                      className="mt-3 px-0"
                       onClick={() => navigate('/analitico/territorio')}
                     >
                       Explorar o território
                       <ArrowRight className="size-4" />
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </ChartPanel>
-            </div>
-          )}
+            )}
+          </div>
           <MunicipalTable
             rows={data!.municipalities.filter(
               (m) =>

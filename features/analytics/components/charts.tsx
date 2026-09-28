@@ -1,22 +1,234 @@
 'use client';
+
 import { useState } from 'react';
-import { AreaChart } from '@/components/charts/area-chart';
+
 import { Area } from '@/components/charts/area';
-import { Grid } from '@/components/charts/grid';
-import { XAxis } from '@/components/charts/x-axis';
-import { YAxis } from '@/components/charts/y-axis';
-import { ChartTooltip } from '@/components/charts/tooltip';
-import { BarChart } from '@/components/charts/bar-chart';
+import { AreaChart } from '@/components/charts/area-chart';
 import { Bar } from '@/components/charts/bar';
+import { BarChart } from '@/components/charts/bar-chart';
 import { BarXAxis } from '@/components/charts/bar-x-axis';
+import { Grid } from '@/components/charts/grid';
+import { PieCenter } from '@/components/charts/pie-center';
 import { PieChart } from '@/components/charts/pie-chart';
 import { PieSlice } from '@/components/charts/pie-slice';
-import { PieCenter } from '@/components/charts/pie-center';
+import { ChartTooltip } from '@/components/charts/tooltip';
+import { XAxis } from '@/components/charts/x-axis';
+import { YAxis } from '@/components/charts/y-axis';
 import { Button } from '@/components/ui/button';
-import { compactMoney,money,percent,ratio } from '@/shared/lib/format';
-export type Series={key:string;label:string;color:string};
-export function TrendChart({data,series}:{data:Record<string,unknown>[];series:Series[]}){return <div className="chart-box"><AreaChart data={data} className="h-full w-full" style={{height:'100%'}} margin={{top:16,right:20,bottom:36,left:72}} animationDuration={500}><Grid horizontal numTicksRows={4}/>{series.map(s=><Area key={s.key} dataKey={s.key} fill={s.color} stroke={s.color} fillOpacity={.15} strokeWidth={2.5}/>)}<XAxis numTicks={6}/><YAxis numTicks={4} formatValue={v=>compactMoney(v)}/><ChartTooltip showDatePill={false} content={({point})=><div className="p-3 text-sm"><p className="font-medium mb-2">{String(point.label??'')}</p>{series.map(s=><div key={s.key} className="flex justify-between gap-6 py-1"><span>{s.label}</span><span className="font-mono">{money(Number(point[s.key]))}</span></div>)}</div>}/></AreaChart></div>;}
-export function BarsChart({data,series,percentage=false}:{data:Record<string,unknown>[];series:Series[];percentage?:boolean}){return <div className="chart-box"><BarChart data={data} xDataKey="name" className="h-full w-full" margin={{top:16,right:16,bottom:44,left:percentage?48:72}} animationDuration={450} barGap={.4}><Grid horizontal numTicksRows={4}/>{series.map(s=><Bar key={s.key} dataKey={s.key} fill={s.color}/>)}<BarXAxis/><YAxis formatValue={v=>percentage?percent(v):compactMoney(v)} numTicks={4}/><ChartTooltip showDatePill={false} content={({point})=><div className="p-3 text-sm"><p className="font-semibold mb-2">{String(point.name)}</p>{series.map(s=><p key={s.key}>{s.label}: {percentage?percent(Number(point[s.key])):money(Number(point[s.key]))}</p>)}</div>}/></BarChart></div>;}
-export function DonutChart({data,total,onSelect,fillVerticalSpace=false}:{data:{name:string;key:string;value:number;color:string}[];total:number;onSelect?:(key:string)=>void;fillVerticalSpace?:boolean}){
- const [hover,setHover]=useState<number|null>(null);const values=data.map(d=>({label:d.name,value:d.value,color:d.color}));return <div className={`flex flex-col items-center gap-5 sm:flex-row ${fillVerticalSpace?'min-h-[var(--chart-height)]':''}`}><div className="size-48 shrink-0"><PieChart data={values} innerRadius={64} padAngle={.025} hoveredIndex={hover} onHoverChange={setHover}><PieCenter>{({value,label,isHovered})=><div className="text-center px-3"><p className="metric whitespace-nowrap text-[clamp(0.6875rem,12cqw,1.25rem)] leading-none text-primary">{isHovered?percent(ratio(value,total)):compactMoney(total)}</p><p className="mt-1 text-xs text-muted-foreground">{isHovered?label:'do valor considerado'}</p></div>}</PieCenter>{values.map((_,i)=><PieSlice key={i} index={i} showGlow={false} hoverEffect="grow"/>)}</PieChart></div><div className={`flex w-full flex-col ${fillVerticalSpace?'self-stretch justify-between':'space-y-1'}`}>{data.map((d,i)=><Button key={d.key} variant="ghost" onClick={()=>onSelect?.(d.key)} onMouseEnter={()=>setHover(i)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(i)} onBlur={()=>setHover(null)} className="flex w-full h-auto min-h-11 items-center justify-between px-2 text-left font-normal"><span className="flex min-w-0 items-center gap-2"><span className="size-2.5 shrink-0 rounded-sm" style={{background:d.color}}/><span className="text-sm whitespace-normal">{d.name}</span></span><span className="pl-2 text-right"><span className="block text-sm data-value">{percent(ratio(d.value,total))}</span><span className="block text-xs text-muted-foreground">{compactMoney(d.value)}</span></span></Button>)}</div></div>;
+import { compactMoney, money, percent, ratio } from '@/shared/lib/format';
+
+export type Series = { key: string; label: string; color: string };
+
+export function TrendChart({
+  data,
+  series,
+}: {
+  data: Record<string, unknown>[];
+  series: Series[];
+}) {
+  return (
+    <div className="chart-box">
+      <AreaChart
+        data={data}
+        className="h-full w-full"
+        style={{ height: '100%' }}
+        margin={{ top: 16, right: 20, bottom: 36, left: 72 }}
+        animationDuration={500}
+      >
+        <Grid horizontal numTicksRows={4} />
+        {series.map((seriesItem) => (
+          <Area
+            key={seriesItem.key}
+            dataKey={seriesItem.key}
+            fill={seriesItem.color}
+            stroke={seriesItem.color}
+            fillOpacity={0.15}
+            strokeWidth={2.5}
+          />
+        ))}
+        <XAxis numTicks={6} />
+        <YAxis numTicks={4} formatValue={(value) => compactMoney(value)} />
+        <ChartTooltip
+          showDatePill={false}
+          content={({ point }) => (
+            <div className="p-3 text-sm">
+              <p className="mb-2 font-medium">{String(point.label ?? '')}</p>
+              {series.map((seriesItem) => (
+                <div
+                  key={seriesItem.key}
+                  className="flex justify-between gap-6 py-1"
+                >
+                  <span>{seriesItem.label}</span>
+                  <span className="font-mono">
+                    {money(Number(point[seriesItem.key]))}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        />
+      </AreaChart>
+    </div>
+  );
+}
+
+export function BarsChart({
+  data,
+  series,
+  percentage = false,
+  fullWidth = true,
+}: {
+  data: Record<string, unknown>[];
+  series: Series[];
+  percentage?: boolean;
+  fullWidth?: boolean;
+}) {
+  const margin = fullWidth
+    ? { top: 16, right: 20, bottom: 44, left: 58 }
+    : { top: 16, right: 16, bottom: 44, left: percentage ? 48 : 72 };
+
+  return (
+    <div className="chart-box">
+      <BarChart
+        data={data}
+        xDataKey="name"
+        className="h-full w-full"
+        aspectRatio={fullWidth ? 'auto' : undefined}
+        margin={margin}
+        animationDuration={450}
+        barGap={fullWidth ? 0.24 : 0.4}
+      >
+        <Grid horizontal numTicksRows={4} />
+        {series.map((seriesItem) => (
+          <Bar
+            key={seriesItem.key}
+            dataKey={seriesItem.key}
+            fill={seriesItem.color}
+            hoverFill={fullWidth ? 'var(--primary)' : undefined}
+          />
+        ))}
+        <BarXAxis />
+        <YAxis
+          formatValue={(value) =>
+            percentage ? percent(value) : compactMoney(value)
+          }
+          numTicks={4}
+        />
+        <ChartTooltip
+          showDatePill={false}
+          content={({ point }) => (
+            <div className="min-w-52 p-3 text-sm">
+              <p className="mb-2 font-semibold">
+                {String(point.label ?? point.name)}
+              </p>
+              {series.map((seriesItem) => (
+                <p key={seriesItem.key} className="flex justify-between gap-6">
+                  <span>{seriesItem.label}</span>
+                  <span className="font-mono">
+                    {percentage
+                      ? percent(Number(point[seriesItem.key]))
+                      : money(Number(point[seriesItem.key]))}
+                  </span>
+                </p>
+              ))}
+            </div>
+          )}
+        />
+      </BarChart>
+    </div>
+  );
+}
+
+export function DonutChart({
+  data,
+  total,
+  onSelect,
+  fillVerticalSpace = false,
+}: {
+  data: { name: string; key: string; value: number; color: string }[];
+  total: number;
+  onSelect?: (key: string) => void;
+  fillVerticalSpace?: boolean;
+}) {
+  const [hover, setHover] = useState<number | null>(null);
+  const values = data.map((item) => ({
+    label: item.name,
+    value: item.value,
+    color: item.color,
+  }));
+
+  return (
+    <div
+      className={`flex flex-col items-center gap-5 sm:flex-row ${
+        fillVerticalSpace ? 'min-h-(--chart-height)' : ''
+      }`}
+    >
+      <div className="size-48 shrink-0">
+        <PieChart
+          data={values}
+          innerRadius={64}
+          padAngle={0.025}
+          hoveredIndex={hover}
+          onHoverChange={setHover}
+        >
+          <PieCenter>
+            {({ value, label, isHovered }) => (
+              <div className="px-3 text-center">
+                <p className="metric text-primary whitespace-nowrap text-[clamp(0.6875rem,12cqw,1.25rem)] leading-none">
+                  {isHovered
+                    ? percent(ratio(value, total))
+                    : compactMoney(total)}
+                </p>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  {isHovered ? label : 'do valor considerado'}
+                </p>
+              </div>
+            )}
+          </PieCenter>
+          {values.map((_, index) => (
+            <PieSlice
+              key={index}
+              index={index}
+              showGlow={false}
+              hoverEffect="grow"
+            />
+          ))}
+        </PieChart>
+      </div>
+      <div
+        className={`flex w-full flex-col ${
+          fillVerticalSpace ? 'justify-between self-stretch' : 'space-y-1'
+        }`}
+      >
+        {data.map((item, index) => (
+          <Button
+            key={item.key}
+            variant="ghost"
+            onClick={() => onSelect?.(item.key)}
+            onMouseEnter={() => setHover(index)}
+            onMouseLeave={() => setHover(null)}
+            onFocus={() => setHover(index)}
+            onBlur={() => setHover(null)}
+            className="flex h-auto min-h-11 w-full items-center justify-between px-2 text-left font-normal"
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span
+                className="size-2.5 shrink-0 rounded-sm"
+                style={{ background: item.color }}
+              />
+              <span className="text-sm whitespace-normal">{item.name}</span>
+            </span>
+            <span className="pl-2 text-right">
+              <span className="data-value block text-sm">
+                {percent(ratio(item.value, total))}
+              </span>
+              <span className="text-muted-foreground block text-xs">
+                {compactMoney(item.value)}
+              </span>
+            </span>
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
 }

@@ -31,7 +31,7 @@ export default function Methodology() {
         {[
           {
             title: 'TCE-CE / SIM',
-            text: 'Notas de empenho e natureza da despesa remetidas pelos municípios.',
+            text: 'Notas de empenho e elemento de despesa remetidos pelos municípios.',
             icon: Database,
             href: 'https://api-dados-abertos.tce.ce.gov.br/sim/',
           },
@@ -70,7 +70,7 @@ export default function Methodology() {
             <AccordionTrigger>Qual é a base dos indicadores?</AccordionTrigger>
             <AccordionContent>
               O total das compras consideradas corresponde ao valor empenhado
-              líquido nas sete naturezas abaixo. Na demonstração: valor bruto
+              líquido nos sete elementos de despesas abaixo. Na demonstração: valor bruto
               menos anulações. Empenho não é pagamento, liquidação ou
               comprovação de entrega. Registros sem classificação permanecem no
               denominador.
@@ -151,9 +151,9 @@ export default function Methodology() {
       </section>
       <section className="panel overflow-hidden">
         <div className="p-6">
-          <h2 className="text-lg font-semibold">Naturezas consideradas</h2>
+          <h2 className="text-lg font-semibold">Elementos de despesas considerados</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            O recorte é definido pelo código da natureza, sem dedução por
+            O recorte é definido pelo código do elemento de despesa, sem dedução por
             atividade econômica.
           </p>
         </div>

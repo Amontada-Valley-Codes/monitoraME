@@ -135,7 +135,7 @@ export default function Territory() {
               <div className="grid xl:grid-cols-2 gap-6 mb-6">
                 <ChartPanel
                   title="Origem em relação ao comprador"
-                  description="Porte: seleção global · origem: todas"
+                  description="Porte: seleção global"
                   rows={summary.byOrigin.map((origin) => ({
                     label: origin.name,
                     values: [money(origin.value)],
@@ -150,7 +150,7 @@ export default function Territory() {
 
                 <ChartPanel
                   title="Compras por UF do fornecedor"
-                  description="Porte: seleção global · origem: todas"
+                  description="Porte: seleção global"
                   legend={[{ label: 'Empenhado líquido', color: 'var(--chart-1)' }]}
                   rows={['CE', 'SP', '—'].map((uf) => ({
                     label: uf,

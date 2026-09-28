@@ -341,7 +341,7 @@ export function GlobalFilters() {
 
             <fieldset>
               <legend className="mb-3 text-sm font-medium">
-                Naturezas consideradas
+                Elementos de despesas considerados
               </legend>
               <div className="space-y-4">
                 {CATEGORIES.map((category) => (
