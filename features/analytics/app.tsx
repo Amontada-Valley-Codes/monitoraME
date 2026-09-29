@@ -22,6 +22,7 @@ import Goals from './pages/goals';
 import Reports from './pages/reports';
 import Methodology from './pages/methodology';
 import Quality from './pages/quality';
+import { PricingSection } from '@/components/pricing-section';
 
 function Routes() {
   const path = usePathname();
@@ -32,6 +33,7 @@ function Routes() {
   let page;
 
   if (path === '/') page = <Dashboard />;
+  else if (section === 'planos') page = <PricingSection />;
   else if (section === 'municipios')
     page = id ? <MunicipalityDetail id={id} /> : <Municipalities />;
   else if (section === 'despesas')
