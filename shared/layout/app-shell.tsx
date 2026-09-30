@@ -37,7 +37,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -55,7 +54,6 @@ import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 
 export const NAV = [
   { path: '/', label: 'Visão geral', icon: LayoutDashboard },
-  { path: '/analitico/planos', label: 'Planos', icon: CircleDollarSign },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
@@ -66,6 +64,12 @@ export const NAV = [
   { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
   { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
 ];
+
+const PLANS_PAGE = {
+  path: '/analitico/planos',
+  label: 'Planos',
+  icon: CircleDollarSign,
+};
 
 function Navigation() {
   const path = usePathname();
@@ -100,7 +104,7 @@ function Navigation() {
             Poder Público
           </SidebarGroupLabel>
           <SidebarMenu className="gap-1">
-            {NAV.slice(0, 7).map((item) => (
+            {NAV.slice(0, 6).map((item) => (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
                   tooltip={item.label}
@@ -129,8 +133,9 @@ function ShellContent({ children }: { children: ReactNode }) {
   const { navigate, reload, state } = useAnalytics();
   const [search, setSearch] = useState(false);
 
-  const current =
-    NAV.find((n) => (n.path === '/' ? path === '/' : path.startsWith(n.path))) ?? NAV[0];
+  const current = path.startsWith(PLANS_PAGE.path)
+    ? PLANS_PAGE
+    : NAV.find((n) => (n.path === '/' ? path === '/' : path.startsWith(n.path))) ?? NAV[0];
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -201,9 +206,15 @@ function ShellContent({ children }: { children: ReactNode }) {
               </TooltipTrigger>
               <TooltipContent>Atualizar consulta</TooltipContent>
             </Tooltip>
-            <Badge variant="outline" className="text-primary bg-secondary/50 hidden sm:flex">
-              Dados públicos
-            </Badge>
+            <Button
+              variant={path.startsWith(PLANS_PAGE.path) ? 'secondary' : 'outline'}
+              size="sm"
+              aria-label="Abrir planos"
+              onClick={() => navigate(PLANS_PAGE.path)}
+            >
+              <CircleDollarSign className="size-4 text-primary" />
+              <span className="hidden sm:inline text-primary">Planos</span>
+            </Button>
           </div>
         </header>
 
@@ -268,7 +279,7 @@ function ShellContent({ children }: { children: ReactNode }) {
         </CommandList>
       </CommandDialog>
 
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="bottom-right" />
     </>
   );
 }
