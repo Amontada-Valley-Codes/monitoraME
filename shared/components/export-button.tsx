@@ -36,17 +36,16 @@ interface ExportButtonProps {
   dataset: ExportDataset;
   filters: Filters;
   compact?: boolean;
-
-  hasAccount: boolean;
-  hasPlan: boolean;
+  hasAccount?: boolean;
+  hasPlan?: boolean;
 }
 
 export function ExportButton({
   dataset,
   filters,
   compact = false,
-  hasAccount,
-  hasPlan,
+  hasAccount = false,
+  hasPlan = false,
 }: ExportButtonProps) {
   const [open, setOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -101,7 +100,6 @@ export function ExportButton({
 
   return (
     <>
-      {/* Botão Exportar */}
       <Button
         variant={compact ? "outline" : "default"}
         onClick={handleExportClick}
@@ -119,6 +117,7 @@ export function ExportButton({
       <TeamUpgradeModal
         open={upgradeOpen}
         onOpenChange={setUpgradeOpen}
+        hasAccount={hasAccount}
       />
 
       {/* 
