@@ -15,10 +15,7 @@ import {
   Search,
   ChevronRight,
   RefreshCw,
-  ChartNoAxesCombined,
   Globe,
-  Command as CommandIcon,
-  User,
   CircleDollarSign,
 } from 'lucide-react';
 import {
@@ -31,7 +28,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarInset,
   SidebarTrigger,
   useSidebar,

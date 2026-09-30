@@ -104,7 +104,7 @@ export default function Dashboard() {
               }))}
             >
               <div className="flex h-full min-h-0 flex-col">
-                <div className="min-h-0 flex-1 [&_.chart-box]:h-full">
+                <div className="min-h-0 flex-1 [&_.chart-box]:h-full [&_.chart-box]:w-full [&_svg]:w-full">
                   <BarsChart
                     data={a.byCategory.map((c) => ({
                       name: c.key.slice(-2),
