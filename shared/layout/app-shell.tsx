@@ -19,6 +19,7 @@ import {
   Globe,
   Command as CommandIcon,
   User,
+  CircleDollarSign,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -54,6 +55,7 @@ import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 
 export const NAV = [
   { path: '/', label: 'Visão geral', icon: LayoutDashboard },
+  { path: '/analitico/planos', label: 'Planos', icon: CircleDollarSign },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
@@ -98,7 +100,7 @@ function Navigation() {
             Poder Público
           </SidebarGroupLabel>
           <SidebarMenu className="gap-1">
-            {NAV.slice(0, 6).map((item) => (
+            {NAV.slice(0, 7).map((item) => (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
                   tooltip={item.label}

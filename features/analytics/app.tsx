@@ -22,16 +22,20 @@ import Goals from './pages/goals';
 import Reports from './pages/reports';
 import Methodology from './pages/methodology';
 import Quality from './pages/quality';
+import { PricingSection } from '@/components/pricing-section';
 
 function Routes() {
   const path = usePathname();
-  const { state, reload } = useAnalytics();
+  const { state, reload, navigate } = useAnalytics();
   const parts = path.split('/').filter(Boolean);
   const section = parts[1];
   const id = parts[2];
   let page;
 
   if (path === '/') page = <Dashboard />;
+  else if (section === 'planos') page = (
+    <PricingSection onAccessPlatform={() => navigate('/')} />
+  );
   else if (section === 'municipios')
     page = id ? <MunicipalityDetail id={id} /> : <Municipalities />;
   else if (section === 'despesas')
