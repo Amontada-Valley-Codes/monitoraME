@@ -1,5 +1,6 @@
 import { apiFetch } from "@/services/api";
 import { AuthFormData } from "../schemas/auth.schema";
+import { LoginFormData } from "../schemas/login.schema";
 
 interface AuthResponse {
   id?: string;
@@ -12,7 +13,7 @@ interface AuthResponse {
 }
 
 export const authService = {
-  async login(data: Pick<AuthFormData, "email" | "senha">): Promise<AuthResponse> {
+  async login(data: LoginFormData): Promise<AuthResponse> {
     return apiFetch<AuthResponse>("/sessions/login", {
       method: "POST",
       body: JSON.stringify({
@@ -34,7 +35,33 @@ export const authService = {
     });
   },
 
-  loginWithGoogle(): void {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333"}/auth/google`;
+  // Rotaciona o token de renovação usando o refresh token
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    return apiFetch<AuthResponse>("/sessions/refresh", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    });
+  },
+
+  // Revoga a sessão atual (logout pontual)
+  async logoutCurrent(accessToken: string): Promise<void> {
+    await apiFetch("/sessions/current", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  },
+
+  // Revoga todas as sessões ativas da conta
+  async logoutAll(accessToken: string): Promise<void> {
+    await apiFetch("/sessions", {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
   },
 };
