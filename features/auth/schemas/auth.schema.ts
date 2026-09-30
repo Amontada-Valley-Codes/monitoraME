@@ -31,19 +31,15 @@ export const authSchema = z.object({
     message: "CPF inválido",
   }),
   email: z.string().email("E-mail inválido"),
-  // Atualizado para coincidir com regras comuns de backend (Mínimo 8 chars, 1 maiúscula, 1 número e 1 caractere especial)
   senha: z.string()
     .min(8, "A senha deve ter no mínimo 8 caracteres")
     .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
     .regex(/[0-9]/, "Deve conter pelo menos um número")
-    .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (ex: @, #, $, etc.)"),
+    .regex(/[^A-Za-z0-9]/, "Deve conter pelo menos um caractere especial (!@#$%^&*)"),
   confirmarSenha: z.string(),
-  termos: z.preprocess(
-    (val) => val === true || val === "on",
-    z.boolean().refine((val) => val === true, {
-      message: "Você deve aceitar os Termos de Uso para continuar",
-    })
-  ),
+  termos: z.literal(true, {
+    message: "Você deve aceitar os Termos de Uso para continuar",
+  }),
 }).refine((data) => data.senha === data.confirmarSenha, {
   message: "As senhas não coincidem",
   path: ["confirmarSenha"],

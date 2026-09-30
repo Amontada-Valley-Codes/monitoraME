@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
+import { authService } from "@/features/auth/services/auth.service";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token");
+  const accessToken = cookieStore.get("access_token")?.value;
 
   if (!accessToken) {
     redirect("/login");
@@ -13,8 +14,22 @@ export default async function HomePage() {
   async function handleLogout() {
     "use server";
     const store = await cookies();
+    const token = store.get("access_token")?.value;
+
+    // 1. Apaga os cookies locais e redireciona IMEDIATAMENTE 
+    // (garante que a UI nunca fica travada por problemas de rede/backend)
     store.delete("access_token");
     store.delete("refresh_token");
+
+    try {
+      if (token) {
+        // 2. Tenta notificar o backend em segundo plano (opcional/não bloqueante)
+        await authService.logoutCurrent(token);
+      }
+    } catch (error) {
+      // Ignora falhas do backend no logout para não afetar o utilizador
+    }
+
     redirect("/login");
   }
 
@@ -27,8 +42,14 @@ export default async function HomePage() {
           </div>
           <span className="font-bold text-slate-900 text-lg">Portal Municipal</span>
         </div>
+        
+        {/* Formulário com Server Action e botão de submissão explícito */}
         <form action={handleLogout}>
-          <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-100">
+          <Button 
+            type="submit" 
+            variant="outline" 
+            className="border-slate-200 text-slate-700 hover:bg-slate-100"
+          >
             Terminar Sessão
           </Button>
         </form>

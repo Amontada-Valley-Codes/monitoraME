@@ -6,8 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authSchema, AuthFormData } from "../schemas/auth.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface RegisterFormProps {
   onSubmitAction: (data: AuthFormData) => Promise<void>;
@@ -20,86 +20,55 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
+    defaultValues: {
+      termos: false as any,
+    },
   });
 
-  const senhaValue = watch("senha", "");
+  const senhaValue = watch("senha") || "";
 
-  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length > 11) value = value.slice(0, 11);
-
-    if (value.length > 9) {
-      value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, "$1.$2.$3-$4");
-    } else if (value.length > 6) {
-      value = value.replace(/^(\d{3})(\d{3})(\d{1,3}).*/, "$1.$2.$3");
-    } else if (value.length > 3) {
-      value = value.replace(/^(\d{3})(\d{1,3}).*/, "$1.$2");
-    }
-
-    setValue("cpf", value, { shouldValidate: true });
-  };
-
-  const getPasswordStrength = (pass: string) => {
-    if (!pass) return { text: "", color: "bg-slate-200", width: "w-0" };
-    if (pass.length < 8) return { text: "Muito curta", color: "bg-red-500", width: "w-1/4" };
-    if (!/[A-Z]/.test(pass) || !/[0-9]/.test(pass)) return { text: "Média (adicione maiúsculas/números)", color: "bg-yellow-500", width: "w-2/4" };
-    return { text: "Senha forte", color: "bg-emerald-500", width: "w-full" };
-  };
-
-  const strength = getPasswordStrength(senhaValue);
+  // Avaliação de força da senha para feedback visual
+  const hasMinLen = senhaValue.length >= 8;
+  const hasUpper = /[A-Z]/.test(senhaValue);
+  const hasNumber = /[0-9]/.test(senhaValue);
+  const hasSpecial = /[^A-Za-z0-9]/.test(senhaValue);
 
   const handleFormSubmit = async (data: AuthFormData) => {
-    console.log("1. Formulário submetido com sucesso pelo Zod:", data);
     try {
       setLoading(true);
       await onSubmitAction(data);
-      console.log("2. Ação onSubmitAction executada com sucesso!");
-    } catch (error) {
-      console.error("❌ Erro capturado na submissão:", error);
+      toast.success("Conta criada com sucesso!");
+    } catch (error: any) {
+      toast.error(error.message || "Ocorreu um erro ao criar a conta.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Função disparada se houver erros de validação do Zod ao tentar enviar
-  const onInvalid = (errors: any) => {
-    console.warn("⚠️ Validação do Zod impediu o envio. Campos com erro:", errors);
-  };
-
-  const cpfRegistration = register("cpf");
-
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="mb-6">
         <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-          Criar conta
+          Criar Conta
         </h2>
         <p className="text-sm text-slate-500">
-          Crie sua conta para ganhar acesso a detalhes municipais e outras funcionalidades
+          Registe-se para aceder ao portal municipal e monitorar dados
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit, onInvalid)} className="space-y-3">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
         <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Nome completo</label>
+          <label className="text-xs font-medium text-slate-700 block mb-1">Nome Completo</label>
           <Input placeholder="Seu nome" {...register("name")} />
           {errors.name && <span className="text-xs text-red-500 mt-1 block">{errors.name.message}</span>}
         </div>
 
         <div>
           <label className="text-xs font-medium text-slate-700 block mb-1">CPF</label>
-          <Input 
-            placeholder="000.000.000-00" 
-            {...cpfRegistration}
-            onChange={(e) => {
-              cpfRegistration.onChange(e);
-              handleCpfChange(e);
-            }}
-          />
+          <Input placeholder="000.000.000-00" {...register("cpf")} />
           {errors.cpf && <span className="text-xs text-red-500 mt-1 block">{errors.cpf.message}</span>}
         </div>
 
@@ -111,48 +80,51 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
 
         <div>
           <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>
-          <Input type="password" placeholder="Mínimo 8 caracteres" {...register("senha")} />
-          {senhaValue && (
-            <div className="mt-1">
-              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className={`h-full transition-all duration-300 ${strength.color} ${strength.width}`} />
-              </div>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">{strength.text}</span>
+          <Input type="password" placeholder="Mínimo 8 caracteres, maiúsculas, números e símbolos" {...register("senha")} />
+          
+          {/* Indicador visual dinâmico de força da senha */}
+          <div className="mt-2 space-y-1 text-xs">
+            <p className="text-slate-600 font-medium">Requisitos para senha forte:</p>
+            <div className="grid grid-cols-2 gap-1 text-slate-500">
+              <span className={hasMinLen ? "text-green-600 font-semibold" : "text-slate-400"}>
+                {hasMinLen ? "✓" : "○"} Mínimo 8 caracteres
+              </span>
+              <span className={hasUpper ? "text-green-600 font-semibold" : "text-slate-400"}>
+                {hasUpper ? "✓" : "○"} Letra maiúscula
+              </span>
+              <span className={hasNumber ? "text-green-600 font-semibold" : "text-slate-400"}>
+                {hasNumber ? "✓" : "○"} Número
+              </span>
+              <span className={hasSpecial ? "text-green-600 font-semibold" : "text-slate-400"}>
+                {hasSpecial ? "✓" : "○"} Caractere especial (!@#$)
+              </span>
             </div>
-          )}
+          </div>
+
           {errors.senha && <span className="text-xs text-red-500 mt-1 block">{errors.senha.message}</span>}
         </div>
 
         <div>
           <label className="text-xs font-medium text-slate-700 block mb-1">Confirmar Senha</label>
-          <Input type="password" placeholder="Repita a senha" {...register("confirmarSenha")} />
+          <Input type="password" placeholder="Confirme sua senha" {...register("confirmarSenha")} />
           {errors.confirmarSenha && <span className="text-xs text-red-500 mt-1 block">{errors.confirmarSenha.message}</span>}
         </div>
 
-        <div className="flex items-center space-x-2 py-1">
-          <Checkbox id="termos" {...register("termos")} />
-          <label htmlFor="termos" className="text-xs text-slate-600 cursor-pointer">
-            Concordo com os Termos de Uso e Política de Privacidade.
+        <div className="flex items-center space-x-2 pt-2">
+          <input type="checkbox" id="termos" {...register("termos")} className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
+          <label htmlFor="termos" className="text-xs text-slate-600">
+            Concordo com os <span className="font-semibold underline">Termos de Uso</span>
           </label>
         </div>
-        {errors.termos && <span className="text-xs text-red-500 block">{errors.termos.message}</span>}
+        {errors.termos && <span className="text-xs text-red-500 block">{errors.termos.message as string}</span>}
 
-        <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800" disabled={loading}>
-          {loading ? "A cadastrar..." : "Cadastrar →"}
+        <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800 mt-2" disabled={loading}>
+          {loading ? "A criar conta..." : "Criar Conta →"}
         </Button>
       </form>
 
-      <div className="relative my-4 text-center">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-        <span className="relative bg-white px-3 text-xs text-slate-400 uppercase">ou</span>
-      </div>
-
-      <Button variant="outline" className="w-full mb-4 border-slate-200">
-        🌐 Continuar com o Google
-      </Button>
-
-      <div className="text-center text-xs text-slate-500">
-        Já possui uma conta? <Link href="/login" className="font-semibold text-slate-800 underline">Entrar</Link>
+      <div className="text-center text-xs text-slate-500 mt-6">
+        Já possui uma conta? <Link href="/login" className="font-semibold text-slate-800 underline">Faça login</Link>
       </div>
     </div>
   );
