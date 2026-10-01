@@ -90,7 +90,7 @@ function Navigation() {
           aria-label="MonitoraME início"
         >
           <LogoIcon className="size-7 text-primary shrink-0" />
-          <LogoContent className="size-auto! h-6! w-36! text-navy group-data-[collapsible=icon]:hidden" />
+          <LogoContent className="size-auto! h-6! w-36! text-brand-ink group-data-[collapsible=icon]:hidden" />
         </Button>
       </SidebarHeader>
 

@@ -39,6 +39,7 @@
 
   /* Brand / Status */
   --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
   --color-navy: var(--navy);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
