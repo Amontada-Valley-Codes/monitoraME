@@ -8,10 +8,13 @@ import {
   ArrowRight,
   BarChart3,
   Braces,
+  Building2,
+  ChartNoAxesCombined,
   CheckCircle2,
   ChevronDown,
   CircleDollarSign,
   FileSearch,
+  Landmark,
   MapPin,
 } from 'lucide-react';
 
@@ -52,6 +55,27 @@ const municipalities = TCE_MUNICIPALITIES.map((municipality) => ({
   ...municipality,
   label: municipalityLabel(municipality.name),
 }));
+
+const reasons = [
+  {
+    title: 'Clareza para decidir melhor',
+    description:
+      'Organizamos, filtramos e apresentamos dados públicos complexos em indicadores claros, comparáveis e úteis para decisões mais estratégicas.',
+    icon: ChartNoAxesCombined,
+  },
+  {
+    title: 'Oportunidades para empresas',
+    description:
+      'Facilitamos a descoberta de oportunidades compatíveis com a atividade e a região de cada negócio, sem substituir os canais oficiais de participação.',
+    icon: Building2,
+  },
+  {
+    title: 'Inteligência para a gestão pública',
+    description:
+      'Mostramos quanto dos recursos permanece no território, a participação das microempresas e onde fortalecer a economia local.',
+    icon: Landmark,
+  },
+];
 
 const modules = [
   {
@@ -187,7 +211,7 @@ export function LandingPage() {
                 Inteligência e <span className="text-primary">transparência</span> nas compras públicas.
               </h1>
               <p className="mt-7 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-                Conectamos dados do TCE-CE, PNCP e Receita Federal para auditar despesas, garantir os direitos de MPEs e reter o capital nos municípios cearenses.
+                A MonitoraME transforma dados públicos complexos em informações claras para decisões melhores nas compras públicas, com foco especial nas microempresas.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
@@ -266,7 +290,39 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="sobre" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
+        <section id="sobre" className="scroll-mt-20 bg-card">
+          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
+            <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-20">
+              <div>
+                <p className="eyebrow text-primary">Informação que gera valor</p>
+                <h2 className="mt-4 max-w-lg text-3xl font-bold leading-[1.05] sm:text-4xl">
+                  Por que escolher a MonitoraME?
+                </h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                Em vez de apenas disponibilizar dados, a MonitoraME organiza, filtra e apresenta indicadores que tornam as compras públicas mais acessíveis, estratégicas e transparentes para empresas, prefeituras e gestores.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-4 md:grid-cols-3">
+              {reasons.map(({ title, description, icon: Icon }) => (
+                <Card key={title} className="h-full gap-5 bg-background shadow-none">
+                  <CardHeader>
+                    <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
+                      <Icon className="size-5" />
+                    </div>
+                    <CardTitle className="text-lg">{title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl border-t px-5 py-20 sm:px-8 lg:py-28">
           <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
             <div className="lg:sticky lg:top-28 lg:self-start">
               <p className="eyebrow text-primary">Inteligência aplicada</p>
@@ -274,7 +330,7 @@ export function LandingPage() {
                 Como transformamos dados públicos em oportunidades?
               </h2>
               <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
-                Algoritmos desenvolvidos para identificar brechas de conformidade, aumentar a competitividade de pequenos negócios locais e otimizar o orçamento municipal.
+                Integramos fontes públicas e transformamos registros dispersos em análises que apoiam a competitividade dos pequenos negócios e o uso estratégico do orçamento municipal.
               </p>
               <Button asChild variant="outline" className="mt-7 rounded-full bg-card px-5">
                 <Link href="#modulos">Conhecer todos os módulos</Link>
