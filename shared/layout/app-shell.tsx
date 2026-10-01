@@ -104,7 +104,11 @@ function Navigation() {
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
                   tooltip={item.label}
-                  isActive={item.path === '/' ? path === '/' : path.startsWith(item.path)}
+                  isActive={
+                    item.path === '/analitico'
+                      ? path === item.path
+                      : path === item.path || path.startsWith(`${item.path}/`)
+                  }
                   onClick={() => {
                     navigate(item.path);
                     setOpenMobile(false);

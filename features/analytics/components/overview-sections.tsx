@@ -149,18 +149,19 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
 }
 
 export function OverviewDestinations({ params }: { params: PipelineOverviewParams }) {
-  const { data, status, retry, view } = useOverviewDestinations(params);
+  const { data, status, retry } = useOverviewDestinations(params);
   const rows = data ?? [];
+  const meTotalCents = rows.reduce((total, item) => total + item.value, 0);
   return (
     <ChartPanel
       title="Destino dos recursos"
-      description="Origem do estabelecimento em relação ao município comprador"
+      description="Origem das compras de ME em relação ao município comprador"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
       empty={status === 'ready' && rows.length === 0}
     >
-      <DonutChart data={rows} total={view?.totalCents ?? 0} />
+      <DonutChart data={rows} total={meTotalCents} />
     </ChartPanel>
   );
 }
