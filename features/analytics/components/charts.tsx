@@ -88,7 +88,7 @@ export function BarsChart({
     : { top: 16, right: 16, bottom: 44, left: percentage ? 48 : 72 };
 
   return (
-    <div className="chart-box">
+    <div className={fullWidth ? 'chart-box h-full w-full min-w-0' : 'chart-box'}>
       <BarChart
         data={data}
         xDataKey="name"
