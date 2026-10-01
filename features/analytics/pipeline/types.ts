@@ -44,7 +44,7 @@ const businessSizeSchema = metricSchema.extend({
   porte: z.string().optional(),
 });
 
-const expenseElementSchema = metricSchema.extend({
+const expenseElementSchema = z.object({
   codigo: z.string().optional(),
   codigo_elemento_despesa: z.string().optional(),
   nome: z.string().optional(),
@@ -52,7 +52,7 @@ const expenseElementSchema = metricSchema.extend({
   descricao_elemento_despesa: z.string().optional(),
   elemento_despesa: z.string().optional(),
   valor_liquido_centavos: z.number().finite().optional(),
-});
+}).passthrough();
 
 const monthlyEvolutionSchema = z.object({
   competencia: z.string().optional(),

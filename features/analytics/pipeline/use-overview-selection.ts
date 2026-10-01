@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { PipelineOverviewParams } from './types';
+import { getTceMunicipality } from './municipalities';
 
 export function useOverviewSelection() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export function useOverviewSelection() {
   const rawYear = searchParams.get('ano') ?? String(currentYear);
   const year = /^\d{4}$/.test(rawYear) ? rawYear : String(currentYear);
   const rawMunicipality = searchParams.get('codigo_municipio');
-  const municipality = rawMunicipality && /^\d{3}$/.test(rawMunicipality)
+  const municipality = rawMunicipality && getTceMunicipality(rawMunicipality)
     ? rawMunicipality
     : undefined;
 

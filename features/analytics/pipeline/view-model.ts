@@ -157,14 +157,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key: code,
       name,
-      value: numeric(itemRecord, [
-        'valor_centavos',
-        'valor_liquido_centavos',
-        'valor_compras_centavos',
-        'total_centavos',
-        'valor',
-      ]) ?? 0,
-      percentage: numeric(itemRecord, ['percentual']) ?? undefined,
+      value: numeric(itemRecord, ['valor_liquido_centavos']) ?? 0,
       color: 'var(--chart-1)',
     };
   });

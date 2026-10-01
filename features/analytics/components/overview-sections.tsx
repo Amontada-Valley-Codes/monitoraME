@@ -66,25 +66,25 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
   const rows = data ?? [];
   return (
     <ChartPanel
-      className="flex flex-col"
-      contentClassName="flex min-h-0 flex-1"
       title="Elementos de despesas"
-      description="Valores consolidados pelo pipeline"
+      description="Valores líquidos consolidados pelo pipeline"
       legend={[{ label: 'Valor empenhado líquido', color: 'var(--chart-1)' }]}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
       empty={status === 'ready' && rows.length === 0}
     >
-      <BarsChart
-        data={rows.map((item) => ({
-          name: item.key.slice(-2),
-          label: item.name,
-          value: item.value,
-        }))}
-        series={[{ key: 'value', label: 'Valor considerado', color: 'var(--chart-1)' }]}
-        fullWidth
-      />
+      <div className="h-(--chart-height) min-h-(--chart-height) w-full">
+        <BarsChart
+          data={rows.map((item) => ({
+            name: item.key.slice(-2),
+            label: item.name,
+            value: item.value,
+          }))}
+          series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]}
+          fullWidth
+        />
+      </div>
     </ChartPanel>
   );
 }
@@ -152,6 +152,10 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
 export function OverviewReading({ params }: { params: PipelineOverviewParams }) {
   const { data, view } = useOverviewKpis(params);
   if (!data || !view) return null;
+  const spendingPerHundred = data.meMeiPercentage === null
+    ? null
+    : money(data.meMeiPercentage * 100);
+
   return (
     <section className="panel flex flex-col p-6">
       <div className="mb-5 flex items-center justify-between">
@@ -163,7 +167,9 @@ export function OverviewReading({ params }: { params: PipelineOverviewParams }) 
         {valueOrDash(data.meMeiPercentage, percent)}
       </p>
       <p className="mt-3 text-sm leading-relaxed">
-        O percentual é exibido como calculado pelo pipeline, sem recomposição no navegador.
+        {spendingPerHundred === null
+          ? 'Não há dados suficientes para calcular os gastos com microempresas neste período.'
+          : `A cada R$ 100,00 em compras, ${spendingPerHundred} foram gastos com microempresas.`}
       </p>
       <div className="mt-6 space-y-3 border-t pt-5 text-sm">
         <div className="flex justify-between gap-4">
