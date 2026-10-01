@@ -16,6 +16,7 @@ import {
   FileSearch,
   Landmark,
   MapPin,
+  MessageCircle,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -187,6 +188,7 @@ export function LandingPage() {
             <Link className="transition-colors hover:text-foreground" href="#modulos">Módulos</Link>
             <Link className="transition-colors hover:text-foreground" href="#metodologia">Metodologia</Link>
             <Link className="transition-colors hover:text-foreground" href="#casos">Casos</Link>
+            <Link className="transition-colors hover:text-foreground" href="#contato">Contato</Link>
             <Link className="flex items-center gap-1 transition-colors hover:text-foreground" href="#fontes">
               Dados abertos <ChevronDown className="size-3" />
             </Link>
@@ -415,8 +417,61 @@ export function LandingPage() {
           </div>
         </section>
 
+        <section id="contato" className="scroll-mt-20 border-y bg-card">
+          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20 lg:py-24">
+            <div>
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary">
+                <MessageCircle className="size-6" />
+              </div>
+              <p className="eyebrow mt-7 text-primary">Entre em contato</p>
+              <h2 className="mt-4 max-w-md text-3xl font-bold leading-[1.05] sm:text-4xl">
+                Vamos transformar dados em decisões melhores?
+              </h2>
+              <p className="mt-6 max-w-lg text-sm leading-7 text-muted-foreground">
+                Converse com a equipe da MonitoraME para conhecer a plataforma, entender os indicadores e descobrir como aplicá-los à realidade da sua empresa ou município.
+              </p>
+              <Button asChild className="mt-7 rounded-full px-6">
+                <a
+                  href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME."
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <MessageCircle className="size-4" />
+                  Falar pelo WhatsApp
+                </a>
+              </Button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Card className="h-full bg-background shadow-none">
+                <CardHeader>
+                  <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
+                    <Building2 className="size-5" />
+                  </div>
+                  <CardTitle className="text-lg">Para empresas e MPEs</CardTitle>
+                  <CardDescription className="text-sm leading-6">
+                    Encontre oportunidades alinhadas à sua atividade e região e acompanhe o mercado público com mais clareza.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              <Card className="h-full bg-background shadow-none">
+                <CardHeader>
+                  <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
+                    <Landmark className="size-5" />
+                  </div>
+                  <CardTitle className="text-lg">Para prefeituras e gestores</CardTitle>
+                  <CardDescription className="text-sm leading-6">
+                    Analise a participação das microempresas, a retenção de recursos e as oportunidades de fomento local.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
+          </div>
+        </section>
+
         <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:pb-20">
-          <div className="relative overflow-hidden rounded-3xl bg-foreground px-7 py-10 text-primary-foreground shadow-[0_24px_60px_-35px_rgb(0_20_41/60%)] sm:px-11 lg:flex lg:items-center lg:justify-between lg:gap-10">
+          <div className="relative mt-16 overflow-hidden rounded-3xl bg-foreground px-7 py-10 text-primary-foreground shadow-[0_24px_60px_-35px_rgb(0_20_41/60%)] sm:px-11 lg:mt-20 lg:flex lg:items-center lg:justify-between lg:gap-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,color-mix(in_srgb,var(--primary)_30%,transparent),transparent_38%)]" />
             <div className="relative max-w-2xl">
               <h2 className="text-2xl font-bold text-white sm:text-3xl">Monitore o seu município agora mesmo.</h2>
@@ -445,6 +500,7 @@ export function LandingPage() {
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <Link href="/analitico/metodologia" className="hover:text-foreground">Termos de uso</Link>
             <Link href="/analitico/metodologia" className="hover:text-foreground">Privacidade & LGPD</Link>
+            <Link href="#contato" className="hover:text-foreground">Contato</Link>
             <Link href="/analitico" className="hover:text-foreground">API aberta</Link>
             <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="hover:text-foreground">Portal TCE-CE</a>
           </div>
