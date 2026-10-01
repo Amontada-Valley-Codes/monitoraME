@@ -23,6 +23,7 @@ import Reports from './pages/reports';
 import Methodology from './pages/methodology';
 import Quality from './pages/quality';
 import { PricingSection } from '@/components/pricing-section';
+import { AccessGateProvider } from '@/shared/components/access-gate';
 
 function Routes() {
   const path = usePathname();
@@ -65,7 +66,13 @@ function Routes() {
   );
 }
 
-export default function AnalyticsApp() {
+export default function AnalyticsApp({
+  hasAccount = false,
+  hasPlan = false,
+}: {
+  hasAccount?: boolean;
+  hasPlan?: boolean;
+}) {
   return (
     <Suspense
       fallback={
@@ -74,9 +81,11 @@ export default function AnalyticsApp() {
         </div>
       }
     >
-      <AnalyticsProvider>
-        <Routes />
-      </AnalyticsProvider>
+      <AccessGateProvider hasAccount={hasAccount} hasPlan={hasPlan}>
+        <AnalyticsProvider>
+          <Routes />
+        </AnalyticsProvider>
+      </AccessGateProvider>
     </Suspense>
   );
 }

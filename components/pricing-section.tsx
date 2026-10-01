@@ -39,17 +39,17 @@ export function PricingSection({
   }
 
   return (
-    <section className="relative w-full overflow-hidden">
-      <div className="mx-auto mb-4 max-w-2xl text-center">
+    <section className="relative flex w-full flex-1 flex-col justify-center overflow-hidden">
+      <div className="mx-auto max-w-2xl text-center space-y-4">
         <div className="flex justify-center">
           <div className="eyebrow rounded-md border bg-card px-4 py-1 text-primary">
             Planos MonitoraME
           </div>
         </div>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+        <h1 className="mt-2 mb-1 text-3xl font-bold tracking-tight md:text-4xl">
           Escolha o plano ideal para sua gestão
         </h1>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground md:text-base">
+        <p className="mt-1 mb-4 text-sm leading-6 text-muted-foreground md:text-base">
           Acompanhe compras públicas com clareza, indicadores confiáveis e
           ferramentas que crescem com sua equipe.
         </p>
@@ -64,7 +64,7 @@ export function PricingSection({
               key={plan.id}
               className={cn(
                 "max-w-full bg-card",
-                plan.featured && "border-primary shadow-sm md:-translate-y-2",
+                plan.featured && "border-primary shadow-sm md:-translate-y-6",
               )}
             >
               <PricingCard.Header

@@ -43,10 +43,11 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { Toaster } from '@/components/ui/sonner';
 import { LogoIcon, LogoContent } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
+import { useAccessGate } from '@/shared/components/access-gate';
+import { getRestrictedFeature } from '@/shared/config/access';
 
 export const NAV = [
   { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
@@ -61,6 +62,17 @@ export const NAV = [
   { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
 ];
 
+const SIDEBAR_GROUPS = [
+  {
+    label: 'Áreas públicas',
+    items: [NAV[0], NAV[1], NAV[3]],
+  },
+  {
+    label: 'Análises avançadas',
+    items: [NAV[2], NAV[4], NAV[5]],
+  },
+];
+
 const PLANS_PAGE = {
   path: '/analitico/planos',
   label: 'Planos',
@@ -70,6 +82,7 @@ const PLANS_PAGE = {
 function Navigation() {
   const path = usePathname();
   const { navigate } = useAnalytics();
+  const { hasPlan } = useAccessGate();
   const { setOpen, setOpenMobile } = useSidebar();
 
   useEffect(() => {
@@ -105,7 +118,7 @@ function Navigation() {
                 <SidebarMenuButton
                   tooltip={item.label}
                   isActive={
-                    item.path === '/analitico'
+                    itemhttps://github.com/0xedtx/monitoraME/pull/16/conflict?name=shared%252Flayout%252Fapp-shell.tsx&ancestor_oid=47740105d948bd335b34f64e40ed928345d59ab0&base_oid=e403e1b9084abfe5f5ecd17cb7093cc024d4ea67&head_oid=2460768d6f74b12f8410507fd5fb0d80f46dc7e1.path === '/analitico'
                       ? path === item.path
                       : path === item.path || path.startsWith(`${item.path}/`)
                   }
@@ -123,6 +136,29 @@ function Navigation() {
           </SidebarMenu>
         </SidebarGroup>
 
+                return (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      tooltip={item.label}
+                      aria-label={isLocked ? `${item.label}, bloqueado` : item.label}
+                      aria-haspopup={isLocked ? 'dialog' : undefined}
+                      data-locked={isLocked || undefined}
+                      isActive={item.path === '/' ? path === '/' : path.startsWith(item.path)}
+                      onClick={() => {
+                        navigate(item.path);
+                        setOpenMobile(false);
+                      }}
+                      className="min-h-11 gap-3 text-sm data-[locked=true]:text-sidebar-foreground/65 data-[active=true]:bg-primary data-[active=true]:font-medium data-[active=true]:text-white!"
+                    >
+                      <item.icon className="size-4" />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
     </Sidebar>
   );
@@ -213,14 +249,26 @@ function ShellContent({ children }: { children: ReactNode }) {
               onClick={() => navigate(PLANS_PAGE.path)}
             >
               <CircleDollarSign className="size-4 text-primary" />
-              <span className="hidden sm:inline text-primary">Planos</span>
+              <span className="hidden font-mono text-primary sm:inline uppercase text-[11px]">Planos</span>
             </Button>
           </div>
         </header>
 
-        <div id="main-content" tabIndex={-1} className="page-content outline-none">
-          {children}
-          <footer className="mt-10 pt-5 border-t flex flex-wrap justify-between gap-3 text-xs text-muted-foreground">
+        <div
+          id="main-content"
+          tabIndex={-1}
+          className="page-content flex min-h-[calc(100svh-var(--header-height))] flex-col outline-none"
+        >
+          <div
+            className={
+              path.startsWith(PLANS_PAGE.path)
+                ? 'flex flex-1 flex-col pb-5'
+                : 'pb-10'
+            }
+          >
+            {children}
+          </div>
+          <footer className="mt-auto flex flex-wrap justify-between gap-3 border-t pt-5 text-xs text-muted-foreground">
             <span>MonitoraME · Inteligência em compras públicas</span>
             <Button
               variant="link"
@@ -278,8 +326,6 @@ function ShellContent({ children }: { children: ReactNode }) {
           </CommandGroup>
         </CommandList>
       </CommandDialog>
-
-      <Toaster position="bottom-right" />
     </>
   );
 }
