@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
-import { authService } from "@/features/auth/services/auth.service";
+import { apiService } from "@/features/auth/services/auth.service";
 
 export default function HomePage() {
   return (
@@ -33,7 +33,7 @@ async function AuthenticatedHome() {
     try {
       if (token) {
         // 2. Tenta notificar o backend em segundo plano (opcional/não bloqueante)
-        await authService.logoutCurrent(token);
+        await apiService.logoutCurrent(token);
       }
     } catch {
       // Ignora falhas do backend no logout para não afetar o utilizador
