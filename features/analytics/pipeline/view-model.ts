@@ -1,0 +1,261 @@
+import type {
+  DestinoRecurso,
+  PipelineOverviewFailure,
+  PipelineTceOverview,
+  PorteEmpresarial,
+} from './types';
+
+type UnknownRecord = Record<string, unknown>;
+
+export interface OverviewMetric {
+  key: string;
+  name: string;
+  value: number;
+  percentage?: number;
+  color: string;
+}
+
+export interface OverviewViewModel {
+  source: string;
+  period: string;
+  municipalityName: string | null;
+  missingMonths: string[];
+  failures: string[];
+  kpis: {
+    meMeiPercentage: number | null;
+    mePurchasesCents: number | null;
+    localPercentage: number | null;
+    outsidePercentage: number | null;
+  };
+  businessSizes: OverviewMetric[];
+  expenseElements: OverviewMetric[];
+  monthly: Array<{
+    date: Date;
+    label: string;
+    total: number;
+    mpe: number;
+  }>;
+  destinations: OverviewMetric[];
+  totalCents: number;
+  empty: boolean;
+}
+
+function record(value: unknown): UnknownRecord {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as UnknownRecord
+    : {};
+}
+
+function numeric(source: UnknownRecord, keys: readonly string[]): number | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    const nested = record(value);
+    for (const nestedKey of ['valor', 'valor_centavos', 'percentual']) {
+      const nestedValue = nested[nestedKey];
+      if (typeof nestedValue === 'number' && Number.isFinite(nestedValue)) {
+        return nestedValue;
+      }
+    }
+  }
+  return null;
+}
+
+function text(source: UnknownRecord, keys: readonly string[]): string | null {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === 'string' && value.trim()) return value;
+  }
+  return null;
+}
+
+function humanize(value: string): string {
+  return value
+    .toLocaleLowerCase('pt-BR')
+    .replaceAll('_', ' ')
+    .replace(/(^|\s)\S/g, (letter) => letter.toLocaleUpperCase('pt-BR'));
+}
+
+function monthLabel(competence: string): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(competence);
+  if (!match) return competence;
+  return new Date(`${competence}-15T12:00:00`).toLocaleDateString('pt-BR', {
+    month: 'short',
+    year: '2-digit',
+  });
+}
+
+function failureLabel(failure: PipelineOverviewFailure): string {
+  if (typeof failure === 'string') return failure;
+  return [failure.competencia, failure.mensagem ?? failure.erro]
+    .filter(Boolean)
+    .join(': ');
+}
+
+const sizeNames: Record<PorteEmpresarial, string> = {
+  ME: 'Microempresa',
+  MEI: 'Microempreendedor individual',
+  OUTROS_PORTES: 'Outros portes',
+  NAO_IDENTIFICADO: 'Não identificado',
+};
+
+const sizeColors: Record<PorteEmpresarial, string> = {
+  ME: 'var(--size-me)',
+  MEI: 'var(--size-mei)',
+  OUTROS_PORTES: 'var(--size-other)',
+  NAO_IDENTIFICADO: 'var(--size-unknown)',
+};
+
+const destinationNames: Record<DestinoRecurso, string> = {
+  NO_MUNICIPIO_COMPRADOR: 'No município comprador',
+  EM_OUTRO_MUNICIPIO: 'Em outro município do Ceará',
+  FORA_DO_CEARA: 'Fora do Ceará',
+  ORIGEM_NAO_IDENTIFICADA: 'Origem não identificada',
+};
+
+const destinationColors: Record<DestinoRecurso, string> = {
+  NO_MUNICIPIO_COMPRADOR: 'var(--origin-local)',
+  EM_OUTRO_MUNICIPIO: 'var(--origin-state)',
+  FORA_DO_CEARA: 'var(--origin-external)',
+  ORIGEM_NAO_IDENTIFICADA: 'var(--origin-unknown)',
+};
+
+export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewModel {
+  const kpis = record(data.kpis);
+  const municipality = data.base_analitica.municipio_comprador;
+  const municipalityName = typeof municipality === 'string'
+    ? municipality
+    : text(record(municipality), ['nome', 'nome_municipio']);
+
+  const businessSizes = data.participacao_por_porte_empresarial.map((item) => {
+    const itemRecord = record(item);
+    const rawKey = text(itemRecord, ['porte_empresarial', 'porte']) ?? 'NAO_IDENTIFICADO';
+    const key = rawKey in sizeNames ? rawKey as PorteEmpresarial : 'NAO_IDENTIFICADO';
+    return {
+      key,
+      name: sizeNames[key],
+      value: numeric(itemRecord, [
+        'valor_centavos',
+        'valor_compras_centavos',
+        'total_centavos',
+        'valor',
+      ]) ?? 0,
+      percentage: numeric(itemRecord, ['percentual', 'participacao_percentual']) ?? undefined,
+      color: sizeColors[key],
+    };
+  });
+
+  const expenseElements = data.elementos_despesa.map((item, index) => {
+    const itemRecord = record(item);
+    const code = text(itemRecord, ['codigo_elemento_despesa', 'codigo']) ?? String(index + 1);
+    const name = text(itemRecord, [
+      'descricao_elemento_despesa',
+      'descricao',
+      'elemento_despesa',
+      'nome',
+    ]) ?? code;
+    return {
+      key: code,
+      name,
+      value: numeric(itemRecord, [
+        'valor_centavos',
+        'valor_liquido_centavos',
+        'valor_compras_centavos',
+        'total_centavos',
+        'valor',
+      ]) ?? 0,
+      percentage: numeric(itemRecord, ['percentual']) ?? undefined,
+      color: 'var(--chart-1)',
+    };
+  });
+
+  const monthly = data.evolucao_compras_consideradas.map((item) => {
+    const itemRecord = record(item);
+    const competence = item.competencia ?? item.periodo ?? '';
+    return {
+      date: new Date(`${competence}-15T12:00:00`),
+      label: monthLabel(competence),
+      total: numeric(itemRecord, [
+        'compras_consideradas_centavos',
+        'valor_compras_consideradas_centavos',
+        'total_centavos',
+      ]) ?? 0,
+      mpe: numeric(itemRecord, [
+        'microempresas_centavos',
+        'valor_microempresas_centavos',
+        'me_mei_centavos',
+        'valor_me_mei_centavos',
+      ]) ?? 0,
+    };
+  });
+
+  const destinations = data.destino_recursos.map((item) => {
+    const itemRecord = record(item);
+    const rawKey = text(itemRecord, ['destino', 'destino_recurso'])
+      ?? 'ORIGEM_NAO_IDENTIFICADA';
+    const key = rawKey in destinationNames
+      ? rawKey as DestinoRecurso
+      : 'ORIGEM_NAO_IDENTIFICADA';
+    return {
+      key,
+      name: destinationNames[key] ?? humanize(key),
+      value: numeric(itemRecord, [
+        'valor_centavos',
+        'valor_compras_centavos',
+        'total_centavos',
+        'valor',
+      ]) ?? 0,
+      percentage: numeric(itemRecord, ['percentual', 'participacao_percentual']) ?? undefined,
+      color: destinationColors[key],
+    };
+  });
+
+  const totalCents = numeric(kpis, [
+    'total_compras_consideradas_centavos',
+    'compras_consideradas_centavos',
+    'total_centavos',
+  ]) ?? businessSizes.reduce((sum, item) => sum + item.value, 0);
+
+  return {
+    source: data.fonte,
+    period: `${data.parametros.data_inicial} a ${data.parametros.data_final}`,
+    municipalityName,
+    missingMonths: data.competencias_ausentes,
+    failures: data.falhas_competencias.map(failureLabel),
+    kpis: {
+      meMeiPercentage: numeric(kpis, [
+        'percentual_participacao_me',
+        'participacao_me_mei_percentual',
+        'participacao_microempresas_percentual',
+        'percentual_participacao_me_mei',
+        'participacao_me_mei',
+      ]),
+      mePurchasesCents: numeric(kpis, [
+        'total_compras_ME_centavos',
+        'total_compras_me_centavos',
+        'valor_compras_me_centavos',
+        'compras_me_centavos',
+        'total_me_centavos',
+      ]),
+      localPercentage: numeric(kpis, [
+        'percentual_compras_fornecedores_locais',
+        'percentual_local',
+        'percentual_compras_locais',
+        'compras_locais_percentual',
+        'participacao_local_percentual',
+      ]),
+      outsidePercentage: numeric(kpis, [
+        'percentual_fora_municipio',
+        'percentual_recursos_fora_municipio',
+        'recursos_fora_municipio_percentual',
+        'participacao_fora_municipio_percentual',
+      ]),
+    },
+    businessSizes,
+    expenseElements,
+    monthly,
+    destinations,
+    totalCents,
+    empty: totalCents === 0 && monthly.every((item) => item.total === 0),
+  };
+}
