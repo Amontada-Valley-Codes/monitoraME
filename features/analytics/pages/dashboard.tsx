@@ -66,7 +66,8 @@ export default function Dashboard() {
             {data && (
               <ExportButton
                 dataset={exportDataset(data)}
-                filters={filters} hasAccount={false} hasPlan={false}              />
+                filters={filters}
+              />
             )}
           </>
         }
