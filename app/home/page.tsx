@@ -1,9 +1,18 @@
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 import { authService } from "@/features/auth/services/auth.service";
 
-export default async function HomePage() {
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <AuthenticatedHome />
+    </Suspense>
+  );
+}
+
+async function AuthenticatedHome() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("access_token")?.value;
 
@@ -26,7 +35,7 @@ export default async function HomePage() {
         // 2. Tenta notificar o backend em segundo plano (opcional/não bloqueante)
         await authService.logoutCurrent(token);
       }
-    } catch (error) {
+    } catch {
       // Ignora falhas do backend no logout para não afetar o utilizador
     }
 

@@ -33,7 +33,7 @@ function Routes() {
   const id = parts[2];
   let page;
 
-  if (path === '/') page = <Dashboard />;
+  if (path === '/analitico') page = <Dashboard />;
   else if (section === 'planos') page = (
     <PricingSection onAccessPlatform={() => navigate('/')} />
   );

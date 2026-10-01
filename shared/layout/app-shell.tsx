@@ -50,7 +50,7 @@ import { useAccessGate } from '@/shared/components/access-gate';
 import { getRestrictedFeature } from '@/shared/config/access';
 
 export const NAV = [
-  { path: '/', label: 'Visão geral', icon: LayoutDashboard },
+  { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
@@ -102,20 +102,39 @@ function Navigation() {
           className="p-0 justify-start hover:bg-transparent"
           aria-label="MonitoraME início"
         >
-          <LogoIcon className="size-7 text-primary shrink-0" />
-          <LogoContent className="size-auto! h-6! w-36! text-navy group-data-[collapsible=icon]:hidden" />
+          <LogoIcon className="size-7 shrink-0 text-brand-ink" />
+          <LogoContent className="size-auto! h-6! w-36! text-brand-ink group-data-[collapsible=icon]:hidden" />
         </Button>
       </SidebarHeader>
 
-      <SidebarContent className="gap-1 px-2 pt-3">
-        {SIDEBAR_GROUPS.map((group) => (
-          <SidebarGroup key={group.label} className="py-2">
-            <SidebarGroupLabel className="eyebrow mb-1 text-muted-foreground">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarMenu className="gap-1">
-              {group.items.map((item) => {
-                const isLocked = Boolean(getRestrictedFeature(item.path) && !hasPlan);
+      <SidebarContent className="px-2">
+        <SidebarGroup className="pt-5">
+          <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
+            Poder Público
+          </SidebarGroupLabel>
+          <SidebarMenu className="gap-1">
+            {NAV.slice(0, 6).map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  tooltip={item.label}
+                  isActive={
+                    itemhttps://github.com/0xedtx/monitoraME/pull/16/conflict?name=shared%252Flayout%252Fapp-shell.tsx&ancestor_oid=47740105d948bd335b34f64e40ed928345d59ab0&base_oid=e403e1b9084abfe5f5ecd17cb7093cc024d4ea67&head_oid=2460768d6f74b12f8410507fd5fb0d80f46dc7e1.path === '/analitico'
+                      ? path === item.path
+                      : path === item.path || path.startsWith(`${item.path}/`)
+                  }
+                  onClick={() => {
+                    navigate(item.path);
+                    setOpenMobile(false);
+                  }}
+                  className="min-h-11 gap-3 text-sm data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:font-medium"
+                >
+                  <item.icon className="size-4" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
 
                 return (
                   <SidebarMenuItem key={item.path}>

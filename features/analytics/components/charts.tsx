@@ -145,7 +145,7 @@ export function DonutChart({
   onSelect,
   fillVerticalSpace = false,
 }: {
-  data: { name: string; key: string; value: number; color: string }[];
+  data: { name: string; key: string; value: number; percentage?: number; color: string }[];
   total: number;
   onSelect?: (key: string) => void;
   fillVerticalSpace?: boolean;
@@ -176,7 +176,7 @@ export function DonutChart({
               <div className="px-3 text-center">
                 <p className="metric text-primary whitespace-nowrap text-[clamp(0.6875rem,12cqw,1.25rem)] leading-none">
                   {isHovered
-                    ? percent(ratio(value, total))
+                    ? percent(data[hover ?? -1]?.percentage ?? ratio(value, total))
                     : compactMoney(total)}
                 </p>
                 <p className="text-muted-foreground mt-1 text-xs">
@@ -220,7 +220,7 @@ export function DonutChart({
             </span>
             <span className="pl-2 text-right">
               <span className="data-value block text-sm">
-                {percent(ratio(item.value, total))}
+                {percent(item.percentage ?? ratio(item.value, total))}
               </span>
               <span className="text-muted-foreground block text-xs">
                 {compactMoney(item.value)}
