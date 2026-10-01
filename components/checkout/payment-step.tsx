@@ -107,7 +107,6 @@ export function PaymentStep({ plan, method, onMethodChange, cardDetails, onCardD
           )}
         </CardContent>
       </Card>
-
       <div className="flex items-start gap-2 rounded-lg bg-success-soft px-4 py-3 text-sm text-success">
         <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <p>Seus dados são protegidos e não são armazenados nesta demonstração.</p>

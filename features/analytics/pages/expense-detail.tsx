@@ -90,7 +90,8 @@ export default function ExpenseDetail({ id }: { id: string }) {
                 ['Anulações (R$)', row.cancelled / 100],
                 ['Valor líquido (R$)', row.net / 100],
               ],
-            }} hasAccount={false} hasPlan={false}          />
+            }}
+          />
         }
       />
       <div className="mb-6 grid gap-4 md:grid-cols-3">

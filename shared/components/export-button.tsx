@@ -5,6 +5,7 @@ import {
   Download,
   FileDown,
   Loader2,
+  LockKeyhole,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,42 +31,31 @@ import {
   type ExportDataset,
 } from "@/shared/lib/export";
 
-import { TeamUpgradeModal } from "@/components/cta_count";
+import { useAccessGate } from "@/shared/components/access-gate";
+
+const EXPORT_FEATURE = {
+  name: "Exportação de dados",
+  description: "Baixe o recorte selecionado em PDF, CSV ou Excel, com filtros e procedência dos dados.",
+};
 
 interface ExportButtonProps {
   dataset: ExportDataset;
   filters: Filters;
   compact?: boolean;
-  hasAccount?: boolean;
-  hasPlan?: boolean;
 }
 
 export function ExportButton({
   dataset,
   filters,
   compact = false,
-  hasAccount = false,
-  hasPlan = false,
 }: ExportButtonProps) {
   const [open, setOpen] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [format, setFormat] = useState<"pdf" | "csv" | "xlsx">("xlsx");
   const [busy, setBusy] = useState(false);
+  const { hasPlan, requestAccess } = useAccessGate();
 
   function handleExportClick() {
-    // 1. Não possui conta
-    if (!hasAccount) {
-      setUpgradeOpen(true);
-      return;
-    }
-
-    // 2. Possui conta, mas não possui plano
-    if (!hasPlan) {
-      setUpgradeOpen(true);
-      return;
-    }
-
-    // 3. Possui conta + plano
+    if (!requestAccess(EXPORT_FEATURE)) return;
     setOpen(true);
   }
 
@@ -105,25 +95,11 @@ export function ExportButton({
         onClick={handleExportClick}
         disabled={!dataset.rows.length}
       >
-        <Download className="size-4" />
+        {hasPlan ? <Download className="size-4" /> : <LockKeyhole className="size-4" />}
 
         {compact ? "Exportar" : "Exportar dados"}
+        {!hasPlan && <span className="text-[10px] font-medium opacity-75">· Assinatura</span>}
       </Button>
-
-      {/* 
-        Sem conta OU sem plano
-        → abre o TeamUpgradeModal
-      */}
-      <TeamUpgradeModal
-        open={upgradeOpen}
-        onOpenChange={setUpgradeOpen}
-        hasAccount={hasAccount}
-      />
-
-      {/* 
-        Com conta + plano
-        → abre o exportador
-      */}
       <Dialog
         open={open}
         onOpenChange={(value) => {

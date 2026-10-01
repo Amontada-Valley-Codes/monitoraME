@@ -1,19 +1,21 @@
 'use client';
 
-import { Check, X } from 'lucide-react';
+import { Check, LockKeyhole, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { CTA_CONTENT } from '@/components/cta-content';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import type { RestrictedFeature } from '@/shared/config/access';
 
 interface TeamUpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hasAccount: boolean;
+  feature?: RestrictedFeature;
 }
 
-export function TeamUpgradeModal({ open, onOpenChange, hasAccount }: TeamUpgradeModalProps) {
+export function TeamUpgradeModal({ open, onOpenChange, hasAccount, feature }: TeamUpgradeModalProps) {
   const router = useRouter();
   const content = CTA_CONTENT[hasAccount ? 'choosePlan' : 'createAccount'];
 
@@ -38,13 +40,18 @@ export function TeamUpgradeModal({ open, onOpenChange, hasAccount }: TeamUpgrade
         </button>
 
         <div className="px-6 pb-7 pt-6 sm:px-8">
-          <DialogTitle className="mt-5 max-w-175 text-xl font-bold leading-tight tracking-tight sm:text-[22px]">
-            {content.title}
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <LockKeyhole className="size-3.5" aria-hidden="true" />
+            Recurso da assinatura
+          </div>
+
+          <DialogTitle className="mt-4 max-w-175 text-xl font-bold leading-tight tracking-tight sm:text-[22px]">
+            {feature ? `${feature.name} amplia sua visão dos dados` : content.title}
           </DialogTitle>
 
-          <p className="mt-2 max-w-137.5 text-[10px] leading-5 text-muted-foreground sm:text-xs">
-            {content.description}
-          </p>
+          <DialogDescription className="mt-2 max-w-150 text-xs leading-5 sm:text-sm">
+            {feature?.description ?? content.description}
+          </DialogDescription>
 
           <div className="mt-5 h-px bg-border" />
 
