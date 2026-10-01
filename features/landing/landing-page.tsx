@@ -25,10 +25,19 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/shared/components/logo';
-import {
-  DEFAULT_FILTERS,
-  MUNICIPALITIES,
-} from '@/features/analytics/data/fixtures';
+import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
+
+const connectorWords = new Set(['DA', 'DAS', 'DE', 'DO', 'DOS', 'E']);
+
+function municipalityLabel(name: string) {
+  return name
+    .split(' ')
+    .map((word, index) => {
+      if (index > 0 && connectorWords.has(word)) return word.toLowerCase();
+      return `${word.charAt(0)}${word.slice(1).toLowerCase()}`;
+    })
+    .join(' ');
+}
 
 function normalize(value: string) {
   return value
@@ -39,7 +48,10 @@ function normalize(value: string) {
     .toUpperCase();
 }
 
-const municipalities = MUNICIPALITIES;
+const municipalities = TCE_MUNICIPALITIES.map((municipality) => ({
+  ...municipality,
+  label: municipalityLabel(municipality.name),
+}));
 
 const modules = [
   {
@@ -121,7 +133,7 @@ export function LandingPage() {
     event.preventDefault();
     const query = normalize(municipality);
     const match = municipalities.find(
-      (item) => item.id === query || normalize(item.name) === query,
+      (item) => item.code === query || normalize(item.name) === query,
     );
 
     if (!match) {
@@ -131,13 +143,8 @@ export function LandingPage() {
 
     setError('');
     const searchParams = new URLSearchParams({
-      uf: DEFAULT_FILTERS.uf,
-      municipality: match.id,
-      start: DEFAULT_FILTERS.start,
-      end: DEFAULT_FILTERS.end,
-      size: DEFAULT_FILTERS.size,
-      origin: DEFAULT_FILTERS.origin,
-      categories: DEFAULT_FILTERS.categories.join(','),
+      codigo_municipio: match.code,
+      ano: String(new Date().getFullYear()),
     });
     router.push(`/analitico?${searchParams.toString()}`);
   }
@@ -184,7 +191,7 @@ export function LandingPage() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
-                  <Link href="?uf=CE&municipality=2304400&start=2025-01-01&end=2025-12-31&size=all&origin=all&categories=339039%2C339030%2C449051%2C449052%2C339032%2C339040%2C339035">Explore municípios</Link>
+                  <Link href="/analitico">Explore municípios</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full bg-card px-6">
                   <Link href="/analitico/metodologia">Ver metodologia</Link>
@@ -224,7 +231,7 @@ export function LandingPage() {
                     />
                     <datalist id="municipalities">
                       {municipalities.map((item) => (
-                        <option key={item.id} value={item.name} />
+                        <option key={item.code} value={item.label} />
                       ))}
                     </datalist>
                   </div>
@@ -252,7 +259,7 @@ export function LandingPage() {
               Fontes integradas, harmonizadas e auditadas em tempo real
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-xs font-medium text-muted-foreground sm:gap-x-14">
-              {['TCE-CE', 'SIM / SICON', 'PNCP', 'Receita Federal', 'IBGE Cidades'].map((source) => (
+              {['TCE-CE', 'SIM / SICON', 'PNCP', 'Open CNPJ', 'IBGE'].map((source) => (
                 <span key={source} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary" />{source}</span>
               ))}
             </div>
