@@ -55,8 +55,8 @@ export function LoginForm({ onSubmitAction }: LoginFormProps) {
 
         <div>
           <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>
-          <Input type="password" placeholder="Sua senha" {...register("senha")} />
-          {errors.senha && <span className="text-xs text-red-500 mt-1 block">{errors.senha.message}</span>}
+          <Input type="password" placeholder="Sua senha" {...register("password")} />
+          {errors.password && <span className="text-xs text-red-500 mt-1 block">{errors.password.message}</span>}
         </div>
 
         <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800" disabled={loading}>
