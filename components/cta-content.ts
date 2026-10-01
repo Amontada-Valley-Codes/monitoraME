@@ -42,7 +42,7 @@ export const CTA_CONTENT: Record<'createAccount' | 'choosePlan', CtaContent> = {
       badge: 'Gratuito',
       description: 'Tenha acesso a informações públicas de forma simples, organizada e transparente.',
       primaryAction: {
-        label: 'Criar uma conta',
+        label: 'Criar conta',
         href: '/register',
       },
       secondaryAction: {
@@ -51,11 +51,9 @@ export const CTA_CONTENT: Record<'createAccount' | 'choosePlan', CtaContent> = {
         href: '/login',
       },
       benefits: [
-        'Informações públicas claras e organizadas.',
-        'Dados baseados em fontes públicas e confiáveis.',
-        'Consulte licitações, empresas e municípios.',
-        'Visualize dados de forma simples.',
-        'Acompanhe informações públicas em um só lugar.',
+        'Compare resultados entre municípios e períodos.',
+        'Explore despesas e rubricas em detalhes.',
+        'Exporte recortes em PDF, CSV e Excel.',
       ],
     },
     footer: 'Comece gratuitamente e explore as informações disponíveis no MonitoraME.',
@@ -76,15 +74,14 @@ export const CTA_CONTENT: Record<'createAccount' | 'choosePlan', CtaContent> = {
       badge: 'A partir de R$ 49',
       description: 'Compare as opções e escolha os recursos ideais para sua equipe.',
       primaryAction: {
-        label: 'Conhecer planos',
+        label: 'Assinar',
         href: '/analitico/planos',
       },
       benefits: [
         'Exporte relatórios em PDF, CSV e Excel.',
         'Compare resultados entre municípios.',
-        'Acompanhe metas e indicadores personalizados.',
-        'Organize análises para toda a equipe.',
-        'Conte com opções para diferentes estruturas de gestão.',
+        'Explore despesas, rubricas e análises territoriais.',
+        'Receba alertas e use o matching avançado de oportunidades.',
       ],
     },
     footer: 'Você pode comparar os planos antes de iniciar sua assinatura.',

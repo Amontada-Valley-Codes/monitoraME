@@ -45,6 +45,8 @@ import { dateLabel } from '@/shared/lib/format';
 import { useAnalytics } from '../data/context';
 import { CATEGORIES, MUNICIPALITIES, ORIGINS, SIZES } from '../data/fixtures';
 
+const FILTER_TRIGGER_CLASS = 'h-11 rounded-md border-border bg-card px-3 shadow-xs';
+
 interface MunicipalityPickerProps {
   value: string;
   onChange: (selected: string) => void;
@@ -73,7 +75,7 @@ export function MunicipalityPicker({
           role="combobox"
           aria-expanded={open}
           aria-label="Selecionar município"
-          className="w-full justify-between sm:w-auto min-w-52 bg-card"
+          className={`${FILTER_TRIGGER_CLASS} w-full min-w-52 justify-between sm:w-auto`}
         >
           <MapPin className="size-4 text-primary" />
           {selectedName}
@@ -160,13 +162,6 @@ export function GlobalFilters() {
   return (
     <div className="no-print mb-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Badge
-          variant="outline"
-          className="bg-card px-3 py-3 text-primary border-border"
-        >
-          CE · Ceará
-        </Badge>
-
         <MunicipalityPicker
           value={filters.municipality}
           onChange={(municipality) => setFilters({ municipality })}
@@ -175,7 +170,7 @@ export function GlobalFilters() {
         {/* Date Filter Popover */}
         <Popover open={datesOpen} onOpenChange={handleDatesOpenChange}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="bg-card">
+            <Button variant="outline" className={FILTER_TRIGGER_CLASS}>
               <CalendarDays className="size-4 text-primary" />
               {dateLabel(filters.start)} — {dateLabel(filters.end)}
             </Button>
@@ -258,7 +253,7 @@ export function GlobalFilters() {
         {/* More Filters Sheet Trigger */}
         <Button
           variant="outline"
-          className="bg-card"
+          className={FILTER_TRIGGER_CLASS}
           onClick={() => {
             setDraft(filters);
             setOpen(true);

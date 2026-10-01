@@ -16,7 +16,7 @@ export function CheckoutSummary({ plan }: { plan: CheckoutPlan }) {
             <CircleDollarSign className="size-7" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <CardTitle className="truncate text-base">Plano {plan.name}</CardTitle>
+            <CardTitle className="truncate font-mono text-base uppercase">Plano {plan.name}</CardTitle>
             <span className="mt-1 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-primary">Assinatura mensal</span>
           </div>
         </CardHeader>
