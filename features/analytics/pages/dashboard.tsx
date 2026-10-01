@@ -94,20 +94,19 @@ export default function Dashboard() {
             </div>
           )}
 
-          <OverviewKpis params={params} />
+          <OverviewKpis
+            params={params}
+            expenseChart={<OverviewExpenses params={params} />}
+          />
 
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <OverviewExpenses params={params} />
             <OverviewBusinessSizes params={params} />
+            <OverviewDestinations params={params} />
           </div>
 
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
             <OverviewEvolution params={params} />
             <OverviewReading params={params} />
-          </div>
-
-          <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <OverviewDestinations params={params} />
           </div>
 
           <Alert className="mt-6 bg-transparent text-muted-foreground">

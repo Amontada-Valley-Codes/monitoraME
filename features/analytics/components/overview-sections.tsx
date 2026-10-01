@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { ArrowUpRight, ChartPie, MapPin, Store, Wallet } from 'lucide-react';
 
 import { BarsChart, DonutChart, TrendChart } from './charts';
@@ -19,44 +20,59 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
+export function OverviewKpis({
+  params,
+  expenseChart,
+}: {
+  params: PipelineOverviewParams;
+  expenseChart: ReactNode;
+}) {
   const { data, view } = useOverviewKpis(params);
   if (!data || !view) return null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <KpiCard
-        label="Participação de ME e MEI"
-        value={valueOrDash(data.meMeiPercentage, percent)}
-        detail="Percentual informado pelo pipeline"
-        change={null}
-        icon={ChartPie}
-        sizeScope="ME + MEI"
-        highlight
-      />
-      <KpiCard
-        label="Total de compras de ME"
-        value={valueOrDash(data.mePurchasesCents, compactMoney)}
-        detail="Valor líquido em reais"
-        change={null}
-        icon={Wallet}
-        sizeScope="ME"
-      />
-      <KpiCard
-        label="Compras com fornecedores locais"
-        value={valueOrDash(data.localPercentage, percent)}
-        detail="No município comprador"
-        change={null}
-        icon={MapPin}
-      />
-      <KpiCard
-        label="Recursos fora do município"
-        value={valueOrDash(data.outsidePercentage, percent)}
-        detail="Percentual informado pelo pipeline"
-        change={null}
-        icon={ArrowUpRight}
-        inverse
-      />
+    <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:grid-rows-2 xl:gap-x-6 xl:gap-y-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <KpiCard
+          label="Participação de ME e MEI"
+          value={valueOrDash(data.meMeiPercentage, percent)}
+          detail="Percentual de compras de Microempresas e Empresas de Pequeno Porte"
+          change={null}
+          icon={ChartPie}
+          sizeScope="ME + MEI"
+          highlight
+        />
+        <KpiCard
+          label="Total de compras de ME"
+          value={valueOrDash(data.mePurchasesCents, compactMoney)}
+          detail="Valor líquido em reais"
+          change={null}
+          icon={Wallet}
+          sizeScope="ME"
+        />
+      </div>
+
+      <div className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1 *:h-full">
+        {expenseChart}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-1 xl:row-start-2">
+        <KpiCard
+          label="Compras com fornecedores locais"
+          value={valueOrDash(data.localPercentage, percent)}
+          detail="No município comprador"
+          change={null}
+          icon={MapPin}
+        />
+        <KpiCard
+          label="Recursos fora do município"
+          value={valueOrDash(data.outsidePercentage, percent)}
+          detail="Percentual informado pelo pipeline"
+          change={null}
+          icon={ArrowUpRight}
+          inverse
+        />
+      </div>
     </div>
   );
 }
@@ -127,7 +143,7 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
       onRetry={retry}
       empty={status === 'ready' && rows.length === 0}
     >
-      <DonutChart data={rows} total={view?.totalCents ?? 0} fillVerticalSpace />
+      <DonutChart data={rows} total={view?.totalCents ?? 0} />
     </ChartPanel>
   );
 }

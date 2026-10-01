@@ -6,8 +6,9 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Portal Municipal",
-  description: "Aplicação Next.js com autenticação segura",
+  title: "MonitoraME — Inteligência em compras públicas",
+  description:
+    "Dados públicos transformados em inteligência para municípios e pequenos negócios do Ceará.",
 };
 
 export default function RootLayout({

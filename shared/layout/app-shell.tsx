@@ -49,7 +49,7 @@ import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 
 export const NAV = [
-  { path: '/', label: 'Visão geral', icon: LayoutDashboard },
+  { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
@@ -89,7 +89,7 @@ function Navigation() {
           className="p-0 justify-start hover:bg-transparent"
           aria-label="MonitoraME início"
         >
-          <LogoIcon className="size-7 text-primary shrink-0" />
+          <LogoIcon className="size-7 shrink-0 text-brand-ink" />
           <LogoContent className="size-auto! h-6! w-36! text-brand-ink group-data-[collapsible=icon]:hidden" />
         </Button>
       </SidebarHeader>
