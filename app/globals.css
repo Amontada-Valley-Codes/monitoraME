@@ -153,6 +153,59 @@
   }
 }
 
+/* Keep older screens that still use the Tailwind slate palette in sync with
+   the global theme until they are migrated to the semantic color tokens. */
+@layer utilities {
+  .dark .bg-white {
+    background-color: var(--card);
+  }
+
+  .dark .bg-slate-50,
+  .dark .bg-slate-50\/50,
+  .dark .bg-slate-50\/80,
+  .dark .bg-slate-100,
+  .dark .bg-slate-200 {
+    background-color: var(--muted);
+  }
+
+  .dark .bg-slate-900 {
+    background-color: var(--primary);
+  }
+
+  .dark .bg-slate-900.text-white {
+    color: var(--primary-foreground);
+  }
+
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700 {
+    color: var(--foreground);
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  .dark .text-slate-400,
+  .dark .text-slate-300 {
+    color: var(--muted-foreground);
+  }
+
+  .dark .border-slate-100,
+  .dark .border-slate-200,
+  .dark .border-slate-300 {
+    border-color: var(--border);
+  }
+
+  .dark .hover\:bg-slate-50:hover,
+  .dark .hover\:bg-slate-100:hover,
+  .dark .hover\:bg-slate-800:hover {
+    background-color: var(--accent);
+  }
+
+  .dark .hover\:text-slate-800:hover {
+    color: var(--foreground);
+  }
+}
+
 @layer components {
   .page-content {
     width: 100%;
