@@ -9,6 +9,7 @@
   --primary: #2058b7;
   --primary-foreground: #ffffff;
   --brand: #4575d6;
+  --brand-ink: #001429;
   --navy: #c8dcf1;
   --secondary: #ebf3fe;
   --secondary-foreground: #2058b7;
@@ -63,7 +64,7 @@
   --rail-size: 4.25rem;
   --header-height: 4.5rem;
   --chart-height: 17.5rem;
-  --chart-compact-height: 14rem;
+  --chart-compact-height: 12rem;
   --content-max: 100rem;
   --font-heading: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'Roboto', sans-serif;
@@ -76,6 +77,62 @@
   --sidebar-accent-foreground: #2058b7;
   --sidebar-border: #e2e7f3;
   --sidebar-ring: #2058b7;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0b1220;
+  --foreground: #edf3ff;
+  --card: #111b2d;
+  --card-foreground: #edf3ff;
+  --popover: #111b2d;
+  --popover-foreground: #edf3ff;
+  --primary: #8fb4ff;
+  --primary-foreground: #071426;
+  --brand: #6f9df4;
+  --brand-ink: #dce8ff;
+  --navy: #152a4a;
+  --secondary: #192a46;
+  --secondary-foreground: #c4d6ff;
+  --muted: #182235;
+  --muted-foreground: #aab5c9;
+  --accent: #1c3152;
+  --accent-foreground: #d7e3ff;
+  --destructive: #ffb4ab;
+  --border: #2b3950;
+  --input: #53617a;
+  --ring: #8fb4ff;
+  --success: #8ddb80;
+  --success-soft: #14331a;
+  --warning: #ffcf75;
+  --warning-soft: #3b2a0e;
+  --chart-1: #8fb4ff;
+  --chart-2: #bd9bff;
+  --chart-3: #9bb5c3;
+  --chart-4: #6f94df;
+  --chart-5: #b5bdcc;
+  --size-me: #64cfb5;
+  --size-mei: #83bcae;
+  --size-other: #6e87aa;
+  --size-unknown: #657289;
+  --origin-local: #8fb4ff;
+  --origin-state: #7698df;
+  --origin-external: #bd9bff;
+  --origin-unknown: #657289;
+  --chart-tooltip-foreground: #edf3ff;
+  --chart-tooltip-muted: #aab5c9;
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 24%);
+  --shadow-popover:
+    0 10px 28px -8px rgb(0 0 0 / 48%), 0 3px 8px -3px rgb(0 0 0 / 32%);
+  --shadow-dialog: 0 24px 48px -12px rgb(0 0 0 / 58%);
+  --sidebar: #0f192a;
+  --sidebar-foreground: #c3cde0;
+  --sidebar-primary: #8fb4ff;
+  --sidebar-primary-foreground: #071426;
+  --sidebar-accent: #1c3152;
+  --sidebar-accent-foreground: #d7e3ff;
+  --sidebar-border: #2b3950;
+  --sidebar-ring: #8fb4ff;
 }
 
 :root {

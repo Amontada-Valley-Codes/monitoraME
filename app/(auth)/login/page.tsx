@@ -1,5 +1,5 @@
 import { LoginView } from "@/components/login-view"
-import { authService } from "@/features/auth/services/auth.service";
+import { apiService } from "@/features/auth/services/auth.service";
 import { LoginFormData } from "@/features/auth/schemas/login.schema";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,7 +9,7 @@ export default function LoginPage() {
   async function handleLogin(data: LoginFormData) {
     "use server";
     try {
-      const response = await authService.login(data);
+      const response = await apiService.login(data);
       const { accessToken, refreshToken } = response;
       const cookieStore = await cookies();
 

@@ -46,11 +46,9 @@ import {
 import { LogoIcon, LogoContent } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
-import { useAccessGate } from '@/shared/components/access-gate';
-import { getRestrictedFeature } from '@/shared/config/access';
 
 export const NAV = [
-  { path: '/', label: 'Visão geral', icon: LayoutDashboard },
+  { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
@@ -62,17 +60,6 @@ export const NAV = [
   { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
 ];
 
-const SIDEBAR_GROUPS = [
-  {
-    label: 'Áreas públicas',
-    items: [NAV[0], NAV[1], NAV[3]],
-  },
-  {
-    label: 'Análises avançadas',
-    items: [NAV[2], NAV[4], NAV[5]],
-  },
-];
-
 const PLANS_PAGE = {
   path: '/analitico/planos',
   label: 'Planos',
@@ -82,7 +69,6 @@ const PLANS_PAGE = {
 function Navigation() {
   const path = usePathname();
   const { navigate } = useAnalytics();
-  const { hasPlan } = useAccessGate();
   const { setOpen, setOpenMobile } = useSidebar();
 
   useEffect(() => {
@@ -102,44 +88,40 @@ function Navigation() {
           className="p-0 justify-start hover:bg-transparent"
           aria-label="MonitoraME início"
         >
-          <LogoIcon className="size-7 text-primary shrink-0" />
-          <LogoContent className="size-auto! h-6! w-36! text-navy group-data-[collapsible=icon]:hidden" />
+          <LogoIcon className="size-7 shrink-0 text-brand-ink" />
+          <LogoContent className="size-auto! h-6! w-36! text-brand-ink group-data-[collapsible=icon]:hidden" />
         </Button>
       </SidebarHeader>
 
-      <SidebarContent className="gap-1 px-2 pt-3">
-        {SIDEBAR_GROUPS.map((group) => (
-          <SidebarGroup key={group.label} className="py-2">
-            <SidebarGroupLabel className="eyebrow mb-1 text-muted-foreground">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarMenu className="gap-1">
-              {group.items.map((item) => {
-                const isLocked = Boolean(getRestrictedFeature(item.path) && !hasPlan);
+      <SidebarContent className="px-2">
+        <SidebarGroup className="pt-5">
+          <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
+            Poder Público
+          </SidebarGroupLabel>
+          <SidebarMenu className="gap-1">
+            {NAV.slice(0, 6).map((item) => (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  tooltip={item.label}
+                  isActive={
+                    item.path === '/analitico'
+                      ? path === item.path
+                      : path === item.path || path.startsWith(`${item.path}/`)
+                  }
+                  onClick={() => {
+                    navigate(item.path);
+                    setOpenMobile(false);
+                  }}
+                  className="min-h-11 gap-3 text-sm data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:font-medium"
+                >
+                  <item.icon className="size-4" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
 
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      tooltip={item.label}
-                      aria-label={isLocked ? `${item.label}, bloqueado` : item.label}
-                      aria-haspopup={isLocked ? 'dialog' : undefined}
-                      data-locked={isLocked || undefined}
-                      isActive={item.path === '/' ? path === '/' : path.startsWith(item.path)}
-                      onClick={() => {
-                        navigate(item.path);
-                        setOpenMobile(false);
-                      }}
-                      className="min-h-11 gap-3 text-sm data-[locked=true]:text-sidebar-foreground/65 data-[active=true]:bg-primary data-[active=true]:font-medium data-[active=true]:text-white!"
-                    >
-                      <item.icon className="size-4" />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroup>
-        ))}
       </SidebarContent>
     </Sidebar>
   );
@@ -230,26 +212,14 @@ function ShellContent({ children }: { children: ReactNode }) {
               onClick={() => navigate(PLANS_PAGE.path)}
             >
               <CircleDollarSign className="size-4 text-primary" />
-              <span className="hidden font-mono text-primary sm:inline uppercase text-[11px]">Planos</span>
+              <span className="hidden sm:inline text-primary">Planos</span>
             </Button>
           </div>
         </header>
 
-        <div
-          id="main-content"
-          tabIndex={-1}
-          className="page-content flex min-h-[calc(100svh-var(--header-height))] flex-col outline-none"
-        >
-          <div
-            className={
-              path.startsWith(PLANS_PAGE.path)
-                ? 'flex flex-1 flex-col pb-5'
-                : 'pb-10'
-            }
-          >
-            {children}
-          </div>
-          <footer className="mt-auto flex flex-wrap justify-between gap-3 border-t pt-5 text-xs text-muted-foreground">
+        <div id="main-content" tabIndex={-1} className="page-content outline-none">
+          {children}
+          <footer className="mt-10 pt-5 border-t flex flex-wrap justify-between gap-3 text-xs text-muted-foreground">
             <span>MonitoraME · Inteligência em compras públicas</span>
             <Button
               variant="link"
@@ -307,6 +277,7 @@ function ShellContent({ children }: { children: ReactNode }) {
           </CommandGroup>
         </CommandList>
       </CommandDialog>
+
     </>
   );
 }

@@ -62,13 +62,13 @@ export function PaymentStep({ plan, method, onMethodChange, cardDetails, onCardD
         <CardContent className="px-6 py-5">
           {method === 'pix' ? (
             <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
-              <div className="flex size-40 shrink-0 items-center justify-center rounded-lg border bg-card p-3 text-navy shadow-xs">
+              <div className="flex size-40 shrink-0 items-center justify-center rounded-lg border bg-card p-3 text-brand-ink shadow-xs">
                 <QRCode
                   value={pixPayload}
                   title={`PIX do plano ${plan.name} no valor de ${formatPlanPrice(plan.priceInCents)}`}
                   level="M"
                   bgColor="var(--card)"
-                  fgColor="var(--navy)"
+                  fgColor="var(--brand-ink)"
                   size={136}
                   className="h-auto w-full"
                 />
