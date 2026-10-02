@@ -137,7 +137,7 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
   return (
     <ChartPanel
       title="Participação por porte empresarial"
-      description="Percentual do valor considerado"
+      description="Percentual do valor valor liquido anual"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}

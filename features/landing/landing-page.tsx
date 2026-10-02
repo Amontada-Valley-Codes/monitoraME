@@ -195,7 +195,7 @@ export function LandingPage() {
           </nav>
 
           <Button asChild className="rounded-full bg-foreground px-5 text-xs text-background hover:bg-foreground/85">
-            <Link href="/login">Acessar painel</Link>
+            <Link href="/analitico">Acessar painel</Link>
           </Button>
         </div>
       </header>
@@ -215,7 +215,18 @@ export function LandingPage() {
               <p className="mt-7 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
                 A MonitoraME transforma dados públicos complexos em informações claras para decisões melhores nas compras públicas, com foco especial nas microempresas.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 flex max-w-xl items-start gap-3 rounded-2xl border border-primary/15 bg-secondary/60 p-4">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+                  <Landmark className="size-4" />
+                </span>
+                <p className="text-sm leading-6 text-muted-foreground">
+                  <strong className="block font-semibold text-foreground">
+                    É necessário um governo mais orientado a dados.
+                  </strong>
+                  Informação clara fortalece decisões públicas mais estratégicas, eficientes e transparentes.
+                </p>
+              </div>
+              <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
                   <Link href="/analitico">Explore municípios</Link>
                 </Button>
