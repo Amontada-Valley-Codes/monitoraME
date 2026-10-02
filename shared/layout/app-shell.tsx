@@ -43,7 +43,6 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { Toaster } from '@/components/ui/sonner';
 import { LogoIcon, LogoContent } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
@@ -279,7 +278,6 @@ function ShellContent({ children }: { children: ReactNode }) {
         </CommandList>
       </CommandDialog>
 
-      <Toaster position="bottom-right" />
     </>
   );
 }
