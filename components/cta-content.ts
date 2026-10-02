@@ -43,7 +43,7 @@ export const CTA_CONTENT: Record<'createAccount' | 'choosePlan', CtaContent> = {
       description: 'Tenha acesso a informações públicas de forma simples, organizada e transparente.',
       primaryAction: {
         label: 'Criar conta',
-        href: '/register',
+        href: '/register/onboarding',
       },
       secondaryAction: {
         prefix: 'Já possui uma conta?',
