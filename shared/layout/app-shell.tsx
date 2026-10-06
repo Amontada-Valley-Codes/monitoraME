@@ -71,6 +71,7 @@ function Navigation() {
   const { navigate } = useAnalytics();
   const { setOpen, setOpenMobile } = useSidebar();
   const isCommitmentDetail = path.startsWith('/analytics/empenhos/');
+  const isSupplierDetail = path.startsWith('/analytics/fornecedores/');
 
   useEffect(() => {
     const media = window.matchMedia('(min-width:1280px)');
@@ -107,6 +108,8 @@ function Navigation() {
                   isActive={
                     item.path === '/analitico/empenhos' && isCommitmentDetail
                       ? true
+                      : item.path === '/analitico/fornecedores' && isSupplierDetail
+                      ? true
                       : item.path === '/analitico'
                       ? path === item.path
                       : path === item.path || path.startsWith(`${item.path}/`)
@@ -137,6 +140,8 @@ function ShellContent({ children }: { children: ReactNode }) {
 
   const current = path.startsWith('/analytics/empenhos/')
     ? NAV.find((item) => item.path === '/analitico/empenhos')!
+    : path.startsWith('/analytics/fornecedores/')
+    ? NAV.find((item) => item.path === '/analitico/fornecedores')!
     : path.startsWith(PLANS_PAGE.path)
     ? PLANS_PAGE
     : NAV.find((n) => (n.path === '/' ? path === '/' : path.startsWith(n.path))) ?? NAV[0];
