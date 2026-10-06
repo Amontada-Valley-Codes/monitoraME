@@ -6,6 +6,7 @@ export type CommitmentErrorContent = {
 };
 
 export function getCommitmentErrorContent(status: number, message: string): CommitmentErrorContent {
+  if (status === 0) return { title: 'Sem conexão', description: 'Verifique sua conexão e tente novamente.', action: 'Tentar novamente', href: null };
   if (status === 401) return { title: 'Sua sessão expirou', description: 'Entre novamente para continuar.', action: 'Entrar', href: '/login' };
   if (status === 403) return { title: 'Cadastro necessário', description: 'Conclua o cadastro da empresa para consultar os empenhos.', action: 'Completar cadastro', href: '/request-access/company' };
   if (status === 422) return { title: 'Período inválido', description: message, action: 'Revisar filtros', href: null };

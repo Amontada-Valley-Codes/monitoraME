@@ -70,6 +70,7 @@ function Navigation() {
   const path = usePathname();
   const { navigate } = useAnalytics();
   const { setOpen, setOpenMobile } = useSidebar();
+  const isCommitmentDetail = path.startsWith('/analytics/empenhos/');
 
   useEffect(() => {
     const media = window.matchMedia('(min-width:1280px)');
@@ -104,7 +105,9 @@ function Navigation() {
                 <SidebarMenuButton
                   tooltip={item.label}
                   isActive={
-                    item.path === '/analitico'
+                    item.path === '/analitico/empenhos' && isCommitmentDetail
+                      ? true
+                      : item.path === '/analitico'
                       ? path === item.path
                       : path === item.path || path.startsWith(`${item.path}/`)
                   }
@@ -132,7 +135,9 @@ function ShellContent({ children }: { children: ReactNode }) {
   const { navigate, reload, state } = useAnalytics();
   const [search, setSearch] = useState(false);
 
-  const current = path.startsWith(PLANS_PAGE.path)
+  const current = path.startsWith('/analytics/empenhos/')
+    ? NAV.find((item) => item.path === '/analitico/empenhos')!
+    : path.startsWith(PLANS_PAGE.path)
     ? PLANS_PAGE
     : NAV.find((n) => (n.path === '/' ? path === '/' : path.startsWith(n.path))) ?? NAV[0];
 

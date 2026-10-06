@@ -2,10 +2,12 @@ import MockAdapter from 'axios-mock-adapter';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { money } from '../../../shared/lib/format';
-import { commitmentsHttp, fetchCommitments } from './api';
+import { commitmentsHttp, fetchCommitmentDetail, fetchCommitments } from './api';
+import { cancellationSummary, nullableLabel } from './detail-format';
 import { getCommitmentErrorContent, getCommitmentViewState } from './error-state';
-import { buildCommitmentDetailHref, safeCommitmentListPath } from './navigation';
+import { buildCommitmentApiPath, buildCommitmentDetailHref, safeCommitmentListPath, safeDecodeCommitmentKey, supplierHref } from './navigation';
 import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, patchCommitmentFilters } from './query';
+import { createSingleFlight } from './single-flight';
 
 const mock = new MockAdapter(commitmentsHttp);
 afterEach(() => mock.reset());
@@ -53,5 +55,51 @@ describe('consulta de empenhos', () => {
 
   it('formata valores inteiros em centavos', () => {
     expect(money(136838000)).toBe('R$ 1.368.380,00');
+  });
+
+  it('normaliza e codifica a chave exatamente uma vez na chamada de detalhe', async () => {
+    const encoded = '010%7C202500%7C16%7C01%7C2025-10-10%7C10100004';
+    expect(safeDecodeCommitmentKey(encoded)).toBe('010|202500|16|01|2025-10-10|10100004');
+    expect(safeDecodeCommitmentKey('010|202500')).toBe('010|202500');
+    expect(buildCommitmentApiPath(encoded)).toContain(encoded);
+    expect(buildCommitmentApiPath(encoded)).not.toContain('%257C');
+    mock.onGet(`/analytics/tce/empenhos/${encoded}`).reply((config) => {
+      expect(config.url).toBe(`/analytics/tce/empenhos/${encoded}`);
+      expect(config.url).not.toContain('%257C');
+      expect(config.params).toBeUndefined();
+      return [200, { chave_empenho: '010|202500|16|01|2025-10-10|10100004' }];
+    });
+    await fetchCommitmentDetail(encoded);
+  });
+
+  it('usa travessão para campos nulos e trata anulações de formato desconhecido', () => {
+    expect(nullableLabel(null)).toBe('—');
+    expect(nullableLabel(undefined)).toBe('—');
+    expect(cancellationSummary([]).label).toBe('Sem anulações');
+    expect(cancellationSummary([{ qualquer: 'formato' }, 'texto', null]).count).toBe(3);
+  });
+
+  it('deriva CNPJ pelo documento e ignora tipo_documento numérico', () => {
+    const supplier = { documento: '12.345.678/0001-90', cnpj: '12345678000190', cpf: null, tipo_documento: '1' };
+    expect(supplierHref(supplier)).toBe('/analytics/fornecedores/CNPJ/12345678000190');
+    expect(supplierHref({ documento: '123.456.789-01', cnpj: null, cpf: '12345678901' })).toBeNull();
+    expect(supplierHref({ documento: 'sem documento', cnpj: null, cpf: null })).toBeNull();
+  });
+
+  it.each([404, 401, 403, 503])('normaliza o status HTTP %i no detalhe', async (status) => {
+    mock.onGet('/analytics/tce/empenhos/chave').reply(status, { error: { message: 'Falha', request_id: 'req-1' } });
+    await expect(fetchCommitmentDetail('chave')).rejects.toMatchObject({ status, requestId: 'req-1' });
+  });
+
+  it('compartilha um único refresh entre chamadas simultâneas', async () => {
+    const singleFlight = createSingleFlight<string, string>();
+    let calls = 0;
+    const refresh = () => singleFlight('session', async () => {
+      calls += 1;
+      await Promise.resolve();
+      return 'novo-token';
+    });
+    await expect(Promise.all([refresh(), refresh(), refresh()])).resolves.toEqual(['novo-token', 'novo-token', 'novo-token']);
+    expect(calls).toBe(1);
   });
 });
