@@ -23,6 +23,13 @@ async function upstreamGet(path: string, accessToken?: string) {
   });
 }
 
+async function upstreamPost(path: string, body: unknown, accessToken?: string) {
+  return axios.post(`${API_BASE_URL}${path}`, body, {
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
+    timeout: 35_000,
+  });
+}
+
 function requestIdFrom(error: unknown): string | undefined {
   if (!axios.isAxiosError(error)) return undefined;
   const body = error.response?.data as { error?: { request_id?: string } } | undefined;
@@ -64,6 +71,34 @@ export async function proxyAnalyticsGet(request: NextRequest, path: string, forw
     try {
       const refreshed = await refreshSession(refreshToken);
       const response = successResponse(await upstreamGet(upstreamPath, refreshed.accessToken));
+      response.cookies.set('access_token', refreshed.accessToken, {
+        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 15,
+      });
+      response.cookies.set('refresh_token', refreshed.refreshToken, {
+        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 60 * 24 * 7,
+      });
+      return response;
+    } catch (refreshError) {
+      const response = errorResponse(refreshError);
+      response.cookies.delete('access_token');
+      response.cookies.delete('refresh_token');
+      return response;
+    }
+  }
+}
+
+export async function proxyAnalyticsPost(path: string, body: unknown) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access_token')?.value;
+  try {
+    return successResponse(await upstreamPost(path, body, accessToken));
+  } catch (error) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+    const refreshToken = cookieStore.get('refresh_token')?.value;
+    if (status !== 401 || !refreshToken) return errorResponse(error);
+    try {
+      const refreshed = await refreshSession(refreshToken);
+      const response = successResponse(await upstreamPost(path, body, refreshed.accessToken));
       response.cookies.set('access_token', refreshed.accessToken, {
         httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: 60 * 15,
       });

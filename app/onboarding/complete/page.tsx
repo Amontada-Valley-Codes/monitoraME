@@ -37,7 +37,7 @@ export default function CompleteRegisterPage() {
         password: data.senha,
       }));
 
-      if (loginResponse?.accessToken) {
+      if (loginResponse?.accessToken && loginResponse?.refreshToken) {
         const cookieStore = await cookies();
         cookieStore.set({
           name: "access_token",
@@ -46,6 +46,15 @@ export default function CompleteRegisterPage() {
           secure: process.env.NODE_ENV === "production",
           path: "/",
           maxAge: 60 * 15,
+          sameSite: "lax",
+        });
+        cookieStore.set({
+          name: "refresh_token",
+          value: loginResponse.refreshToken,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 7,
           sameSite: "lax",
         });
       }
