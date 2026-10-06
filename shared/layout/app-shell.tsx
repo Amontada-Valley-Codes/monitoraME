@@ -50,7 +50,7 @@ import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 export const NAV = [
   { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
-  { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
+  { path: '/analitico/empenhos', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
   { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
   { path: '/analitico/comparar', label: 'Comparar resultados', icon: ArrowLeftRight },

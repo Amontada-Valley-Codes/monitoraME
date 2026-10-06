@@ -39,7 +39,7 @@ function Routes() {
   );
   else if (section === 'municipios')
     page = id ? <MunicipalityDetail id={id} /> : <Municipalities />;
-  else if (section === 'empenhos')
+  else if (section === 'empenhos' || section === 'despesas')
     page = id ? <ExpenseDetail id={id} /> : <Expenses />;
   else if (section === 'fornecedores')
     page = id ? <SupplierDetail id={id} /> : <Suppliers />;
