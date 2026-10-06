@@ -46,7 +46,7 @@ export default function LoginPage() {
       throw error;
     }
 
-    redirect("/home");
+    redirect("/analitico");
   }
 
   return <LoginView onSubmitAction={handleLogin} />
