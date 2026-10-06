@@ -1,43 +1,39 @@
+import { Settings2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Logo } from '@/shared/components/logo';
+
 export function OpportunityFeedHeader() {
   return (
-    <div className="border-b border-slate-200 bg-white">
-      <div className="flex items-center justify-between px-4 py-4">
-        <h1 className="text-xl font-bold text-slate-900">
+    <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <div className="flex h-(--header-height) items-center justify-between px-4 sm:px-6">
+        <Logo className="h-6 w-auto text-brand-ink sm:hidden" />
+        <h1 className="hidden text-xl font-semibold text-foreground sm:block">
           Oportunidades em Aberto
         </h1>
 
-        <button
-          type="button"
-          className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100"
+        <Button
+          variant="ghost"
+          size="icon"
           aria-label="Configurações do feed"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
-          </svg>
-        </button>
+          <Settings2 className="size-4 text-muted-foreground" />
+        </Button>
       </div>
 
-      <div className="flex text-sm font-semibold">
-        <button className="relative flex-1 py-3 text-slate-900 transition hover:bg-slate-50">
+      <nav className="flex px-2 text-sm font-medium" aria-label="Filtros do feed">
+        <button className="relative flex-1 py-3 text-foreground transition-colors hover:bg-muted/60">
           Para Você
-          <span className="absolute bottom-0 left-1/2 h-1 w-12 -translate-x-1/2 rounded-full bg-blue-600" />
+          <span className="absolute bottom-0 left-1/2 h-0.5 w-12 -translate-x-1/2 rounded-full bg-primary" />
         </button>
 
-        <button className="flex-1 py-3 text-slate-500 transition hover:bg-slate-50">
+        <button className="flex-1 py-3 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
           Recentes PNCP
         </button>
 
-        <button className="flex-1 py-3 text-slate-500 transition hover:bg-slate-50">
+        <button className="flex-1 py-3 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground">
           Dispensas
         </button>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }
