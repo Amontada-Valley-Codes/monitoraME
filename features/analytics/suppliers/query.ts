@@ -4,6 +4,7 @@ import {
   type SupplierSortField,
   type SupplierSortOrder,
 } from './types';
+import type { SupplierDetailFilters } from './types';
 
 export const DEFAULT_SUPPLIER_FILTERS: SupplierListFilters = {
   uf: 'CE',
@@ -38,6 +39,37 @@ function isCivilDate(value: string): boolean {
   return date.getUTCFullYear() === year
     && date.getUTCMonth() === month - 1
     && date.getUTCDate() === day;
+}
+
+export function parseSupplierDetailFilters(params: URLSearchParams): SupplierDetailFilters | null {
+  const startDate = params.get('start_date');
+  const endDate = params.get('end_date');
+  if (!startDate || !endDate || !isCivilDate(startDate) || !isCivilDate(endDate)) return null;
+
+  const municipality = params.get('municipality_tce_code')?.trim();
+  return {
+    start_date: startDate,
+    end_date: endDate,
+    ...(params.get('uf') === 'CE' ? { uf: 'CE' as const } : {}),
+    ...(municipality && /^\d{3}$/.test(municipality)
+      ? { municipality_tce_code: municipality }
+      : {}),
+    company_sizes: params.getAll('company_sizes').filter((value) => COMPANY_SIZE_VALUES.has(value)),
+    supplier_origins: params.getAll('supplier_origins').filter((value) => SUPPLIER_ORIGIN_VALUES.has(value)),
+    expense_element_codes: params.getAll('expense_element_codes').filter((value) => EXPENSE_ELEMENT_VALUES.has(value)),
+  };
+}
+
+export function serializeSupplierDetailFilters(filters: SupplierDetailFilters): URLSearchParams {
+  const params = new URLSearchParams();
+  params.set('start_date', filters.start_date);
+  params.set('end_date', filters.end_date);
+  if (filters.uf) params.set('uf', filters.uf);
+  if (filters.municipality_tce_code) params.set('municipality_tce_code', filters.municipality_tce_code);
+  for (const value of filters.company_sizes ?? []) params.append('company_sizes', value);
+  for (const value of filters.supplier_origins ?? []) params.append('supplier_origins', value);
+  for (const value of filters.expense_element_codes ?? []) params.append('expense_element_codes', value);
+  return params;
 }
 
 export function parseSupplierFilters(params: URLSearchParams): SupplierListFilters {

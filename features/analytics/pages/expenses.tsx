@@ -1,7 +1,7 @@
 'use client';
 
 import axios from 'axios';
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -12,15 +12,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { EmptyState, LoadingState } from '@/shared/components/states';
 import { SelectField } from '@/shared/components/select-field';
-import { dateLabel, money, number } from '@/shared/lib/format';
+import { number } from '@/shared/lib/format';
 import { fetchCommitments } from '../commitments/api';
 import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from '../commitments/query';
 import type { CommitmentListFilters, CommitmentListResponse, CommitmentSortField } from '../commitments/types';
 import { buildCommitmentDetailHref } from '../commitments/navigation';
+import { CommitmentTable } from '../commitments/table';
 import { getCommitmentErrorContent, getCommitmentViewState } from '../commitments/error-state';
 import { PageHeader } from '../components/page-header';
 import { TceMunicipalitySelect } from '../components/tce-municipality-select';
@@ -36,13 +35,6 @@ const SUPPLIER_ORIGINS = [
   ['EM_OUTRO_MUNICIPIO', 'Em outro município'], ['FORA_DO_CEARA', 'Fora do Ceará'],
   ['ORIGEM_NAO_IDENTIFICADA', 'Origem não identificada'],
 ] as const;
-const SORT_COLUMNS: Array<{ field: CommitmentSortField; label: string; align?: 'right' }> = [
-  { field: 'date', label: 'Data' }, { field: 'municipality', label: 'Município' },
-  { field: 'supplier', label: 'Fornecedor' }, { field: 'expense_element', label: 'Elemento de despesa' },
-  { field: 'gross_value', label: 'Empenhado', align: 'right' },
-  { field: 'cancelled_value', label: 'Anulado', align: 'right' },
-  { field: 'net_value', label: 'Líquido', align: 'right' },
-];
 type RequestError = { status: number; message: string };
 
 function normalizeRequestError(error: unknown): RequestError {
@@ -154,23 +146,7 @@ export default function Expenses() {
 
     {viewState === 'loading' ? <LoadingState /> : viewState === 'error' && error ? <CommitmentError error={error} onRetry={() => setVersion((value) => value + 1)} /> : viewState === 'empty' ?
       <EmptyState title="Nenhum empenho encontrado" description="Ajuste o período ou os filtros para consultar outros registros." onReset={() => replaceFilters(DEFAULT_COMMITMENT_FILTERS)} /> :
-      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos"><Table><TableHeader><TableRow>
-        {SORT_COLUMNS.map((column) => <TableHead key={column.field} aria-sort={filters.sort_by === column.field ? filters.sort_order === 'asc' ? 'ascending' : 'descending' : 'none'} className={column.align === 'right' ? 'text-right' : undefined}>
-          <Button variant="ghost" size="sm" className={column.align === 'right' ? '-mr-3 ml-auto' : '-ml-3'} onClick={() => changeSort(column.field)}>{column.label}{filters.sort_by !== column.field ? <ArrowUpDown className="size-3.5 text-muted-foreground" /> : filters.sort_order === 'asc' ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />}</Button>
-        </TableHead>)}
-      </TableRow></TableHeader><TableBody>{data.items.map((item) => {
-        const supplierDocument = item.fornecedor.documento.replace(/\D/g, '');
-        const canLinkSupplier = Boolean(item.fornecedor.cnpj) && supplierDocument.length === 14;
-        return <TableRow key={item.chave_empenho} tabIndex={0} className="cursor-pointer" aria-label={`Abrir empenho ${item.display_id}`} onClick={() => openDetail(item.chave_empenho)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDetail(item.chave_empenho); } }}>
-          <TableCell><span>{dateLabel(item.data_empenho)}</span><span className="mt-1 block font-mono text-xs text-muted-foreground">{item.display_id}</span></TableCell>
-          <TableCell>{item.municipio_comprador.nome}<span className="block text-xs text-muted-foreground">{item.municipio_comprador.uf} · TCE {item.municipio_comprador.codigo_tce}</span></TableCell>
-          <TableCell className="max-w-64 whitespace-normal">{canLinkSupplier ? <Button variant="link" className="h-auto min-h-0 justify-start p-0 text-left text-foreground whitespace-normal" onClick={(event) => { event.stopPropagation(); router.push(`/analitico/fornecedores/${encodeURIComponent(item.fornecedor.cnpj!)}`); }}>{item.fornecedor.nome}</Button> : <span className="font-medium">{item.fornecedor.nome}</span>}<Badge variant="outline" className="mt-1 block w-fit">{item.fornecedor.porte}</Badge></TableCell>
-          <TableCell className="max-w-64 whitespace-normal"><span className="font-mono text-xs">{item.elemento_despesa.codigo_exibicao}</span><span className="mt-1 block text-xs text-muted-foreground">{item.elemento_despesa.nome}</span></TableCell>
-          <TableCell className="data-value text-right">{money(item.valores.valor_empenhado_centavos)}</TableCell>
-          <TableCell className="data-value text-right"><span>{money(item.valores.valor_anulado_centavos)}</span>{item.possui_anulacao && <Tooltip><TooltipTrigger asChild><Badge variant="outline" className="mt-1 ml-auto block w-fit text-destructive">Anulado</Badge></TooltipTrigger><TooltipContent>{number(item.quantidade_anulacoes)} {item.quantidade_anulacoes === 1 ? 'anulação' : 'anulações'}</TooltipContent></Tooltip>}</TableCell>
-          <TableCell className="data-value text-right font-medium">{money(item.valores.valor_liquido_centavos)}</TableCell>
-        </TableRow>;
-      })}</TableBody></Table>
+      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos"><CommitmentTable items={data.items} sortBy={filters.sort_by} sortOrder={filters.sort_order} onSort={changeSort} onOpen={openDetail} />
       <div className="flex flex-col items-center justify-between gap-3 border-t px-4 py-3 sm:flex-row"><p className="text-sm text-muted-foreground" aria-live="polite">{number(firstItem)}–{number(lastItem)} de {number(data.pagination.total_items)}</p><div className="flex items-center gap-2"><span className="text-sm text-muted-foreground">Página {number(data.pagination.page)} de {number(Math.max(1, data.pagination.total_pages))}</span><Button variant="outline" size="icon" aria-label="Página anterior" disabled={!data.pagination.has_previous} onClick={() => updateFilters({ page: filters.page - 1 }, false)}><ChevronLeft /></Button><Button variant="outline" size="icon" aria-label="Próxima página" disabled={!data.pagination.has_next} onClick={() => updateFilters({ page: filters.page + 1 }, false)}><ChevronRight /></Button></div></div>
       </section>}
   </>;

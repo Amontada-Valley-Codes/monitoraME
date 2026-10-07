@@ -29,10 +29,12 @@ export function supplierHref(supplier: {
 }
 
 export function safeCommitmentListPath(value?: string): string {
-  if (!value?.startsWith('/analitico/empenhos')) return '/analitico/empenhos';
+  if (!value) return '/analitico/empenhos';
   try {
     const url = new URL(value, 'https://monitorame.local');
-    return url.origin === 'https://monitorame.local' && url.pathname === '/analitico/empenhos'
+    const isGeneralList = url.pathname === '/analitico/empenhos';
+    const isSupplierList = /^\/analytics\/fornecedores\/(CNPJ\/\d{14}|CPF\/\d{11})\/empenhos$/.test(url.pathname);
+    return url.origin === 'https://monitorame.local' && (isGeneralList || isSupplierList)
       ? `${url.pathname}${url.search}`
       : '/analitico/empenhos';
   } catch {
