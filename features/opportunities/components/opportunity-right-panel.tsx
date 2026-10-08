@@ -28,7 +28,7 @@ export function OpportunityRightPanel() {
 
           <p className="mt-2 text-sm leading-relaxed text-slate-600">
             Dados do PNCP são 100% livres e públicos. Tenha IA para resumir
-            exigências de habilitação, pipeline Kanban de propostas e radar de
+            exigências de habilitação, funil Kanban de propostas e radar de
             concorrentes.
           </p>
 
@@ -46,7 +46,7 @@ export function OpportunityRightPanel() {
           </p>
 
           <p className="mt-1">
-            © 2026 MonitoraME. Dados Abertos TCE-CE & PNCP
+            © 2026 MonitoraME. Dados públicos e contratações abertas
           </p>
         </div>
       </div>

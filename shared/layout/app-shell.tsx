@@ -8,14 +8,9 @@ import {
   ReceiptText,
   Building2,
   ArrowLeftRight,
-  Target,
-  Files,
-  Database,
-  BookOpen,
   Search,
   ChevronRight,
   RefreshCw,
-  Globe,
   CircleDollarSign,
 } from 'lucide-react';
 import {
@@ -46,18 +41,22 @@ import {
 import { LogoIcon, LogoContent } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
+import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
+import { useProtectedNavigate } from '@/shared/auth/protected-navigation';
+
+const normalizeMunicipality = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 
 export const NAV = [
   { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
-  { path: '/analitico/despesas', label: 'Despesas empenhadas', icon: ReceiptText },
+  { path: '/analitico/empenhos', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
-  { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
+  // { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
   { path: '/analitico/comparar', label: 'Comparar resultados', icon: ArrowLeftRight },
-  { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
-  { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
-  { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
-  { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
+  // { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
+  // { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
+  // { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
+  // { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
 ];
 
 const PLANS_PAGE = {
@@ -70,6 +69,9 @@ function Navigation() {
   const path = usePathname();
   const { navigate } = useAnalytics();
   const { setOpen, setOpenMobile } = useSidebar();
+  const protectedNavigate = useProtectedNavigate();
+  const isCommitmentDetail = path.startsWith('/analytics/empenhos/');
+  const isSupplierDetail = path.startsWith('/analytics/fornecedores/');
 
   useEffect(() => {
     const media = window.matchMedia('(min-width:1280px)');
@@ -104,12 +106,17 @@ function Navigation() {
                 <SidebarMenuButton
                   tooltip={item.label}
                   isActive={
-                    item.path === '/analitico'
+                    item.path === '/analitico/empenhos' && isCommitmentDetail
+                      ? true
+                      : item.path === '/analitico/fornecedores' && isSupplierDetail
+                      ? true
+                      : item.path === '/analitico'
                       ? path === item.path
                       : path === item.path || path.startsWith(`${item.path}/`)
                   }
                   onClick={() => {
-                    navigate(item.path);
+                    if (item.path === '/analitico/municipios') void protectedNavigate(item.path);
+                    else navigate(item.path);
                     setOpenMobile(false);
                   }}
                   className="min-h-11 gap-3 text-sm data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:font-medium"
@@ -129,10 +136,15 @@ function Navigation() {
 
 function ShellContent({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const { navigate, reload, state } = useAnalytics();
+  const { navigate, reload, state, filters } = useAnalytics();
+  const protectedNavigate = useProtectedNavigate();
   const [search, setSearch] = useState(false);
 
-  const current = path.startsWith(PLANS_PAGE.path)
+  const current = path.startsWith('/analytics/empenhos/')
+    ? NAV.find((item) => item.path === '/analitico/empenhos')!
+    : path.startsWith('/analytics/fornecedores/')
+    ? NAV.find((item) => item.path === '/analitico/fornecedores')!
+    : path.startsWith(PLANS_PAGE.path)
     ? PLANS_PAGE
     : NAV.find((n) => (n.path === '/' ? path === '/' : path.startsWith(n.path))) ?? NAV[0];
 
@@ -149,6 +161,14 @@ function ShellContent({ children }: { children: ReactNode }) {
 
   const go = (path: string) => {
     navigate(path);
+    setSearch(false);
+  };
+
+  const openMunicipality = (name: string) => {
+    const code = TCE_MUNICIPALITIES.find((item) => normalizeMunicipality(item.name) === normalizeMunicipality(name))?.code;
+    if (!code) return;
+    const params = new URLSearchParams({ municipality_tce_code: code, start_date: filters.start, end_date: filters.end });
+    void protectedNavigate(`/analitico/municipios?${params}`);
     setSearch(false);
   };
 
@@ -255,7 +275,7 @@ function ShellContent({ children }: { children: ReactNode }) {
               <CommandItem
                 key={m.id}
                 value={m.name + ' ' + m.id}
-                onSelect={() => go('/analitico/municipios/' + m.id)}
+                onSelect={() => openMunicipality(m.name)}
               >
                 <MapPinned className="size-4" />
                 {m.name}

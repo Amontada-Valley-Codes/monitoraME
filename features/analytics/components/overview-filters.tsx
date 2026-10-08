@@ -6,10 +6,9 @@ import { Label } from '@/components/ui/label';
 import { SelectField } from '@/shared/components/select-field';
 
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
-import { TceMunicipalitySelect } from './tce-municipality-select';
 
 export function OverviewFilters() {
-  const { year, municipality, update } = useOverviewSelection();
+  const { year, update } = useOverviewSelection();
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, index) => String(currentYear - index));
 
@@ -32,16 +31,6 @@ export function OverviewFilters() {
             className="h-11 w-full items-center gap-2 rounded-lg border-input bg-card py-0 pr-3 pl-9 text-sm font-normal shadow-xs data-[size=default]:h-11"
           />
         </div>
-      </div>
-      <div className="flex w-full flex-col gap-1.5 sm:w-72">
-        <Label htmlFor="overview-municipality" className="h-5 leading-5">
-          Município comprador
-        </Label>
-        <TceMunicipalitySelect
-          value={municipality}
-          onValueChange={(code) => update({ municipality: code ?? '' })}
-          className="h-11 w-full items-center gap-2 rounded-lg border-input bg-card px-3 py-0 text-sm font-normal shadow-xs"
-        />
       </div>
       <p className="ml-auto hidden text-xs text-muted-foreground xl:block">
         Período: 01/01/{year} a 31/12/{year}

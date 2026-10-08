@@ -2,10 +2,7 @@
 
 import { curveMonotoneX } from "@visx/curve";
 import { AreaClosed, LinePath } from "@visx/shape";
-
-// CurveFactory type - simplified version compatible with visx
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
-type CurveFactory = any;
+import type { CurveFactory } from "@visx/vendor/d3-shape";
 
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { AreaGradientDefs } from "./area-gradient-defs";
@@ -225,6 +222,10 @@ export function Area({
     },
     [dataKey, yScale]
   );
+  const isDefined = useCallback(
+    (d: Record<string, unknown>) => typeof d[dataKey] === "number",
+    [dataKey]
+  );
 
   const hasDashTail = resolveDashTailBounds(dashFromIndex, data.length);
   // The stroke gradient is only emitted when at least one edge fades, so fall
@@ -250,6 +251,7 @@ export function Area({
         <AreaClosed
           curve={curve}
           data={renderData}
+          defined={isDefined}
           fill={areaFill}
           x={(d) => xScale(xAccessor(d)) ?? 0}
           y={getY}
@@ -262,6 +264,7 @@ export function Area({
           <LinePath
             curve={curve}
             data={renderData}
+            defined={isDefined}
             innerRef={pathRef}
             stroke={visibleStroke}
             strokeLinecap="round"

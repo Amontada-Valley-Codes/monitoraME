@@ -30,19 +30,19 @@ export default function Methodology() {
       <div className="mb-6 grid gap-5 md:grid-cols-3">
         {[
           {
-            title: 'TCE-CE / SIM',
+            title: 'Compras públicas municipais',
             text: 'Notas de empenho e elemento de despesa remetidos pelos municípios.',
             icon: Database,
             href: 'https://api-dados-abertos.tce.ce.gov.br/sim/',
           },
           {
-            title: 'Receita Federal e Simples',
+            title: 'Cadastro empresarial',
             text: 'Porte declarado, identificação de MEI e localização do estabelecimento.',
             icon: Building2,
             href: 'https://dados.gov.br/dados/conjuntos-dados/cadastro-nacional-da-pessoa-juridica---cnpj',
           },
           {
-            title: 'IBGE',
+            title: 'Referências territoriais',
             text: 'Códigos e referências territoriais dos municípios brasileiros.',
             icon: MapPin,
             href: 'https://www.ibge.gov.br/',
@@ -141,10 +141,9 @@ export default function Methodology() {
             <AccordionContent>
               Dados, CNPJs e empresas são fictícios. Há 19 municípios com
               registros de janeiro de 2024 a agosto de 2026; Carnaubal demonstra
-              ausência de dados. Não existe consulta ao TCE ou à Receita em
+              ausência de dados. Não existe consulta às fontes públicas em
               tempo real. Metas e configurações de relatórios ficam neste
-              navegador. A autorização real deverá ocorrer no backend; monitor e
-              admin usam a mesma configuração de permissões.
+              navegador. O acesso é protegido conforme o perfil de cada pessoa.
             </AccordionContent>
           </AccordionItem>
         </Accordion>

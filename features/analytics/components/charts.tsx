@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { compactMoney, money, percent, ratio } from '@/shared/lib/format';
 
 export type Series = { key: string; label: string; color: string };
+const chartMoney = (value: unknown) => typeof value === 'number' ? money(value) : 'Dados não publicados';
 
 export function TrendChart({
   data,
@@ -60,7 +61,7 @@ export function TrendChart({
                 >
                   <span>{seriesItem.label}</span>
                   <span className="font-mono">
-                    {money(Number(point[seriesItem.key]))}
+                    {chartMoney(point[seriesItem.key])}
                   </span>
                 </div>
               ))}

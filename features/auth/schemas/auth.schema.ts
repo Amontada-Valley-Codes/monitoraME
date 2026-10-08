@@ -25,12 +25,13 @@ function isValidCPF(cpf: string) {
   return true;
 }
 
-export const authSchema = z.object({
+const authFields = {
   name: z.string().min(2, "Nome obrigatório"),
   cpf: z.string().refine((val) => isValidCPF(val), {
     message: "CPF inválido",
   }),
   email: z.string().email("E-mail inválido"),
+  phone: z.string().optional(),
   senha: z.string()
     .min(8, "A senha deve ter no mínimo 8 caracteres")
     .regex(/[A-Z]/, "Deve conter pelo menos uma letra maiúscula")
@@ -40,9 +41,24 @@ export const authSchema = z.object({
   termos: z.literal(true, {
     message: "Você deve aceitar os Termos de Uso para continuar",
   }),
-}).refine((data) => data.senha === data.confirmarSenha, {
+};
+
+const passwordsMatch = (data: { senha: string; confirmarSenha: string }) =>
+  data.senha === data.confirmarSenha;
+
+export const authSchema = z.object(authFields).refine(passwordsMatch, {
   message: "As senhas não coincidem",
   path: ["confirmarSenha"],
 });
 
 export type AuthFormData = z.infer<typeof authSchema>;
+
+export const completeAuthSchema = z.object({
+  ...authFields,
+  phone: z.string().min(10, "Telefone inválido"),
+}).refine(passwordsMatch, {
+  message: "As senhas não coincidem",
+  path: ["confirmarSenha"],
+});
+
+export type CompleteAuthFormData = z.infer<typeof completeAuthSchema>;
