@@ -80,7 +80,7 @@ export const apiService = {
 
   /** POST /accounts/complete - Finaliza onboarding ou cria conta direta */
   completeOnboarding: (
-    data: { name: string; email: string; phone: string; cpf: string; password: string },
+    data: { cpf: string; password: string },
     token?: string
   ) =>
     fetcher<{ id: string; name: string; email: string; phone: string | null; role: string; status: string }>(

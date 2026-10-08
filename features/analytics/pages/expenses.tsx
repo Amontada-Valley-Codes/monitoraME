@@ -118,7 +118,7 @@ export default function Expenses() {
   const viewState = getCommitmentViewState(loading, Boolean(error), data?.items.length ?? 0);
 
   return <>
-    <PageHeader eyebrow="Exploração dos dados" title="Despesas empenhadas" description="Consulte empenhos do TCE por período, município, fornecedor e elemento de despesa." />
+    <PageHeader eyebrow="Exploração dos dados" title="Despesas empenhadas" description="Consulte empenhos públicos por período, município, fornecedor e elemento de despesa." />
     <section className="panel no-print mb-6 p-4" aria-label="Filtros de empenhos">
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.3fr_auto]">
         <div><Label htmlFor="commitment-start" className="filter-label">Data inicial</Label><Input id="commitment-start" type="date" value={filters.start_date} onChange={(event) => updateFilters({ start_date: event.target.value })} /></div>

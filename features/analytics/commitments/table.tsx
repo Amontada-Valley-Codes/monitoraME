@@ -42,7 +42,7 @@ export function CommitmentTable({
     </TableHead>;
   })}</TableRow></TableHeader><TableBody>{items.map((item) => <TableRow key={item.chave_empenho} tabIndex={0} className="cursor-pointer" aria-label={`Abrir empenho ${item.display_id}`} onClick={() => onOpen(item.chave_empenho)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onOpen(item.chave_empenho); } }}>
     <TableCell><span>{dateLabel(item.data_empenho)}</span><span className="mt-1 block font-mono text-xs text-muted-foreground">{item.display_id}</span></TableCell>
-    <TableCell>{item.municipio_comprador.nome}<span className="block text-xs text-muted-foreground">{item.municipio_comprador.uf} · TCE {item.municipio_comprador.codigo_tce}</span></TableCell>
+    <TableCell>{item.municipio_comprador.nome}<span className="block text-xs text-muted-foreground">{item.municipio_comprador.uf} · Código {item.municipio_comprador.codigo_tce}</span></TableCell>
     {!omitSupplier && <TableCell className="max-w-64 whitespace-normal"><span className="font-medium">{item.fornecedor.nome}</span><Badge variant="outline" className="mt-1 block w-fit">{item.fornecedor.porte}</Badge></TableCell>}
     <TableCell className="max-w-64 whitespace-normal"><span className="font-mono text-xs">{item.elemento_despesa.codigo_exibicao}</span><span className="mt-1 block text-xs text-muted-foreground">{item.elemento_despesa.nome}</span></TableCell>
     <TableCell className="data-value text-right">{money(item.valores.valor_empenhado_centavos)}</TableCell>

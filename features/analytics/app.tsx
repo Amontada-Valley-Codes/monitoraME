@@ -10,7 +10,6 @@ import {
   EmptyState,
 } from '@/shared/components/states';
 import Dashboard from './pages/dashboard';
-import Municipalities from './pages/municipalities';
 import MunicipalityDetail from './pages/municipality-detail';
 import Expenses from './pages/expenses';
 import ExpenseDetail from './pages/expense-detail';
@@ -24,6 +23,11 @@ import Methodology from './pages/methodology';
 import Quality from './pages/quality';
 import { PricingSection } from '@/components/pricing-section';
 import { AccessGateProvider } from '@/shared/components/access-gate';
+import { AuthGate } from '@/shared/auth/auth-gate';
+import { CompleteAccountGate } from '@/shared/auth/complete-account-gate';
+import { LeadCtaProvider } from '@/shared/auth/lead-cta-context';
+import { SessionProvider } from '@/shared/auth/session-context';
+import { Providers } from '@/app/providers';
 
 function Routes() {
   const path = usePathname();
@@ -38,7 +42,7 @@ function Routes() {
     <PricingSection onAccessPlatform={() => navigate('/')} />
   );
   else if (section === 'municipios')
-    page = id ? <MunicipalityDetail id={id} /> : <Municipalities />;
+    page = <AuthGate><MunicipalityDetail id={id} /></AuthGate>;
   else if (section === 'empenhos' || section === 'despesas')
     page = id ? <ExpenseDetail id={id} /> : <Expenses />;
   else if (section === 'fornecedores')
@@ -51,17 +55,17 @@ function Routes() {
   else if (section === 'qualidade') page = <Quality />;
   else page = <EmptyState title="Página não encontrada" />;
 
-  const needsBoundary = !!id || section === 'comparar';
+  const needsBoundary = (!!id && section !== 'municipios') || section === 'comparar';
+  const requiresCompleteAccount = path !== '/analitico' && section !== 'municipios';
+  const content = needsBoundary && state === 'loading' ? (
+    <LoadingState />
+  ) : needsBoundary && state === 'error' ? (
+    <ErrorState onRetry={reload} />
+  ) : page;
 
   return (
     <AppShell>
-      {needsBoundary && state === 'loading' ? (
-        <LoadingState />
-      ) : needsBoundary && state === 'error' ? (
-        <ErrorState onRetry={reload} />
-      ) : (
-        page
-      )}
+      {requiresCompleteAccount ? <CompleteAccountGate>{content}</CompleteAccountGate> : content}
     </AppShell>
   );
 }
@@ -74,7 +78,7 @@ export default function AnalyticsApp({
   hasPlan?: boolean;
 }) {
   return (
-    <Suspense
+    <Providers><SessionProvider><LeadCtaProvider><Suspense
       fallback={
         <div className="p-8">
           <LoadingState />
@@ -86,6 +90,6 @@ export default function AnalyticsApp({
           <Routes />
         </AnalyticsProvider>
       </AccessGateProvider>
-    </Suspense>
+    </Suspense></LeadCtaProvider></SessionProvider></Providers>
   );
 }

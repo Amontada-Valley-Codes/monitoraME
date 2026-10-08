@@ -1,79 +1,49 @@
-import { CompleteRegisterWrapper } from "@/features/auth/components/complete-register-wrapper";
-import { apiService } from "@/features/auth/services/auth.service";
-import { AuthFormData } from "@/features/auth/schemas/auth.schema";
-import { ApiError } from "@/services/api";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { CompleteRegisterWrapper } from "@/features/auth/components/complete-register-wrapper";
+import { ApiError, apiService } from "@/features/auth/services/auth.service";
+import { AuthFormData } from "@/features/auth/schemas/auth.schema";
+import { isValidReturnTo } from "@/shared/auth/return-to";
 
-export default function CompleteRegisterPage() {
-  async function handleCompleteRegister(data: AuthFormData, linkToken: string) {
+export const instant = false;
+
+export default async function CompleteRegisterPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const cookieStore = await cookies();
+  if (!cookieStore.has("access_token") && !cookieStore.has("refresh_token")) redirect("/?cta=lead");
+  const requestedReturnTo = (await searchParams).returnTo;
+  const destination = isValidReturnTo(requestedReturnTo) ? requestedReturnTo : "/analitico/municipios";
+
+  async function handleCompleteRegister(data: AuthFormData) {
     "use server";
     try {
-      // 1. POST /sessions/onboarding: Troca o token do link por sessão de onboarding
-      const sessionResponse = (await apiService.exchangeOnboardingToken(
-        linkToken
-      ));
-      const sessionAccessToken = sessionResponse?.accessToken;
-
-      if (!sessionAccessToken) {
-        throw new Error("Falha ao gerar a sessão temporária de onboarding.");
+      const serverCookies = await cookies();
+      let accessToken = serverCookies.get("access_token")?.value;
+      if (!accessToken) {
+        const refreshToken = serverCookies.get("refresh_token")?.value;
+        if (!refreshToken) throw new Error("Sua sessão expirou. Solicite um novo link de acesso.");
+        const refreshed = await apiService.refreshSession(refreshToken);
+        accessToken = refreshed.accessToken;
+        serverCookies.set("access_token", refreshed.accessToken, cookieOptions(60 * 15));
+        serverCookies.set("refresh_token", refreshed.refreshToken, cookieOptions(60 * 60 * 24 * 7));
       }
 
-      // 2. POST /accounts/complete: Conclui o onboarding utilizando o Bearer token
-      await apiService.completeOnboarding(
-        {
-          name: data.name,
-          email: data.email,
-          phone: "88999999999", // Atualize conforme o campo do seu formulário, se aplicável
-          cpf: data.cpf,
-          password: data.senha,
-        },
-        sessionAccessToken
-      );
-
-      // 3. POST /sessions/login: Após finalizar, obtemos a sessão ativa (ACTIVE)
-      const loginResponse = (await apiService.login({
-        email: data.email,
-        password: data.senha,
-      }));
-
-      if (loginResponse?.accessToken && loginResponse?.refreshToken) {
-        const cookieStore = await cookies();
-        cookieStore.set({
-          name: "access_token",
-          value: loginResponse.accessToken,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: 60 * 15,
-          sameSite: "lax",
-        });
-        cookieStore.set({
-          name: "refresh_token",
-          value: loginResponse.refreshToken,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7,
-          sameSite: "lax",
-        });
-      }
+      await apiService.completeOnboarding({ cpf: data.cpf, password: data.senha }, accessToken);
+      const loginResponse = await apiService.login({ email: data.email, password: data.senha });
+      serverCookies.set("access_token", loginResponse.accessToken, cookieOptions(60 * 15));
+      serverCookies.set("refresh_token", loginResponse.refreshToken, cookieOptions(60 * 60 * 24 * 7));
     } catch (error) {
       if (error instanceof ApiError) {
-        if (error.status === 409) {
-          throw new Error("Este e-mail ou CPF já se encontram registados ou a conta já não está em onboarding.");
-        }
+        if (error.status === 409) throw new Error("Este CPF já está cadastrado ou a conta já foi concluída.");
         throw new Error(error.message);
       }
       throw error;
     }
-
-    redirect("/");
+    redirect(destination);
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center p-6 bg-slate-50">
-      <CompleteRegisterWrapper onSubmitAction={handleCompleteRegister} />
-    </div>
-  );
+  return <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6"><CompleteRegisterWrapper onSubmitAction={handleCompleteRegister} /></div>;
+}
+
+function cookieOptions(maxAge: number) {
+  return { httpOnly: true, secure: process.env.NODE_ENV === "production", path: "/", maxAge, sameSite: "lax" as const };
 }

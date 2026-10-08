@@ -6,6 +6,8 @@ import { isValidSupplierRoute } from '@/features/analytics/suppliers/detail';
 
 type SupplierCommitmentsPageProps = PageProps<'/analytics/fornecedores/[tipo]/[documento]/empenhos'>;
 
+export const instant = false;
+
 export default function SupplierCommitmentsPage(props: SupplierCommitmentsPageProps) {
   return (
     <Suspense fallback={<main className="page-content"><div className="panel h-80 animate-pulse" /></main>}>

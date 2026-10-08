@@ -144,7 +144,7 @@ function DetailError({ error, listHref, onRetry }: { error: AnalyticsApiError; l
       }
     : content;
   const returnTo = typeof window === 'undefined' ? '' : `${window.location.pathname}${window.location.search}`;
-  const href = error.status === 401 ? `/login?returnTo=${encodeURIComponent(returnTo)}` : error.status === 403 ? `/request-access/company?returnTo=${encodeURIComponent(returnTo)}` : errorContent.href;
+  const href = error.status === 401 ? `/login?returnTo=${encodeURIComponent(returnTo)}` : error.status === 403 ? `/onboarding/complete?returnTo=${encodeURIComponent(returnTo)}` : errorContent.href;
   return <Alert role="alert" variant="destructive" className="panel p-6"><CircleAlert /><AlertTitle>{errorContent.title}</AlertTitle><AlertDescription><p>{errorContent.description}</p>{href ? <Button asChild variant="outline" className="mt-3"><Link href={href}>{errorContent.action}</Link></Button> : <Button variant="outline" className="mt-3" onClick={onRetry}>{errorContent.action}</Button>}{error.requestId && <SupportCode value={error.requestId} />}</AlertDescription></Alert>;
 }
 
@@ -159,7 +159,7 @@ function DetailContent({ detail, filters }: { detail: SupplierDetail; filters: S
   const positiveElements = detail.por_elemento_despesa.filter((item) => item.valor_considerado_centavos > 0);
   const commitmentsParams = serializeSupplierDetailFilters(filters);
   const commitmentsHref = `/analytics/fornecedores/${encodeURIComponent(fornecedor.tipo_documento)}/${encodeURIComponent(fornecedor.documento)}/empenhos?${commitmentsParams}`;
-  const municipality = recorte.municipality_tce_code ? `Município TCE ${recorte.municipality_tce_code}` : 'Todos os municípios';
+  const municipality = recorte.municipality_tce_code ? `Município · código ${recorte.municipality_tce_code}` : 'Todos os municípios';
 
   return <div className="space-y-6">
     <header className="panel overflow-hidden">

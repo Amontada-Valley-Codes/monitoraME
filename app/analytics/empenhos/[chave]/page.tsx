@@ -8,6 +8,10 @@ type DetailProps = {
   searchParams: Promise<{ from?: string | string[] }>;
 };
 
+// The authentication gate can replace this page with its loading skeleton,
+// so the segment is intentionally allowed to block during session resolution.
+export const instant = false;
+
 export default function CommitmentDetailPage(props: DetailProps) {
   return (
     <Suspense fallback={<main className="page-content"><div className="panel h-48 animate-pulse" /></main>}>

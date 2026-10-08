@@ -88,13 +88,13 @@ async function requestOverview(
         throw new Error(
           typeof detail.message === 'string'
             ? detail.message
-            : 'Não foi possível consultar o pipeline.',
+            : 'Não foi possível carregar os dados solicitados.',
         );
       }
 
       const parsed = pipelineOverviewSchema.safeParse(body);
       if (!parsed.success) {
-        throw new Error('A resposta recebida do pipeline é incompatível com a tela.');
+        throw new Error('Os dados recebidos não puderam ser exibidos.');
       }
       const staleSeconds = Number(response.headers.get('x-pipeline-stale-time'));
       publish(entry, {
@@ -119,7 +119,7 @@ async function requestOverview(
   return entry.promise;
 }
 
-/** Shares one browser request for every component using the same exercise and municipality. */
+/** Shares one browser request for every component using the same exercise. */
 export function usePipelineOverview(params: PipelineOverviewParams) {
   const key = queryKey(params);
   const entry = getEntry(key);

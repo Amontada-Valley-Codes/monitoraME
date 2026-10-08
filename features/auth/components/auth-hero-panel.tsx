@@ -55,7 +55,7 @@ export function AuthHeroPanel() {
           <div className="text-xs font-bold text-slate-800">Índice de Transparência</div>
           <div className="text-[10px] text-slate-400">4.280 licitações tiradas hoje</div>
           <span className="inline-block mt-1 bg-slate-100 text-slate-600 text-[9px] px-2 py-0.5 rounded font-medium">
-            Padrão TCE/CGU
+            Padrões de controle público
           </span>
         </div>
         <div className="w-10 h-10 rounded-full border-4 border-blue-600 flex items-center justify-center text-xs font-bold text-blue-600">

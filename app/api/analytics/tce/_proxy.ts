@@ -115,7 +115,7 @@ function successResponse(upstream: PublicAnalyticsResponse, cacheHit: boolean) {
   return response;
 }
 
-export async function proxyAnalyticsGet(request: NextRequest, path: string, forwardQuery: boolean) {
+export async function proxyAnalyticsGet(request: NextRequest, path: string, forwardQuery: boolean, allowRefresh = true) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('access_token')?.value;
   const query = forwardQuery ? request.nextUrl.searchParams.toString() : '';
@@ -129,7 +129,7 @@ export async function proxyAnalyticsGet(request: NextRequest, path: string, forw
   } catch (error) {
     const status = axios.isAxiosError(error) ? error.response?.status : undefined;
     const refreshToken = cookieStore.get('refresh_token')?.value;
-    if (status !== 401 || !refreshToken) return errorResponse(error);
+    if (status !== 401 || !refreshToken || !allowRefresh) return errorResponse(error);
     try {
       const refreshed = await refreshSession(refreshToken);
       const cached = await cachedUpstreamGet(upstreamPath, refreshed.accessToken);

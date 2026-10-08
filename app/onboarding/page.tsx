@@ -1,155 +1,72 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { completeOnboardingAction } from "./actions";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { DEFAULT_AFTER_ONBOARDING_PATH } from '@/shared/auth/config';
+import { LeadCtaProvider, useLeadCta } from '@/shared/auth/lead-cta-context';
+import { parseOnboardingToken, stripHashFromAddress } from '@/shared/auth/link-token';
+import { consumeReturnTo } from '@/shared/auth/return-to';
+import { notifySessionChanged, SessionProvider, useSession } from '@/shared/auth/session-context';
+import { Providers } from '../providers';
 
-const completeSchema = z.object({
-  name: z.string().min(2, "Nome obrigatório"),
-  email: z.string().email("E-mail inválido"),
-  cpf: z.string().min(11, "CPF inválido"),
-  password: z.string()
-    .min(8, "Mínimo de 8 caracteres")
-    .regex(/[A-Z]/, "Letra maiúscula obrigatória")
-    .regex(/[0-9]/, "Número obrigatório")
-    .regex(/[^A-Za-z0-9]/, "Caractere especial obrigatório"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
+type ViewState = 'loading' | 'invalid' | 'temporary-error';
 
-type CompleteFormData = z.infer<typeof completeSchema>;
+export default function OnboardingPage() {
+  return <Providers><SessionProvider><LeadCtaProvider><OnboardingContent /></LeadCtaProvider></SessionProvider></Providers>;
+}
 
-export default function OnboardingTokenPage() {
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+function OnboardingContent() {
+  const [state, setState] = useState<ViewState>('loading');
+  const started = useRef(false);
+  const tokenRef = useRef<string | null>(null);
   const router = useRouter();
+  const { refresh } = useSession();
+  const { openLeadCta } = useLeadCta();
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<CompleteFormData>({
-    resolver: zodResolver(completeSchema),
-  });
+  const exchange = useCallback(async () => {
+    const token = tokenRef.current;
+    if (!token) { setState('invalid'); return; }
+    setState('loading');
+    try {
+      const response = await fetch('/api/auth/onboarding/exchange', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      if (!response.ok) {
+        setState(response.status >= 400 && response.status < 500 ? 'invalid' : 'temporary-error');
+        return;
+      }
+      tokenRef.current = null;
+      await refresh();
+      notifySessionChanged();
+      router.replace(consumeReturnTo() ?? DEFAULT_AFTER_ONBOARDING_PATH);
+    } catch {
+      setState('temporary-error');
+    }
+  }, [refresh, router]);
 
   useEffect(() => {
-    // 1. Extrai o token do hash da URL
-    const hash = window.location.hash;
-    if (hash.includes("token=")) {
-      const extractedToken = hash.split("token=")[1]?.split("&")[0];
-      if (extractedToken) {
-        setToken(decodeURIComponent(extractedToken));
-      }
-    }
-
-    // 2. Recupera o e-mail salvo no localStorage e preenche o formulário automaticamente
-    const savedEmail = localStorage.getItem("onboarding_email");
-    if (savedEmail) {
-      setValue("email", savedEmail);
-    }
-  }, [setValue]);
-
-  const onSubmit = async (data: CompleteFormData) => {
-    if (!token) {
-      toast.error("Token de onboarding ausente ou inválido na URL.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // Envia os dados completos com o e-mail preenchido no input
-      await completeOnboardingAction(
-        {
-          name: data.name,
-          email: data.email,
-          cpf: data.cpf,
-          password: data.password,
-          phone: localStorage.getItem("onboarding_phone") || "88999999999",
-        },
-        token
-      );
-
-      toast.success("Cadastro concluído com sucesso!");
-      router.push("/login");
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao concluir o onboarding.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-6 bg-slate-50">
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm max-w-md w-full text-center">
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Link inválido ou expirado</h2>
-          <p className="text-sm text-slate-500 mb-4">
-            O token de acesso não foi detetado na URL. Certifique-se de que utilizou o link completo enviado por e-mail.
-          </p>
-          <Button onClick={() => router.push("/login")} className="w-full bg-slate-900 text-white">
-            Ir para o Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
+    if (started.current) return;
+    started.current = true;
+    tokenRef.current = parseOnboardingToken(window.location.hash);
+    stripHashFromAddress(window.location, window.history);
+    void exchange();
+  }, [exchange]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6 bg-slate-50">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Concluir Cadastro</h2>
-          <p className="text-sm text-slate-500">
-            Confirme seus dados e defina sua senha para ativar sua conta.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Nome Completo</label>
-            <Input placeholder="Seu nome" {...register("name")} />
-            {errors.name && <span className="text-xs text-red-500 mt-1">{errors.name.message}</span>}
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">E-mail</label>
-            <Input placeholder="seu@email.com" {...register("email")} />
-            {errors.email && <span className="text-xs text-red-500 mt-1">{errors.email.message}</span>}
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">CPF</label>
-            <Input placeholder="000.000.000-00" {...register("cpf")} />
-            {errors.cpf && <span className="text-xs text-red-500 mt-1">{errors.cpf.message}</span>}
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Nova Senha</label>
-            <Input type="password" placeholder="Mín. 8 caracteres, maiúsculas, números e símbolos" {...register("password")} />
-            {errors.password && <span className="text-xs text-red-500 mt-1">{errors.password.message}</span>}
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Confirmar Senha</label>
-            <Input type="password" placeholder="Repita a senha" {...register("confirmPassword")} />
-            {errors.confirmPassword && <span className="text-xs text-red-500 mt-1">{errors.confirmPassword.message}</span>}
-          </div>
-
-          <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800 mt-2" disabled={loading}>
-            {loading ? "A concluir..." : "Ativar Conta →"}
-          </Button>
-        </form>
-      </div>
-    </div>
+    <main className="flex min-h-screen items-center justify-center bg-secondary/30 p-6">
+      <section className="w-full max-w-md rounded-2xl border bg-card p-8 text-center shadow-sm" aria-live="polite">
+        {state === 'loading' ? (
+          <><Loader2 className="mx-auto mb-4 size-8 animate-spin text-primary" /><h1 className="text-xl font-semibold">Validando seu acesso...</h1><p className="mt-2 text-sm text-muted-foreground">Isso deve levar apenas alguns segundos.</p></>
+        ) : state === 'invalid' ? (
+          <><AlertCircle className="mx-auto mb-4 size-8 text-destructive" /><h1 className="text-xl font-semibold">Este link não é mais válido</h1><p className="mt-2 text-sm text-muted-foreground">O link pode ter expirado, já ter sido usado ou ter sido substituído. Solicite um novo para continuar.</p><Button className="mt-6 w-full" onClick={openLeadCta}>Solicitar novo link</Button></>
+        ) : (
+          <><AlertCircle className="mx-auto mb-4 size-8 text-amber-600" /><h1 className="text-xl font-semibold">Não foi possível validar agora</h1><p className="mt-2 text-sm text-muted-foreground">Tente novamente sem recarregar esta página. Se você recarregar, será necessário pedir um novo link.</p><Button className="mt-6 w-full" onClick={() => void exchange()}>Tentar novamente</Button></>
+        )}
+      </section>
+    </main>
   );
 }

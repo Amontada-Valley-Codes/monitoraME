@@ -67,7 +67,7 @@ export function OverviewKpis({
         <KpiCard
           label="Recursos fora do município"
           value={valueOrDash(data.outsidePercentage, percent)}
-          detail="Percentual informado pelo pipeline"
+          detail="Percentual consolidado para o período"
           change={null}
           icon={ArrowUpRight}
           inverse
@@ -83,7 +83,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
   return (
     <ChartPanel
       title="Elementos de despesas"
-      description="Valores líquidos consolidados pelo pipeline"
+      description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
       legend={[{ label: 'Valor empenhado líquido', color: 'var(--chart-1)' }]}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
@@ -190,8 +190,8 @@ export function OverviewReading({ params }: { params: PipelineOverviewParams }) 
       </p>
       <div className="mt-6 space-y-3 border-t pt-5 text-sm">
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Fonte</span>
-          <span className="font-medium">{view.source}</span>
+          <span className="text-muted-foreground">Origem dos dados</span>
+          <span className="font-medium">Dados públicos consolidados</span>
         </div>
         <div className="flex justify-between gap-4">
           <span className="text-muted-foreground">Período</span>

@@ -192,7 +192,7 @@ export default function Compare() {
       <PageHeader
         eyebrow="Perspectiva comparativa"
         title="Comparar resultados"
-        description="Compare municípios, períodos ou ambos usando os dados analíticos publicados pelo TCE-CE."
+        description="Compare municípios, períodos ou ambos usando dados públicos consolidados."
       />
       <form id="comparison-form" onSubmit={submit} className="space-y-5">
         <div className="grid gap-4 xl:grid-cols-[1fr_auto_1fr] xl:items-center">
@@ -470,7 +470,7 @@ function ComparisonError({ error, onRetry }: { error: AnalyticsApiError; onRetry
     if (error.status === 401 || error.status === 403) {
       const returnTo = `${window.location.pathname}${window.location.search}`;
       router.push(
-        `${error.status === 401 ? '/login' : '/request-access/company'}?returnTo=${encodeURIComponent(returnTo)}`,
+        `${error.status === 401 ? '/login' : '/onboarding/complete'}?returnTo=${encodeURIComponent(returnTo)}`,
       );
     } else if (error.status === 422 || error.status === 404) {
       window.scrollTo({ top: 0, behavior: 'smooth' });

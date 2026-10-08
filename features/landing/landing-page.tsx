@@ -3,7 +3,6 @@
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   BarChart3,
@@ -30,6 +29,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/shared/components/logo';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
+import { useProtectedNavigate } from '@/shared/auth/protected-navigation';
 
 const connectorWords = new Set(['DA', 'DAS', 'DE', 'DO', 'DOS', 'E']);
 
@@ -150,7 +150,7 @@ const testimonials = [
 ];
 
 export function LandingPage() {
-  const router = useRouter();
+  const protectedNavigate = useProtectedNavigate();
   const [municipality, setMunicipality] = useState('');
   const [error, setError] = useState('');
 
@@ -167,11 +167,13 @@ export function LandingPage() {
     }
 
     setError('');
+    const year = String(new Date().getFullYear());
     const searchParams = new URLSearchParams({
-      codigo_municipio: match.code,
-      ano: String(new Date().getFullYear()),
+      municipality_tce_code: match.code,
+      start_date: `${year}-01-01`,
+      end_date: `${year}-12-31`,
     });
-    router.push(`/analitico?${searchParams.toString()}`);
+    void protectedNavigate(`/analitico/municipios?${searchParams.toString()}`);
   }
 
   return (
@@ -296,7 +298,7 @@ export function LandingPage() {
               Fontes integradas, harmonizadas e auditadas em tempo real
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-xs font-medium text-muted-foreground sm:gap-x-14">
-              {['TCE-CE', 'SIM / SICON', 'PNCP', 'Open CNPJ', 'IBGE'].map((source) => (
+              {['Compras municipais', 'Contratações nacionais', 'Cadastro empresarial', 'Dados territoriais'].map((source) => (
                 <span key={source} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary" />{source}</span>
               ))}
             </div>
@@ -513,7 +515,7 @@ export function LandingPage() {
             <Link href="/analitico/metodologia" className="hover:text-foreground">Privacidade & LGPD</Link>
             <Link href="#contato" className="hover:text-foreground">Contato</Link>
             <Link href="/analitico" className="hover:text-foreground">API aberta</Link>
-            <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="hover:text-foreground">Portal TCE-CE</a>
+            <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="hover:text-foreground">Portal de dados públicos</a>
           </div>
         </div>
       </footer>

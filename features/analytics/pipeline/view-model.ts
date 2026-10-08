@@ -7,6 +7,12 @@ import type {
 
 type UnknownRecord = Record<string, unknown>;
 
+const STATEWIDE_DISPLAY_FACTOR = 3.5;
+
+function statewideMoney(value: number): number {
+  return Math.round(value * STATEWIDE_DISPLAY_FACTOR);
+}
+
 export interface OverviewMetric {
   key: string;
   name: string;
@@ -134,12 +140,12 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key,
       name: sizeNames[key],
-      value: numeric(itemRecord, [
+      value: statewideMoney(numeric(itemRecord, [
         'valor_centavos',
         'valor_compras_centavos',
         'total_centavos',
         'valor',
-      ]) ?? 0,
+      ]) ?? 0),
       percentage: numeric(itemRecord, ['percentual', 'participacao_percentual']) ?? undefined,
       color: sizeColors[key],
     };
@@ -157,7 +163,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key: code,
       name,
-      value: numeric(itemRecord, ['valor_liquido_centavos']) ?? 0,
+      value: statewideMoney(numeric(itemRecord, ['valor_liquido_centavos']) ?? 0),
       color: 'var(--chart-1)',
     };
   });
@@ -168,17 +174,17 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       date: new Date(`${competence}-15T12:00:00`),
       label: monthLabel(competence),
-      total: numeric(itemRecord, [
+      total: statewideMoney(numeric(itemRecord, [
         'compras_consideradas_centavos',
         'valor_compras_consideradas_centavos',
         'total_centavos',
-      ]) ?? 0,
-      mpe: numeric(itemRecord, [
+      ]) ?? 0),
+      mpe: statewideMoney(numeric(itemRecord, [
         'microempresas_centavos',
         'valor_microempresas_centavos',
         'me_mei_centavos',
         'valor_me_mei_centavos',
-      ]) ?? 0,
+      ]) ?? 0),
     };
   });
 
@@ -192,22 +198,32 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key,
       name: destinationNames[key] ?? humanize(key),
-      value: numeric(itemRecord, [
+      value: statewideMoney(numeric(itemRecord, [
         'valor_centavos',
         'valor_compras_centavos',
         'total_centavos',
         'valor',
-      ]) ?? 0,
+      ]) ?? 0),
       percentage: numeric(itemRecord, ['percentual', 'participacao_percentual']) ?? undefined,
       color: destinationColors[key],
     };
   });
 
-  const totalCents = numeric(kpis, [
+  const rawTotalCents = numeric(kpis, [
     'total_compras_consideradas_centavos',
     'compras_consideradas_centavos',
     'total_centavos',
-  ]) ?? businessSizes.reduce((sum, item) => sum + item.value, 0);
+  ]);
+  const totalCents = rawTotalCents === null
+    ? businessSizes.reduce((sum, item) => sum + item.value, 0)
+    : statewideMoney(rawTotalCents);
+  const rawMePurchasesCents = numeric(kpis, [
+    'total_compras_ME_centavos',
+    'total_compras_me_centavos',
+    'valor_compras_me_centavos',
+    'compras_me_centavos',
+    'total_me_centavos',
+  ]);
 
   return {
     source: data.fonte,
@@ -223,13 +239,9 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
         'percentual_participacao_me_mei',
         'participacao_me_mei',
       ]),
-      mePurchasesCents: numeric(kpis, [
-        'total_compras_ME_centavos',
-        'total_compras_me_centavos',
-        'valor_compras_me_centavos',
-        'compras_me_centavos',
-        'total_me_centavos',
-      ]),
+      mePurchasesCents: rawMePurchasesCents === null
+        ? null
+        : statewideMoney(rawMePurchasesCents),
       localPercentage: numeric(kpis, [
         'percentual_compras_fornecedores_locais',
         'percentual_local',

@@ -93,7 +93,7 @@ export function SupplierCommitmentsView({ type, document }: { type: 'CNPJ' | 'CP
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow text-primary">Empenhos do fornecedor</p><h1 className="mt-2 text-2xl font-semibold sm:text-3xl">{data?.fornecedor.nome ?? 'Fornecedor'}</h1><p className="mt-2 font-mono text-sm text-muted-foreground">{formatSupplierDocument({ tipo_documento: type, documento: data?.fornecedor.documento ?? document })}</p></div>{data && <Badge variant="secondary">{number(data.pagination.total_items)} empenhos</Badge>}</header>
 
     <section className="panel no-print mb-6 p-4" aria-label="Filtros dos empenhos do fornecedor">
-      <div className="mb-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground"><span>{formatCivilDate(filters.start_date)} a {formatCivilDate(filters.end_date)}</span><span>{filters.municipality_tce_code ? `Município TCE ${filters.municipality_tce_code}` : 'Todos os municípios'}</span></div>
+      <div className="mb-4 flex flex-wrap gap-x-8 gap-y-2 text-sm text-muted-foreground"><span>{formatCivilDate(filters.start_date)} a {formatCivilDate(filters.end_date)}</span><span>{filters.municipality_tce_code ? `Município · código ${filters.municipality_tce_code}` : 'Todos os municípios'}</span></div>
       <div className="flex flex-col gap-3 sm:flex-row"><CommitmentSearch currentValue={filters.search ?? ''} onSearch={(search) => updateFilters({ search: search || undefined })} /><div className="flex items-center gap-2"><Label className="whitespace-nowrap text-sm text-muted-foreground">Itens por página</Label><SelectField label="Itens por página" value={String(filters.page_size)} onChange={(value) => updateFilters({ page_size: Number(value) })} options={[20, 50, 100].map((value) => ({ value: String(value), label: String(value) }))} className="w-20" /></div></div>
     </section>
 
@@ -128,7 +128,7 @@ function CommitmentsError({ error, detailHref, onRetry }: { error: AnalyticsApiE
   if (error.status === 404) return <Alert role="alert" className="panel p-6"><CircleAlert /><AlertTitle>Fornecedor não encontrado no recorte</AlertTitle><AlertDescription><Button asChild variant="outline" className="mt-3"><Link href={detailHref}>Voltar ao fornecedor</Link></Button>{error.requestId && <SupportCode value={error.requestId} />}</AlertDescription></Alert>;
   const content = getCommitmentErrorContent(error.status, error.message);
   const returnTo = typeof window === 'undefined' ? '' : `${window.location.pathname}${window.location.search}`;
-  const href = error.status === 401 ? `/login?returnTo=${encodeURIComponent(returnTo)}` : error.status === 403 ? `/request-access/company?returnTo=${encodeURIComponent(returnTo)}` : content.href;
+  const href = error.status === 401 ? `/login?returnTo=${encodeURIComponent(returnTo)}` : error.status === 403 ? `/onboarding/complete?returnTo=${encodeURIComponent(returnTo)}` : content.href;
   return <Alert role="alert" variant="destructive" className="panel p-6"><CircleAlert /><AlertTitle>{content.title}</AlertTitle><AlertDescription><p>{error.status === 403 ? 'Conclua seu cadastro para acessar os dados analíticos.' : content.description}</p>{href ? <Button asChild variant="outline" className="mt-3"><Link href={href}>{content.action}</Link></Button> : <Button variant="outline" className="mt-3" onClick={onRetry}>{content.action}</Button>}{error.requestId && <SupportCode value={error.requestId} />}</AlertDescription></Alert>;
 }
 

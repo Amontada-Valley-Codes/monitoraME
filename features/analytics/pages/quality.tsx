@@ -136,7 +136,7 @@ export default function Quality() {
               </div>
               <div>
                 <p className="text-muted-foreground">Origem prevista</p>
-                <p className="mt-1 font-medium">SIM/TCE-CE + Receita + IBGE</p>
+                <p className="mt-1 font-medium">Compras públicas, cadastro empresarial e referências territoriais</p>
               </div>
             </div>
             <p className="mt-6 text-sm text-muted-foreground">

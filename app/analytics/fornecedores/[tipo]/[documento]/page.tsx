@@ -6,6 +6,8 @@ import { isValidSupplierRoute } from '@/features/analytics/suppliers/detail';
 
 type SupplierDetailPageProps = PageProps<'/analytics/fornecedores/[tipo]/[documento]'>;
 
+export const instant = false;
+
 export default function SupplierDetailPage(props: SupplierDetailPageProps) {
   return (
     <Suspense fallback={<main className="page-content"><div className="panel h-80 animate-pulse" /></main>}>

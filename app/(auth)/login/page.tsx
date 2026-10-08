@@ -4,8 +4,16 @@ import { LoginFormData } from "@/features/auth/schemas/login.schema";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ApiError } from "@/services/api";
+import { isValidReturnTo } from "@/shared/auth/return-to";
+import { Suspense } from "react";
 
-export default function LoginPage() {
+export default function LoginPage(props: { searchParams: Promise<{ returnTo?: string }> }) {
+  return <Suspense fallback={null}><LoginContent {...props} /></Suspense>;
+}
+
+async function LoginContent({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const candidate = (await searchParams).returnTo;
+  const destination = isValidReturnTo(candidate) ? candidate : "/analitico";
   async function handleLogin(data: LoginFormData) {
     "use server";
     try {
@@ -46,7 +54,7 @@ export default function LoginPage() {
       throw error;
     }
 
-    redirect("/analitico");
+    redirect(destination);
   }
 
   return <LoginView onSubmitAction={handleLogin} />

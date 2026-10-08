@@ -14,6 +14,7 @@
     "@hookform/resolvers": "^5.9.1",
     "@number-flow/react": "^0.6.2",
     "@shadcn/react": "^0.3.1",
+    "@tanstack/react-query": "^5.104.1",
     "@visx/curve": "4.0.1-alpha.0",
     "@visx/event": "4.0.1-alpha.0",
     "@visx/gradient": "4.0.1-alpha.0",
