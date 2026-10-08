@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { ArrowRight, Bookmark, CircleCheck, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Opportunity } from '../types';
 
 type OpportunityCardProps = {
@@ -25,9 +27,9 @@ export function OpportunityCard({
     .join('');
 
   return (
-    <article className="flex gap-3 px-4 py-4 transition hover:bg-slate-50">
+    <article className="flex gap-3 px-4 py-5 transition-colors hover:bg-muted/40 sm:px-6">
       <div className="shrink-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full border border-blue-200 bg-blue-50 text-xs font-bold text-blue-700">
+        <div className="flex size-10 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
           {initials}
         </div>
       </div>
@@ -36,103 +38,89 @@ export function OpportunityCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="truncate text-sm font-bold text-slate-900">
+              <span className="truncate text-sm font-semibold text-foreground">
                 {opportunity.organization}
               </span>
 
-              <span className="text-blue-500">●</span>
+              <CircleCheck className="size-3.5 fill-primary text-primary-foreground" />
 
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 @{initials.toLowerCase()}
               </span>
 
-              <span className="text-xs text-slate-400">·</span>
+              <span className="text-xs text-muted-foreground">·</span>
 
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 há 2h
               </span>
             </div>
 
-            <Link
-              href={`/oportunidades/${opportunity.id}`}
-              className="mt-2 inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
-            >
-              Ver Detalhes
-              <span>→</span>
-            </Link>
           </div>
 
-          <button
+          <Button
             type="button"
-            className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            variant="ghost"
+            size="icon-sm"
             aria-label="Mais opções"
           >
-            •••
-          </button>
+            <MoreHorizontal className="size-4 text-muted-foreground" />
+          </Button>
         </div>
 
-        <p className="mt-2 text-sm leading-relaxed text-slate-700">
+        <p className="mt-2 text-sm leading-relaxed text-foreground/80">
           {opportunity.description}
         </p>
 
-        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-3">
+        <div className="mt-3 rounded-xl border bg-muted/50 px-4 py-3">
           <div className="grid gap-3 text-xs sm:grid-cols-3">
             <div>
-              <span className="block text-[10px] font-bold uppercase text-slate-400">
+              <span className="eyebrow block text-[10px] text-muted-foreground">
                 Valor Global
               </span>
 
-              <span className="font-bold text-slate-800">
+              <span className="data-value font-semibold text-foreground">
                 {formattedValue}
               </span>
             </div>
 
             <div>
-              <span className="block text-[10px] font-bold uppercase text-slate-400">
+              <span className="eyebrow block text-[10px] text-muted-foreground">
                 Data de Abertura
               </span>
 
-              <span className="font-semibold text-slate-800">
+              <span className="data-value font-medium text-foreground">
                 {formattedDate}
               </span>
             </div>
 
             <div>
-              <span className="block text-[10px] font-bold uppercase text-slate-400">
+              <span className="eyebrow block text-[10px] text-muted-foreground">
                 Critério
               </span>
 
-              <span className="font-semibold text-slate-800">
+              <span className="font-medium text-foreground">
                 Menor Preço por Item
               </span>
             </div>
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2">
-          <Link
-            href={`/oportunidades/${opportunity.id}`}
-            className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
-          >
-            Ver Detalhes
-            <span>→</span>
-          </Link>
+        <div className="mt-3 flex items-center justify-between border-t pt-3">
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/oportunidades/${opportunity.id}`}>
+              Ver detalhes
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
 
-          <button
+          <Button
             type="button"
-            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-blue-600"
+            variant="ghost"
+            size="icon-sm"
             aria-label="Salvar oportunidade"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" />
-            </svg>
-          </button>
+            <Bookmark className="size-4 text-muted-foreground" />
+          </Button>
         </div>
       </div>
     </article>

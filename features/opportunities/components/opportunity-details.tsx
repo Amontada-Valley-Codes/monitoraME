@@ -1,9 +1,101 @@
 import Link from 'next/link';
-import { Opportunity } from '../types';
+import {
+  ArrowLeft,
+  Bookmark,
+  Building2,
+  CircleCheck,
+  Download,
+  ExternalLink,
+  FileSpreadsheet,
+  FileText,
+  Gavel,
+  Mail,
+  MapPin,
+  Search,
+  Share2,
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { OpportunitySidebar } from './opportunity-sidebar';
+import type { Opportunity } from '../types';
 
 type OpportunityDetailsProps = {
   opportunity: Opportunity;
 };
+
+const documents = [
+  {
+    name: 'Edital_PE_014_2024.pdf',
+    description: '2,4 MB · 01/11',
+    label: 'PDF',
+    icon: FileText,
+  },
+  {
+    name: 'Termo_Referencia_Anexo_I.pdf',
+    description: '1,1 MB · Especificações',
+    label: 'TR',
+    icon: FileText,
+  },
+  {
+    name: 'Planilha_Orcamentaria.xlsx',
+    description: '420 KB · Matriz de custo',
+    label: 'XLS',
+    icon: FileSpreadsheet,
+  },
+  {
+    name: 'Minuta_Contrato_Ata.pdf',
+    description: '890 KB · Cláusulas',
+    label: 'DOC',
+    icon: FileText,
+  },
+];
+
+const communications = [
+  {
+    category: 'Urgente / Retificação',
+    date: 'Há 2h',
+    title: 'Retificação do Termo de Referência nº 01',
+    description:
+      'Ajuste técnico na especificação do item 01. Data e horário de abertura mantidos.',
+    meta: 'PDF · 320 KB',
+    tone: 'primary',
+  },
+  {
+    category: 'Impugnação nº 01',
+    date: '04/11',
+    title: 'Julgamento de Impugnação · Qualificação Técnica',
+    description:
+      'Decisão mantida com parecer jurídico referente à qualificação econômico-financeira.',
+    meta: 'Parecer · 540 KB',
+    tone: 'warning',
+  },
+  {
+    category: 'Esclarecimento nº 01',
+    date: 'Ontem',
+    title: 'Atestados de Cooperativas Médicas',
+    description:
+      'Confirmada a aceitação de atestados emitidos por cooperativas médicas registradas.',
+    meta: 'Deferido',
+    tone: 'success',
+  },
+  {
+    category: 'Esclarecimento nº 02',
+    date: '02/11',
+    title: 'Prazos de Entrega e Logística Regional',
+    description:
+      'Detalhamento do cronograma para remessas fracionadas às unidades regionais.',
+    meta: 'Nota técnica',
+    tone: 'muted',
+  },
+] as const;
 
 export function OpportunityDetails({
   opportunity,
@@ -19,637 +111,289 @@ export function OpportunityDetails({
   }).format(new Date(opportunity.openingDate));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex min-h-screen w-full max-w-[1340px]">
-        {/* COLUNA ESQUERDA */}
-        <aside className="hidden w-[275px] shrink-0 border-r border-slate-200 bg-white xl:flex xl:h-screen xl:flex-col xl:justify-between xl:sticky xl:top-0 xl:px-4 xl:py-4">
-          <div>
-            <div className="flex items-center gap-3 px-2 py-1">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M3 3v18h18" />
-                  <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
-              </div>
+    <div className="min-h-screen bg-background">
+      <div className="flex min-h-screen w-full">
+        <OpportunitySidebar />
 
-              <span className="text-xl font-bold tracking-tight text-slate-900">
-                Monitora<span className="text-blue-600">ME</span>
-              </span>
-            </div>
-
-            <div className="mt-8 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Oportunidades
-            </div>
-
-            <nav className="mt-2 space-y-1">
-              <Link
-                href="/oportunidades"
-                className="flex w-full items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-3.5 py-3 text-sm font-semibold text-blue-700"
-              >
-                <div className="flex items-center gap-3">
-                  <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                  </svg>
-
-                  <span>Editais Abertos</span>
-                </div>
-
-                <span className="h-4 w-1.5 rounded-full bg-blue-600" />
+        <main className="min-w-0 flex-1 border-r bg-card">
+          <header className="sticky top-0 z-10 flex h-(--header-height) items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-card/80 sm:px-6">
+            <Button asChild variant="ghost" size="icon" aria-label="Voltar para oportunidades">
+              <Link href="/oportunidades">
+                <ArrowLeft className="size-4" />
               </Link>
+            </Button>
 
-              <button className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
-                <svg
-                  className="h-5 w-5 text-slate-500"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-                </svg>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">Edital detalhado</p>
+              <h1 className="truncate text-base font-semibold text-foreground sm:text-lg">
+                {opportunity.modality} · {opportunity.city}, {opportunity.state}
+              </h1>
+            </div>
 
-                <span>Editais Salvos</span>
-              </button>
-            </nav>
+            <Button variant="ghost" size="icon" className="ml-auto" aria-label="Compartilhar edital">
+              <Share2 className="size-4 text-muted-foreground" />
+            </Button>
+          </header>
 
-            <div className="mt-4 border-t border-slate-100 pt-4">
-              <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Gestão & Inteligência
+          <div className="space-y-4 p-4 sm:p-6">
+            <Card className="gap-5 py-5 shadow-none">
+              <CardHeader className="gap-4 px-5 sm:px-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground">
+                    CPS
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="truncate text-base">
+                        {opportunity.organization}
+                      </CardTitle>
+                      <CircleCheck className="size-4 shrink-0 fill-primary text-primary-foreground" />
+                    </div>
+                    <CardDescription className="mt-1 flex flex-wrap items-center gap-x-2">
+                      <span className="text-primary">@cpsmcamocim</span>
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="size-3" /> Ceará · Região Norte
+                      </span>
+                    </CardDescription>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-muted/60 p-4 sm:p-5">
+                  <Badge variant="outline" className="bg-card text-muted-foreground">
+                    ID PNCP: 07.598.634/0001-37
+                  </Badge>
+                  <h2 className="mt-4 text-lg font-semibold leading-relaxed text-foreground sm:text-xl">
+                    {opportunity.title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {opportunity.description}
+                  </p>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-5 px-5 sm:px-6">
+                <div className="grid gap-4 border-y py-4 sm:grid-cols-3">
+                  <Metric label="Valor estimado" value={formattedValue} />
+                  <Metric
+                    label="Cota MPE"
+                    value="R$ 54.605,00"
+                    badge="25%"
+                    tone="success"
+                    className="sm:border-x sm:px-4"
+                  />
+                  <Metric label="Abertura da sessão" value={formattedDate} tone="warning" />
+                </div>
+
+                <dl className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+                  <Detail label="Modalidade" value={opportunity.modality} />
+                  <Detail label="Critério" value="Menor preço por item" />
+                  <Detail label="Disputa" value="Aberto / Fechado" />
+                  <Detail label="Localização" value={`${opportunity.city} / ${opportunity.state}`} />
+                </dl>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  {opportunity.officialUrl && (
+                    <Button asChild className="sm:flex-1">
+                      <a href={opportunity.officialUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="size-4" />
+                        Acessar edital no PNCP
+                      </a>
+                    </Button>
+                  )}
+                  <Button variant="outline">
+                    <Bookmark className="size-4" />
+                    Salvar certame
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="gap-0 overflow-hidden py-0 shadow-none">
+              <div className="grid grid-cols-2 bg-muted/60 p-1">
+                <Button variant="secondary" className="h-10 bg-card shadow-sm">
+                  <FileText className="size-4" />
+                  Itens (04)
+                </Button>
+                <Button variant="ghost" className="h-10 text-muted-foreground">
+                  <FileText className="size-4" />
+                  Anexos (04)
+                </Button>
               </div>
 
-              <nav className="mt-2 space-y-1">
-                <button className="flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="h-5 w-5 text-amber-500"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
+              <CardContent className="p-4 sm:p-5">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">Arquivos oficiais para download</p>
+                  <Badge variant="outline">ICP-Brasil</Badge>
+                </div>
+
+                <div className="grid gap-3 xl:grid-cols-2">
+                  {documents.map(({ name, description, label, icon: Icon }) => (
+                    <button
+                      key={name}
+                      type="button"
+                      className="flex min-w-0 items-center gap-3 rounded-xl border bg-card p-3 text-left transition-colors hover:bg-muted/50"
                     >
-                      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-                    </svg>
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+                        <Icon className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">{name}</span>
+                        <span className="block text-xs text-muted-foreground">
+                          {label} · {description}
+                        </span>
+                      </span>
+                      <Download className="size-4 shrink-0 text-muted-foreground" />
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-                    <span>Área da Empresa</span>
-                  </div>
-
-                  <span className="rounded bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
-                    PRO
+            <Card className="gap-0 py-0 shadow-none">
+              <CardContent className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                    <Gavel className="size-4 text-muted-foreground" />
                   </span>
-                </button>
+                  <div>
+                    <p className="text-sm font-medium">Pregoeiro: Carlos Eduardo Lima</p>
+                    <p className="text-xs text-muted-foreground">Portaria CPS nº 042/2024</p>
+                  </div>
+                </div>
 
-                <button className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
-                  <svg
-                    className="h-5 w-5 text-slate-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="7" r="4" />
-                    <path d="M5.5 21a6.5 6.5 0 0 1 13 0" />
-                  </svg>
-
-                  <span>Perfil Fornecedor</span>
-                </button>
-
-                <button className="flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-sm text-slate-700 transition hover:bg-slate-100">
-                  <svg
-                    className="h-5 w-5 text-slate-400"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="5" cy="12" r="1.5" />
-                    <circle cx="12" cy="12" r="1.5" />
-                    <circle cx="19" cy="12" r="1.5" />
-                  </svg>
-
-                  <span>Mais opções</span>
-                </button>
-              </nav>
-            </div>
-
-            <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-
-              Filtrar Oportunidades
-            </button>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-2">
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-bold text-white">
-                SN
-
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-slate-900">
-                  Soluções Nordeste
-                </p>
-
-                <p className="truncate text-[10px] text-slate-400">
-                  34.819.•••/0001-92
-                </p>
-              </div>
-
-              <span className="text-slate-400">•••</span>
-            </div>
-          </div>
-        </aside>
-
-        {/* COLUNA CENTRAL */}
-        <main className="w-full min-w-0 max-w-[680px] border-r border-slate-200 bg-white">
-          <div className="border-b border-slate-200 px-4 py-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <Link
-                  href="/oportunidades"
-                  className="mt-1 rounded-full p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                <a
+                  href="mailto:licitacao@consorciocamocim.ce.gov.br"
+                  className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
                 >
-                  ←
-                </Link>
-
-                <div>
-                  <p className="text-sm text-slate-600">
-                    Edital Detalhado
-                  </p>
-
-                  <h1 className="text-lg font-semibold text-slate-900">
-                    PE SRP nº 2024/014 · {opportunity.city},{' '}
-                    {opportunity.state}
-                  </h1>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className="rounded-full p-2 text-slate-500 transition hover:bg-slate-100"
-                aria-label="Compartilhar"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <circle cx="18" cy="5" r="3" />
-                  <circle cx="6" cy="12" r="3" />
-                  <circle cx="18" cy="19" r="3" />
-                  <path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div className="p-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white">
-                  CPS
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-bold text-slate-900">
-                      {opportunity.organization}
-                    </h2>
-
-                    <span className="text-blue-500">✓</span>
-                  </div>
-
-                  <p className="text-sm text-blue-600">
-                    @cpsmcamocim
-                    <span className="text-slate-400">
-                      {' '}
-                      · Ceará · Região Norte
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 rounded-xl bg-slate-50 p-4">
-                <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-500">
-                  ID PNCP: 07.598.634/0001-37
-                </span>
-
-                <h3 className="mt-4 text-lg font-bold leading-relaxed text-slate-900">
-                  Registro de Preços para aquisição de insumos hospitalares,
-                  seringas descartáveis, luvas de procedimento, álcool em gel
-                  70% e cateteres para policlínicas e CEOs regionais.
-                </h3>
-
-                <p className="mt-2 text-sm text-slate-500">
-                  Atendimento continuado dos municípios consorciados de Camocim,
-                  Granja, Chaval e Barroquinha.
-                </p>
-              </div>
-
-              <div className="mt-5 grid gap-4 border-y border-slate-100 py-4 sm:grid-cols-3">
-                <div>
-                  <span className="text-xs font-bold uppercase text-blue-600">
-                    Valor Estimado
-                  </span>
-
-                  <p className="mt-1 text-xl font-bold text-slate-900">
-                    {formattedValue}
-                  </p>
-                </div>
-
-                <div className="border-slate-100 sm:border-x sm:px-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase text-emerald-600">
-                      Cota MPE
-                    </span>
-
-                    <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                      25%
-                    </span>
-                  </div>
-
-                  <p className="mt-1 text-xl font-bold text-emerald-700">
-                    R$ 54.605,00
-                  </p>
-                </div>
-
-                <div>
-                  <span className="text-xs font-bold uppercase text-orange-600">
-                    Abertura Sessão
-                  </span>
-
-                  <p className="mt-1 font-bold text-slate-900">
-                    {formattedDate}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">
-                    Modalidade
-                  </span>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    {opportunity.modality}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">
-                    Critério
-                  </span>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    Menor Preço Item
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">
-                    Disputa
-                  </span>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    Aberto / Fechado
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">
-                    Localização
-                  </span>
-
-                  <p className="mt-1 text-sm font-semibold">
-                    {opportunity.city} / {opportunity.state}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 flex gap-3">
-                {opportunity.officialUrl && (
-                  <a
-                    href={opportunity.officialUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    ↗ Acessar Edital no PNCP
-                  </a>
-                )}
-
-                <button
-                  type="button"
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  ♧ Salvar Certame
-                </button>
-              </div>
-            </div>
-
-            {/* ITENS / ANEXOS */}
-            <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-              <div className="grid grid-cols-2 bg-slate-100 p-1">
-                <button className="rounded-lg bg-white px-4 py-3 text-sm font-semibold text-blue-600 shadow-sm">
-                  ▣ Itens (04)
-                </button>
-
-                <button className="rounded-lg px-4 py-3 text-sm font-semibold text-slate-600">
-                  ▱ Anexos (04)
-                </button>
-              </div>
-
-              <div className="p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-700">
-                    Arquivos Oficiais para Download
-                  </p>
-
-                  <span className="text-xs text-slate-400">
-                    ICP-Brasil
-                  </span>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
-                      PDF
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        Edital_PE_014_2024.pdf
-                      </p>
-
-                      <p className="text-xs text-slate-400">
-                        2.4 MB · 01/11
-                      </p>
-                    </div>
-
-                    <span className="text-slate-400">↓</span>
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-700">
-                      TR
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        Termo_Referencia_Anexo_I.pdf
-                      </p>
-
-                      <p className="text-xs text-slate-400">
-                        1.1 MB · Especificações
-                      </p>
-                    </div>
-
-                    <span className="text-slate-400">↓</span>
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-xs font-bold text-emerald-700">
-                      XLS
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        Planilha_Orcamentaria.xlsx
-                      </p>
-
-                      <p className="text-xs text-slate-400">
-                        420 KB · Matriz Custo
-                      </p>
-                    </div>
-
-                    <span className="text-slate-400">↓</span>
-                  </div>
-
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
-                      DOC
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        Minuta_Contrato_Ata.pdf
-                      </p>
-
-                      <p className="text-xs text-slate-400">
-                        890 KB · Cláusulas
-                      </p>
-                    </div>
-
-                    <span className="text-slate-400">↓</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* PREGOEIRO */}
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100">
-                  ♙
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Pregoeiro: Carlos Eduardo Lima
-                  </p>
-
-                  <p className="text-xs text-slate-400">
-                    Portaria CPS nº 042/2024
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-sm text-blue-600">
-                ✉ licitacao@consorciocamocim.ce.gov.br
-              </p>
-            </div>
+                  <Mail className="size-4" />
+                  licitacao@consorciocamocim.ce.gov.br
+                </a>
+              </CardContent>
+            </Card>
           </div>
         </main>
 
-        {/* COLUNA DIREITA */}
-        <aside className="hidden flex-1 bg-slate-50 p-4 lg:block">
-          <div className="sticky top-4">
-            <div className="relative mb-4">
-              <svg
-                className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-
-              <input
-                type="text"
+        <aside className="hidden w-80 shrink-0 bg-background px-5 py-6 lg:block 2xl:w-96 2xl:px-6">
+          <div className="sticky top-6 space-y-4">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                aria-label="Buscar órgãos, atas e certames"
                 placeholder="Buscar órgãos, atas e certames..."
-                className="w-full rounded-full border-none bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none placeholder:text-slate-500"
+                className="bg-card pl-9"
               />
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">
-                    Comunicados Oficiais
-                  </h2>
+            <Card className="gap-4 py-5 shadow-none">
+              <CardHeader className="gap-2 px-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <CardTitle className="text-lg">Comunicados oficiais</CardTitle>
+                    <CardDescription className="mt-1">
+                      5 registros do Pregoeiro e CPL
+                    </CardDescription>
+                  </div>
+                  <Badge className="bg-success-soft text-success hover:bg-success-soft">Hoje 11:20</Badge>
+                </div>
+              </CardHeader>
 
-                  <p className="mt-1 text-sm text-slate-500">
-                    5 registros oficiais do Pregoeiro e CPL
-                  </p>
+              <CardContent className="px-5">
+                <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 border-b pb-3 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">Todas (5)</span>
+                  <span>Avisos (2)</span>
+                  <span>Impugnações (1)</span>
                 </div>
 
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-700">
-                  HOJE 11:20
-                </span>
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-4 border-b border-slate-100 pb-3 text-xs font-semibold text-slate-600">
-                <span>Todas (5)</span>
-                <span>Avisos (2)</span>
-                <span>Impugnações (1)</span>
-                <span>Esclarecimentos (2)</span>
-              </div>
-
-              <div className="mt-4 space-y-5">
-                <div className="border-l-4 border-blue-500 pl-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-600">
-                      URGENTE / RETIFICAÇÃO
-                    </span>
-
-                    <span className="text-[10px] text-slate-400">
-                      Há 2h
-                    </span>
-                  </div>
-
-                  <h3 className="mt-1 text-sm font-semibold text-slate-900">
-                    Retificação do Termo de Referência nº 01
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Ajuste técnico na especificação do item 01
-                    (Seringas Luer-Lock). Data e horário de abertura
-                    mantidos inalterados.
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Dr. Carlos Eduardo · Pregoeiro</span>
-                    <span>PDF (320 KB)</span>
-                  </div>
+                <div className="space-y-5">
+                  {communications.map((item) => (
+                    <article
+                      key={item.title}
+                      className={`border-l-2 pl-3 ${communicationBorder[item.tone]}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className={`eyebrow text-[10px] ${communicationText[item.tone]}`}>
+                          {item.category}
+                        </span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{item.date}</span>
+                      </div>
+                      <h3 className="mt-1 text-sm font-medium leading-snug">{item.title}</h3>
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                        {item.description}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between gap-3 text-[10px] text-muted-foreground">
+                        <span>Pregoeiro / CPL</span>
+                        <span>{item.meta}</span>
+                      </div>
+                    </article>
+                  ))}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="border-l-4 border-orange-500 pl-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-orange-600">
-                      IMPUGNAÇÃO Nº 01
-                    </span>
-
-                    <span className="text-[10px] text-slate-400">
-                      04/11
-                    </span>
-                  </div>
-
-                  <h3 className="mt-1 text-sm font-semibold text-slate-900">
-                    Julgamento de Impugnação · Qualificação Técnica
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Contestação referente à qualificação econômico-financeira
-                    mínima exigida no item 10.2. Decisão mantida com parecer
-                    jurídico referendado.
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Assessoria Jurídica / Pregoeiro</span>
-                    <span>Parecer (540 KB)</span>
-                  </div>
-                </div>
-
-                <div className="pl-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500">
-                      ESCLARECIMENTO Nº 01
-                    </span>
-
-                    <span className="text-[10px] text-slate-400">
-                      Ontem
-                    </span>
-                  </div>
-
-                  <h3 className="mt-1 text-sm font-semibold text-slate-900">
-                    Atestados de Cooperativas Médicas
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Confirmada aceitação de atestados de capacidade emitidos
-                    por cooperativas médicas privadas devidamente registradas.
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Resp.: Gestor de Saúde do Consórcio</span>
-
-                    <span className="font-semibold text-emerald-600">
-                      Deferido
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pl-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500">
-                      ESCLARECIMENTO Nº 02
-                    </span>
-
-                    <span className="text-[10px] text-slate-400">
-                      02/11
-                    </span>
-                  </div>
-
-                  <h3 className="mt-1 text-sm font-semibold text-slate-900">
-                    Prazos de Entrega e Logística Regional
-                  </h3>
-
-                  <p className="mt-2 text-xs leading-relaxed text-slate-500">
-                    Detalhamento dos cronogramas para remessas fracionadas
-                    diretas às policlínicas e CEOs de Camocim, Granja e
-                    Barroquinha.
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between text-[10px] text-slate-400">
-                    <span>Coord. de Logística e Farmácia</span>
-                    <span>Nota Técnica</span>
-                  </div>
-                </div>
-              </div>
+            <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
+              <Building2 className="size-3.5" />
+              Fonte oficial: PNCP
             </div>
           </div>
         </aside>
       </div>
+    </div>
+  );
+}
+
+const communicationBorder = {
+  primary: 'border-primary',
+  warning: 'border-warning',
+  success: 'border-success',
+  muted: 'border-border',
+} as const;
+
+const communicationText = {
+  primary: 'text-primary',
+  warning: 'text-warning',
+  success: 'text-success',
+  muted: 'text-muted-foreground',
+} as const;
+
+function Metric({
+  label,
+  value,
+  badge,
+  tone = 'primary',
+  className = '',
+}: {
+  label: string;
+  value: string;
+  badge?: string;
+  tone?: 'primary' | 'success' | 'warning';
+  className?: string;
+}) {
+  const toneClass = {
+    primary: 'text-primary',
+    success: 'text-success',
+    warning: 'text-warning',
+  }[tone];
+
+  return (
+    <div className={className}>
+      <div className="flex items-center gap-2">
+        <span className={`eyebrow ${toneClass}`}>{label}</span>
+        {badge && <Badge className="bg-success text-white hover:bg-success">{badge}</Badge>}
+      </div>
+      <p className={`metric mt-1 text-lg font-semibold ${tone === 'primary' ? 'text-foreground' : toneClass}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function Detail({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/40 p-3">
+      <dt className="eyebrow text-[10px] text-muted-foreground">{label}</dt>
+      <dd className="mt-1 text-sm font-medium text-foreground">{value}</dd>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { OpportunityDetails } from '@/features/opportunities/components/opportunity-details';
 import { opportunitiesMock } from '@/features/opportunities/mocks';
