@@ -8,14 +8,9 @@ import {
   ReceiptText,
   Building2,
   ArrowLeftRight,
-  Target,
-  Files,
-  Database,
-  BookOpen,
   Search,
   ChevronRight,
   RefreshCw,
-  Globe,
   CircleDollarSign,
 } from 'lucide-react';
 import {
@@ -56,12 +51,12 @@ export const NAV = [
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
   { path: '/analitico/empenhos', label: 'Despesas empenhadas', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
-  { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
+  // { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
   { path: '/analitico/comparar', label: 'Comparar resultados', icon: ArrowLeftRight },
-  { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
-  { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
-  { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
-  { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
+  // { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
+  // { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
+  // { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
+  // { path: '/analitico/metodologia', label: 'Metodologia e fontes', icon: BookOpen },
 ];
 
 const PLANS_PAGE = {

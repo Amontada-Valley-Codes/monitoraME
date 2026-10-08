@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  logging: {
+    // Server Function arguments include credentials in the onboarding flow.
+    serverFunctions: false,
+  },
   async headers() {
     return [{
       source: '/onboarding',

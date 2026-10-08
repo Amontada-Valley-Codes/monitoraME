@@ -31,3 +31,43 @@ describe('renovação de sessão', () => {
     );
   });
 });
+
+describe('conclusão do onboarding', () => {
+  it('envia todos os campos exigidos pelo endpoint', async () => {
+    const account = {
+      id: 'account-id',
+      name: 'Pessoa Teste',
+      email: 'pessoa@example.com',
+      phone: '+55 88 99999-9999',
+      role: 'PERSON',
+      status: 'ACTIVE',
+    };
+    const request = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(account), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    vi.stubGlobal('fetch', request);
+
+    const payload = {
+      name: account.name,
+      cpf: '52998224725',
+      email: account.email,
+      phone: account.phone,
+      password: 'Senha@123',
+    };
+    await apiService.completeOnboarding(payload, 'access-token');
+
+    expect(request).toHaveBeenCalledWith(
+      expect.stringMatching(/\/accounts\/complete$/),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: expect.any(Headers),
+      }),
+    );
+    const headers = request.mock.calls[0][1].headers as Headers;
+    expect(headers.get('Authorization')).toBe('Bearer access-token');
+  });
+});

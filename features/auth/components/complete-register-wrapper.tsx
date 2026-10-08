@@ -1,12 +1,12 @@
 "use client";
 
 import { RegisterForm } from "@/features/auth/components/register-form";
-import { AuthFormData } from "@/features/auth/schemas/auth.schema";
+import { CompleteAuthFormData } from "@/features/auth/schemas/auth.schema";
 
 interface CompleteRegisterWrapperProps {
-  onSubmitAction: (data: AuthFormData) => Promise<void>;
+  onSubmitAction: (data: CompleteAuthFormData) => Promise<{ error?: string } | void>;
 }
 
 export function CompleteRegisterWrapper({ onSubmitAction }: CompleteRegisterWrapperProps) {
-  return <RegisterForm onSubmitAction={onSubmitAction} />;
+  return <RegisterForm mode="complete" onSubmitAction={onSubmitAction} />;
 }

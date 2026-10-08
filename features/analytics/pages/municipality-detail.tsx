@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Building2, ChartPie, Info, MapPin, RefreshCw, RotateCcw, Share2, SlidersHorizontal, TriangleAlert, Wallet } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Building2, ChartPie, Info, MapPin, RefreshCw, RotateCcw, Share2, TriangleAlert, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SelectField } from '@/shared/components/select-field';
 import { ChartPanel } from '@/shared/components/chart-panel';
@@ -33,6 +32,7 @@ const sizeNames: Record<string, string> = { ME: 'Microempresa', MEI: 'Microempre
 const sizeColors: Record<string, string> = { ME: 'var(--size-me)', MEI: 'var(--size-mei)', OUTROS_PORTES: 'var(--size-other)', NAO_IDENTIFICADO: 'var(--size-unknown)' };
 const destinationNames: Record<string, string> = { NO_MUNICIPIO_COMPRADOR: 'No município comprador', EM_OUTRO_MUNICIPIO: 'Em outro município do Ceará', FORA_DO_CEARA: 'Fora do Ceará', ORIGEM_NAO_IDENTIFICADA: 'Origem não identificada' };
 const destinationColors: Record<string, string> = { NO_MUNICIPIO_COMPRADOR: 'var(--origin-local)', EM_OUTRO_MUNICIPIO: 'var(--origin-state)', FORA_DO_CEARA: 'var(--origin-external)', ORIGEM_NAO_IDENTIFICADA: 'var(--origin-unknown)' };
+const DEFAULT_MUNICIPAL_YEAR = '2025';
 
 function normalized(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); }
 function codeFromLegacyId(id?: string) {
@@ -55,8 +55,8 @@ function MunicipalFilters({ input, initialCode }: { input: MunicipalOverviewInpu
   const router = useRouter();
   const currentYear = new Date().getFullYear();
   const [municipality, setMunicipality] = useState(input?.municipality_tce_code ?? initialCode);
-  const [start, setStart] = useState(input?.start_date ?? `${currentYear}-01-01`);
-  const [end, setEnd] = useState(input?.end_date ?? `${currentYear}-12-31`);
+  const [start, setStart] = useState(input?.start_date ?? `${DEFAULT_MUNICIPAL_YEAR}-01-01`);
+  const [end, setEnd] = useState(input?.end_date ?? `${DEFAULT_MUNICIPAL_YEAR}-12-31`);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const years = Array.from({ length: 5 }, (_, index) => String(currentYear - index));
@@ -70,14 +70,12 @@ function MunicipalFilters({ input, initialCode }: { input: MunicipalOverviewInpu
 
   const selectedYear = start.slice(0, 4) === end.slice(0, 4) && start.endsWith('-01-01') && end.endsWith('-12-31') ? start.slice(0, 4) : '';
   const customPeriod = selectedYear === '';
-  const triggerClass = 'h-11 rounded-md border-border bg-card px-3 shadow-xs';
 
   return <div className="no-print mb-6">
     <div className="flex flex-wrap items-end gap-3">
       <div className="flex w-full flex-col gap-1.5 sm:w-72"><Label htmlFor="overview-municipality">Município comprador</Label><TceMunicipalitySelect value={municipality || undefined} onValueChange={(code) => { const next = code ?? ''; setMunicipality(next); if (next) navigate(next, start, end); else router.replace('/analitico/municipios', { scroll: false }); }} className="h-11 w-full rounded-lg border-input bg-card px-3 shadow-xs" /></div>
       <div className="flex w-full flex-col gap-1.5 sm:w-36"><Label>Exercício</Label><SelectField value={selectedYear} onChange={(year) => { if (!year) { setOpen(true); return; } const nextStart = `${year}-01-01`; const nextEnd = `${year}-12-31`; setStart(nextStart); setEnd(nextEnd); if (municipality) navigate(municipality, nextStart, nextEnd); }} options={[{ value: '', label: 'Personalizado' }, ...years.map((year) => ({ value: year, label: year }))]} label="Selecionar exercício" className="h-11 bg-card" /></div>
-      <Button type="button" variant="outline" className={triggerClass} onClick={() => setOpen(true)}><SlidersHorizontal className="size-4" />Mais filtros{customPeriod && <Badge className="ml-1">1</Badge>}</Button>
-      {customPeriod && <Button type="button" variant="ghost" size="icon" aria-label="Redefinir período" onClick={() => { const nextStart = `${currentYear}-01-01`; const nextEnd = `${currentYear}-12-31`; setStart(nextStart); setEnd(nextEnd); if (municipality) navigate(municipality, nextStart, nextEnd); }}><RotateCcw className="size-4" /></Button>}
+      {customPeriod && <Button type="button" variant="ghost" size="icon" aria-label="Redefinir período" onClick={() => { const nextStart = `${DEFAULT_MUNICIPAL_YEAR}-01-01`; const nextEnd = `${DEFAULT_MUNICIPAL_YEAR}-12-31`; setStart(nextStart); setEnd(nextEnd); if (municipality) navigate(municipality, nextStart, nextEnd); }}><RotateCcw className="size-4" /></Button>}
       <p className="ml-auto hidden text-xs text-muted-foreground xl:block">Período: {civilDate(start)} a {civilDate(end)}</p>
     </div>
     {error && <p role="alert" className="mt-3 text-xs text-destructive">{error}</p>}
@@ -91,7 +89,7 @@ function MunicipalFilters({ input, initialCode }: { input: MunicipalOverviewInpu
         </div>
         <SheetFooter>
           <Button disabled={!municipality || !start || !end} onClick={() => { navigate(municipality, start, end); setOpen(false); }}>Aplicar filtros</Button>
-          <Button variant="outline" onClick={() => { const nextStart = `${currentYear}-01-01`; const nextEnd = `${currentYear}-12-31`; setStart(nextStart); setEnd(nextEnd); }}>Redefinir</Button>
+          <Button variant="outline" onClick={() => { const nextStart = `${DEFAULT_MUNICIPAL_YEAR}-01-01`; const nextEnd = `${DEFAULT_MUNICIPAL_YEAR}-12-31`; setStart(nextStart); setEnd(nextEnd); }}>Redefinir</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -136,8 +134,7 @@ export default function MunicipalityDetail({ id }: { id?: string }) {
   const queryClient = useQueryClient();
   const { clear } = useSession();
   const initialCode = searchParams.get('municipality_tce_code') ?? codeFromLegacyId(id);
-  const currentYear = String(new Date().getFullYear());
-  const candidate = { municipality_tce_code: initialCode, start_date: searchParams.get('start_date') ?? `${currentYear}-01-01`, end_date: searchParams.get('end_date') ?? `${currentYear}-12-31` };
+  const candidate = { municipality_tce_code: initialCode, start_date: searchParams.get('start_date') ?? `${DEFAULT_MUNICIPAL_YEAR}-01-01`, end_date: searchParams.get('end_date') ?? `${DEFAULT_MUNICIPAL_YEAR}-12-31` };
   const parsed = municipalOverviewInputSchema.safeParse(candidate);
   const input = parsed.success ? parsed.data : null;
   const apiParams = input ? toMunicipalOverviewApiParams(input) : null;
