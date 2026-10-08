@@ -28,9 +28,7 @@ export default function Dashboard() {
     <>
       <PageHeader
         eyebrow="Inteligência territorial"
-        title={view?.municipalityName
-          ? `Panorama das compras públicas · ${view.municipalityName}`
-          : 'Panorama das compras públicas'}
+        title="Panorama das compras públicas"
         description="Acompanhe como as compras municipais movimentam a economia do Ceará."
         actions={(
           <Button
@@ -66,7 +64,7 @@ export default function Dashboard() {
       ) : !view || view.empty ? (
         <EmptyState
           title="Nenhum dado publicado para este exercício"
-          description="Escolha outro ano ou município e tente novamente."
+          description="Escolha outro exercício e tente novamente."
         />
       ) : (
         <>
@@ -112,7 +110,7 @@ export default function Dashboard() {
           <Alert className="mt-6 bg-transparent text-muted-foreground">
             <Info className="size-4" />
             <AlertDescription>
-              Fonte: {view.source}. Período consultado: {view.period}. Valores
+              Dados públicos consolidados. Período consultado: {view.period}. Valores
               monetários recebidos em centavos e formatados em reais somente na tela.
             </AlertDescription>
           </Alert>

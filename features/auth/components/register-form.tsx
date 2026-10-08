@@ -1,19 +1,22 @@
 "use client";
 
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { authSchema, AuthFormData } from "../schemas/auth.schema";
+import { authSchema, AuthFormData, completeAuthSchema, CompleteAuthFormData } from "../schemas/auth.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner";
 
-interface RegisterFormProps {
-  onSubmitAction: (data: AuthFormData) => Promise<void>;
-}
+type SubmitResult = { error?: string } | void;
 
-export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
+type RegisterFormProps =
+  | { mode?: "register"; onSubmitAction: (data: AuthFormData) => Promise<SubmitResult> }
+  | { mode: "complete"; onSubmitAction: (data: CompleteAuthFormData) => Promise<SubmitResult> };
+
+export function RegisterForm(props: RegisterFormProps) {
+  const isCompletion = props.mode === "complete";
   const [loading, setLoading] = useState(false);
 
   const {
@@ -21,11 +24,8 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
-    defaultValues: {
-      termos: false as any,
-    },
+  } = useForm<CompleteAuthFormData>({
+    resolver: zodResolver(isCompletion ? completeAuthSchema : authSchema) as Resolver<CompleteAuthFormData>,
   });
 
   const senhaValue = watch("senha") || "";
@@ -36,13 +36,17 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
   const hasNumber = /[0-9]/.test(senhaValue);
   const hasSpecial = /[^A-Za-z0-9]/.test(senhaValue);
 
-  const handleFormSubmit = async (data: AuthFormData) => {
+  const handleFormSubmit = async (data: CompleteAuthFormData) => {
     try {
       setLoading(true);
-      await onSubmitAction(data);
+      const result = await props.onSubmitAction(data);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
       toast.success("Conta criada com sucesso!");
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro ao criar a conta.");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Ocorreu um erro ao criar a conta.");
     } finally {
       setLoading(false);
     }
@@ -77,6 +81,14 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
           <Input type="email" placeholder="seu@email.com" {...register("email")} />
           {errors.email && <span className="text-xs text-red-500 mt-1 block">{errors.email.message}</span>}
         </div>
+
+        {isCompletion && (
+          <div>
+            <label className="text-xs font-medium text-slate-700 block mb-1">Telefone (com DDD)</label>
+            <Input placeholder="+55 (88) 99999-9999" {...register("phone")} />
+            {errors.phone && <span className="text-xs text-red-500 mt-1 block">{errors.phone.message}</span>}
+          </div>
+        )}
 
         <div>
           <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>

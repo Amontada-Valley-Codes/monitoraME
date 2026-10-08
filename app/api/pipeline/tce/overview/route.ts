@@ -7,16 +7,13 @@ import { validateOverviewParams } from '@/features/analytics/pipeline/validation
 export async function GET(request: NextRequest) {
   try {
     const search = request.nextUrl.searchParams;
-    const municipality = search.get('codigo_municipio');
     const params = validateOverviewParams({
       data_inicial: search.get('data_inicial') ?? '',
       data_final: search.get('data_final') ?? '',
-      ...(municipality ? { codigo_municipio: municipality } : {}),
     });
     const data = await getPipelineOverview(
       params.data_inicial,
       params.data_final,
-      params.codigo_municipio,
     );
     const partial = data.competencias_ausentes.length > 0
       || data.falhas_competencias.length > 0;
@@ -41,7 +38,7 @@ export async function GET(request: NextRequest) {
       );
     }
     return NextResponse.json(
-      { error: { code: 'UNKNOWN', message: 'Falha inesperada ao consultar o pipeline.' } },
+      { error: { code: 'UNKNOWN', message: 'Não foi possível carregar os dados solicitados.' } },
       { status: 500 },
     );
   }

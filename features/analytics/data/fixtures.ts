@@ -217,7 +217,7 @@ export const DEFAULT_FILTERS = {
 export const SOURCE_META = {
   updated: '2026-09-10',
   reference: '2026-08-31',
-  source: 'TCE-CE / SIM · Receita Federal · IBGE',
+  source: 'Dados públicos de compras, empresas e territórios',
   isDemo: true,
   policyVersion: 'rn-2026-09',
   coverage: 19,

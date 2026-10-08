@@ -26,7 +26,7 @@ export async function fetchPipelineOverview(
         .map((issue) => `${issue.path.join('.') || 'response'}: ${issue.message}`)
         .join('; ');
       throw new PipelineOverviewError(
-        `O pipeline retornou dados em formato inesperado: ${details}`,
+        `Os dados recebidos não puderam ser processados: ${details}`,
         'INVALID_RESPONSE',
         502,
         { cause: parsed.error },
