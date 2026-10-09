@@ -1,12 +1,11 @@
-import { RegisterView } from "@/components/register-view";
-import { apiService } from "@/features/auth/services/auth.service";
+import { RegisterView, ActionResult } from "@/components/register-view";
+import { ApiError, apiService } from "@/features/auth/services/auth.service";
 import { AuthFormData } from "@/features/auth/schemas/auth.schema";
-import { redirect } from "next/navigation";
-import { ApiError } from "@/services/api";
 
 export default function RegisterPage() {
-  async function handleRegister(data: AuthFormData) {
+  async function handleRegister(data: AuthFormData): Promise<ActionResult> {
     "use server";
+
     try {
       const payload = {
         name: data.name,
@@ -15,19 +14,22 @@ export default function RegisterPage() {
         password: data.senha,
       };
 
-      const response = await apiService.registerPerson(payload);
-      console.log("Conta criada com sucesso:", response);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        console.error(`Erro da API (${error.status}):`, error.message);
-        if (error.status === 409) {
-          throw new Error("E-mail ou CPF já cadastrado.");
-        }
-      }
-      throw error;
-    }
+      await apiService.registerPerson(payload);
 
-    redirect("/login");
+      return { success: true };
+    } catch (error: unknown) {
+      if (error instanceof ApiError || (typeof error === "object" && error !== null && "message" in error)) {
+        return {
+          success: false,
+          error: (error as { message: string }).message,
+        };
+      }
+
+      return {
+        success: false,
+        error: "Ocorreu um erro ao realizar o cadastro. Tente novamente.",
+      };
+    }
   }
 
   return <RegisterView onSubmitAction={handleRegister} />;

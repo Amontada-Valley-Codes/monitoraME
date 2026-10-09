@@ -7,14 +7,17 @@ import { loginSchema, LoginFormData } from "../schemas/login.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ActionResult } from "@/components/register-view";
 
 interface LoginFormProps {
-  onSubmitAction: (data: LoginFormData) => Promise<void>;
+  onSubmitAction: (data: LoginFormData) => Promise<ActionResult>;
 }
 
 export function LoginForm({ onSubmitAction }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -27,9 +30,22 @@ export function LoginForm({ onSubmitAction }: LoginFormProps) {
   const handleFormSubmit = async (data: LoginFormData) => {
     try {
       setLoading(true);
-      await onSubmitAction(data);
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro ao entrar. Tente novamente.");
+      const result = await onSubmitAction(data);
+
+      if (result && !result.success && result.error) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Bem-vindo ao MonitoraME!  ");
+      router.push("/analitico");
+    } catch (error: unknown) {
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? (error as { message: string }).message
+          : "Ocorreu um erro ao entrar. Tente novamente.";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }

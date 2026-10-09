@@ -1,8 +1,10 @@
 import { LoginForm } from "../features/auth/components/login-form";
 import { AuthHeroPanel } from "../features/auth/components/auth-hero-panel";
+import { LoginFormData } from "../features/auth/schemas/login.schema";
+import { ActionResult } from "./register-view";
 
 interface LoginViewProps {
-  onSubmitAction: (data: any) => Promise<void>;
+  onSubmitAction: (data: LoginFormData) => Promise<ActionResult>;
 }
 
 export function LoginView({ onSubmitAction }: LoginViewProps) {
@@ -10,7 +12,7 @@ export function LoginView({ onSubmitAction }: LoginViewProps) {
     <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-6xl mb-6">
         <header className="flex items-center gap-2 font-bold text-blue-600 text-lg">
-          <span className="bg-blue-600 text-white p-1 rounded-md flex items-center justify-center text-xs">🛡️️</span>
+          <span className="bg-blue-600 text-white p-1 rounded-md flex items-center justify-center text-xs">🛡️</span>
           MonitoraME
         </header>
       </div>

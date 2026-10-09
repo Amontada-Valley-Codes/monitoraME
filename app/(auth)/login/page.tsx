@@ -1,13 +1,13 @@
-import { LoginView } from "@/components/login-view"
-import { apiService } from "@/features/auth/services/auth.service";
+import { LoginView } from "@/components/login-view";
+import { ApiError, apiService } from "@/features/auth/services/auth.service";
 import { LoginFormData } from "@/features/auth/schemas/login.schema";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { ApiError } from "@/services/api";
+import { ActionResult } from "@/components/register-view";
 
 export default function LoginPage() {
-  async function handleLogin(data: LoginFormData) {
+  async function handleLogin(data: LoginFormData): Promise<ActionResult> {
     "use server";
+
     try {
       const response = await apiService.login(data);
       const { accessToken, refreshToken } = response;
@@ -36,18 +36,22 @@ export default function LoginPage() {
           sameSite: "lax",
         });
       }
-    } catch (error) {
-      if (error instanceof ApiError) {
-        if (error.status === 401) {
-          throw new Error("E-mail ou palavra-passe incorretos.");
-        }
-        throw new Error(error.message);
-      }
-      throw error;
-    }
 
-    redirect("/analitico");
+      return { success: true };
+    } catch (error: unknown) {
+      if (error instanceof ApiError || (typeof error === "object" && error !== null && "message" in error)) {
+        return {
+          success: false,
+          error: (error as { message: string }).message,
+        };
+      }
+
+      return {
+        success: false,
+        error: "E-mail ou senha incorretos.",
+      };
+    }
   }
 
-  return <LoginView onSubmitAction={handleLogin} />
+  return <LoginView onSubmitAction={handleLogin} />;
 }

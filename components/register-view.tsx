@@ -1,8 +1,14 @@
 import { RegisterForm } from "../features/auth/components/register-form";
 import { AuthHeroPanel } from "../features/auth/components/auth-hero-panel";
+import { AuthFormData } from "../features/auth/schemas/auth.schema";
+
+export type ActionResult = {
+  success: boolean;
+  error?: string;
+};
 
 interface RegisterViewProps {
-  onSubmitAction: (data: any) => Promise<void>;
+  onSubmitAction: (data: AuthFormData) => Promise<ActionResult>;
 }
 
 export function RegisterView({ onSubmitAction }: RegisterViewProps) {

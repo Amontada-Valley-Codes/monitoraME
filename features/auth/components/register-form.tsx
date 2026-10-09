@@ -7,14 +7,17 @@ import { authSchema, AuthFormData } from "../schemas/auth.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ActionResult } from "@/components/register-view";
 
 interface RegisterFormProps {
-  onSubmitAction: (data: AuthFormData) => Promise<void>;
+  onSubmitAction: (data: AuthFormData) => Promise<ActionResult>;
 }
 
 export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); 
 
   const {
     register,
@@ -24,13 +27,12 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
   } = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      termos: false as any,
+      termos: false as unknown as true,
     },
   });
 
   const senhaValue = watch("senha") || "";
 
-  // Avaliação de força da senha para feedback visual
   const hasMinLen = senhaValue.length >= 8;
   const hasUpper = /[A-Z]/.test(senhaValue);
   const hasNumber = /[0-9]/.test(senhaValue);
@@ -39,10 +41,22 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
   const handleFormSubmit = async (data: AuthFormData) => {
     try {
       setLoading(true);
-      await onSubmitAction(data);
+      const result = await onSubmitAction(data);
+
+      if (result && !result.success && result.error) {
+        toast.error(result.error);
+        return;
+      }
+
       toast.success("Conta criada com sucesso!");
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro ao criar a conta.");
+      router.push("/login");
+    } catch (error: unknown) {
+      const message =
+        typeof error === "object" && error !== null && "message" in error
+          ? (error as { message: string }).message
+          : "Ocorreu um erro ao criar a conta.";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -82,7 +96,6 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
           <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>
           <Input type="password" placeholder="Mínimo 8 caracteres, maiúsculas, números e símbolos" {...register("senha")} />
           
-          {/* Indicador visual dinâmico de força da senha */}
           <div className="mt-2 space-y-1 text-xs">
             <p className="text-slate-600 font-medium">Requisitos para senha forte:</p>
             <div className="grid grid-cols-2 gap-1 text-slate-500">
@@ -116,7 +129,7 @@ export function RegisterForm({ onSubmitAction }: RegisterFormProps) {
             Concordo com os <span className="font-semibold underline">Termos de Uso</span>
           </label>
         </div>
-        {errors.termos && <span className="text-xs text-red-500 block">{errors.termos.message as string}</span>}
+        {errors.termos && <span className="text-xs text-red-500 block">{errors.termos.message}</span>}
 
         <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800 mt-2" disabled={loading}>
           {loading ? "A criar conta..." : "Criar Conta →"}
