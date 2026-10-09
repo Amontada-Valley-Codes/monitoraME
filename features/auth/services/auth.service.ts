@@ -1,19 +1,80 @@
 // services/api.service.ts
 
+import { ErrorMapper } from "@/services/error-mapper";
+
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string,
+    public data?: unknown
+  ) {
     super(message);
     this.name = "ApiError";
   }
 }
 
+interface RequestOptions extends Omit<RequestInit, "body"> {
+  token?: string;
+  body?: unknown;
+}
+
+interface ApiErrorResponseBody {
+  message?: string | string[];
+  statusCode?: number;
+  error?: string;
+}
+
+// ==================== INTERFACES DE RESPOSTA TIPADAS ====================
+
+export interface AccessRequestDocument {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  url: string;
+}
+
+export interface AccessRequestResponse {
+  id: string;
+  status: "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+  message: string;
+  documents: Record<string, AccessRequestDocument>;
+}
+
+export interface AdminAccountResponse {
+  id: string;
+  email: string;
+  role: "ADMIN";
+  status: "ACTIVE";
+}
+
+export interface AccessRequestListItem {
+  id: string;
+  status: "pending" | "completed";
+  company: {
+    id: string;
+    legalName: string;
+    cnpj: string;
+  };
+  createdAt: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+// ==================== FETCHER CENTRALIZADO ====================
+
 async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { headers = {}, body, token, ...customConfig } = options;
 
-  // Convert input headers into a unified Headers object
-  const requestHeaders = new Headers(headers);
+  const requestHeaders = new Headers(headers as HeadersInit);
 
   if (!(body instanceof FormData)) {
     requestHeaders.set("Content-Type", "application/json");
@@ -38,7 +99,7 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
     return {} as T;
   }
 
-  let data: any;
+  let data: unknown;
   const contentType = response.headers.get("content-type");
   if (contentType && contentType.includes("application/json")) {
     data = await response.json();
@@ -47,19 +108,21 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   if (!response.ok) {
-    const message = typeof data === "object" && data !== null && "message" in data 
-      ? (data as any).message 
-      : response.statusText;
-    throw new ApiError(response.status, message);
+    let rawMessage: string | string[] = response.statusText;
+
+    if (typeof data === "object" && data !== null && "message" in data) {
+      rawMessage = (data as ApiErrorResponseBody).message || response.statusText;
+    }
+
+    const translatedMessage = ErrorMapper.toPortuguese(rawMessage, response.status);
+
+    throw new ApiError(response.status, translatedMessage, data);
   }
 
   return data as T;
 }
 
-interface RequestOptions extends RequestInit {
-  token?: string;
-  body?: any;
-}
+// ==================== API SERVICE ====================
 
 export const apiService = {
   // ==================== CONTAS ====================
@@ -73,10 +136,19 @@ export const apiService = {
 
   /** GET /accounts/check - Consulta existência e estado pelo e-mail */
   checkAccount: (email: string, token?: string) =>
-    fetcher<{ exists: boolean; account?: { status: string; id?: string; name?: string; email?: string; phone?: string | null } }>(
-      `/accounts/check?email=${encodeURIComponent(email)}`,
-      { method: "GET", token }
-    ),
+    fetcher<{
+      exists: boolean;
+      account?: {
+        status: "ONBOARDING" | "ACTIVE" | "BLOCKED" | "SUSPENDED" | "DISABLED";
+        id?: string;
+        name?: string;
+        email?: string;
+        phone?: string | null;
+      };
+    }>(`/accounts/check?email=${encodeURIComponent(email)}`, {
+      method: "GET",
+      token,
+    }),
 
   /** POST /accounts/complete - Finaliza onboarding ou cria conta direta */
   completeOnboarding: (
@@ -169,7 +241,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/mei */
   createMeiAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/mei", {
+    fetcher<AccessRequestResponse>("/companies/me/access-requests/mei", {
       method: "POST",
       body: formData,
       token,
@@ -177,7 +249,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/me */
   createMeAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/me", {
+    fetcher<AccessRequestResponse>("/companies/me/access-requests/me", {
       method: "POST",
       body: formData,
       token,
@@ -185,7 +257,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/eep */
   createEepAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/eep", {
+    fetcher<AccessRequestResponse>("/companies/me/access-requests/eep", {
       method: "POST",
       body: formData,
       token,
@@ -193,7 +265,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/gov */
   createGovAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/gov", {
+    fetcher<AccessRequestResponse>("/companies/me/access-requests/gov", {
       method: "POST",
       body: formData,
       token,
@@ -203,7 +275,7 @@ export const apiService = {
 
   /** POST /admin/accounts - Cadastra conta admin */
   createAdminAccount: (data: { name: string; cpf: string; email: string; password: string }, token: string) =>
-    fetcher<any>("/admin/accounts", {
+    fetcher<AdminAccountResponse>("/admin/accounts", {
       method: "POST",
       body: data,
       token,
@@ -211,14 +283,17 @@ export const apiService = {
 
   /** GET /admin/access-requests - Lista solicitações de acesso */
   fetchAccessRequests: (status: "pending" | "completed", page = 1, perPage = 20, token: string) =>
-    fetcher<any>(`/admin/access-requests?status=${status}&page=${page}&perPage=${perPage}`, {
-      method: "GET",
-      token,
-    }),
+    fetcher<PaginatedResponse<AccessRequestListItem>>(
+      `/admin/access-requests?status=${status}&page=${page}&perPage=${perPage}`,
+      {
+        method: "GET",
+        token,
+      }
+    ),
 
   /** PATCH /admin/access-requests/{accessRequestId}/approve - Aprova solicitação */
   approveAccessRequest: (accessRequestId: string, reviewComment?: string, token?: string) =>
-    fetcher<any>(`/admin/access-requests/${accessRequestId}/approve`, {
+    fetcher<{ message: string }>(`/admin/access-requests/${accessRequestId}/approve`, {
       method: "PATCH",
       body: reviewComment ? { reviewComment } : undefined,
       token,
