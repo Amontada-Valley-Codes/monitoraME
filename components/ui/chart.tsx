@@ -194,7 +194,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+        "grid min-w-[10rem] items-start gap-2 rounded-lg border border-white/10 bg-chart-tooltip-background px-3 py-2.5 text-xs text-chart-tooltip-foreground shadow-[0_14px_36px_-14px_rgb(0_20_41/70%)] [&_.text-muted-foreground]:text-chart-tooltip-muted",
         className
       )}
     >
@@ -322,7 +322,7 @@ function ChartLegendContent({
                   }}
                 />
               )}
-              {itemConfig?.label}
+              {itemConfig?.label ?? item.value ?? item.dataKey}
             </div>
           )
         })}

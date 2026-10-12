@@ -97,12 +97,12 @@ export default function Dashboard() {
             expenseChart={<OverviewExpenses params={params} />}
           />
 
-          <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
             <OverviewBusinessSizes params={params} />
             <OverviewDestinations params={params} />
           </div>
 
-          <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
             <OverviewEvolution params={params} />
             <OverviewReading params={params} />
           </div>

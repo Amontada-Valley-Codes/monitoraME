@@ -18,6 +18,42 @@ import { Button } from '@/components/ui/button';
 import { compactMoney, money, percent, ratio } from '@/shared/lib/format';
 
 export type Series = { key: string; label: string; color: string };
+export const EXPENSE_COLORS = [
+  'var(--expense-1)',
+  'var(--expense-2)',
+  'var(--expense-3)',
+  'var(--expense-4)',
+  'var(--expense-5)',
+  'var(--expense-6)',
+  'var(--expense-7)',
+] as const;
+const EXPENSE_COLOR_BY_CODE: Record<string, (typeof EXPENSE_COLORS)[number]> = {
+  '30': EXPENSE_COLORS[0],
+  '32': EXPENSE_COLORS[1],
+  '35': EXPENSE_COLORS[2],
+  '39': EXPENSE_COLORS[3],
+  '40': EXPENSE_COLORS[4],
+  '51': EXPENSE_COLORS[5],
+  '52': EXPENSE_COLORS[6],
+};
+const EXPENSE_SHORT_LABEL_BY_CODE: Record<string, string> = {
+  '30': 'Material de consumo',
+  '32': 'Distribuição gratuita',
+  '35': 'Consultoria',
+  '39': 'Serviços de terceiros',
+  '40': 'Serviços de TI',
+  '51': 'Obras e instalações',
+  '52': 'Equipamentos',
+};
+
+export function expenseColor(code: string, fallbackIndex = 0) {
+  return EXPENSE_COLOR_BY_CODE[code.slice(-2)]
+    ?? EXPENSE_COLORS[fallbackIndex % EXPENSE_COLORS.length];
+}
+
+export function expenseShortLabel(code: string, fallback: string) {
+  return EXPENSE_SHORT_LABEL_BY_CODE[code.slice(-2)] ?? fallback;
+}
 const chartMoney = (value: unknown) => typeof value === 'number' ? money(value) : 'Dados não publicados';
 
 export function TrendChart({
@@ -52,19 +88,26 @@ export function TrendChart({
         <ChartTooltip
           showDatePill={false}
           content={({ point }) => (
-            <div className="p-3 text-sm">
-              <p className="mb-2 font-medium">{String(point.label ?? '')}</p>
+            <div className="min-w-60 text-sm">
+              <p className="border-b border-white/10 px-3 py-2.5 font-semibold text-chart-tooltip-foreground">
+                {String(point.label ?? '')}
+              </p>
+              <div className="space-y-2 px-3 py-2.5">
               {series.map((seriesItem) => (
                 <div
                   key={seriesItem.key}
-                  className="flex justify-between gap-6 py-1"
+                  className="flex items-center justify-between gap-6"
                 >
-                  <span>{seriesItem.label}</span>
-                  <span className="font-mono">
+                  <span className="flex items-center gap-2 text-chart-tooltip-muted">
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: seriesItem.color }} />
+                    {seriesItem.label}
+                  </span>
+                  <span className="font-mono font-semibold tabular-nums text-chart-tooltip-foreground">
                     {chartMoney(point[seriesItem.key])}
                   </span>
                 </div>
               ))}
+              </div>
             </div>
           )}
         />
@@ -78,11 +121,13 @@ export function BarsChart({
   series,
   percentage = false,
   fullWidth = true,
+  colorKey,
 }: {
   data: Record<string, unknown>[];
   series: Series[];
   percentage?: boolean;
   fullWidth?: boolean;
+  colorKey?: string;
 }) {
   const margin = fullWidth
     ? { top: 16, right: 20, bottom: 44, left: 58 }
@@ -105,7 +150,8 @@ export function BarsChart({
             key={seriesItem.key}
             dataKey={seriesItem.key}
             fill={seriesItem.color}
-            hoverFill={fullWidth ? 'var(--primary)' : undefined}
+            hoverFill={fullWidth && !colorKey ? 'var(--primary)' : undefined}
+            colorKey={colorKey}
           />
         ))}
         <BarXAxis />
@@ -118,20 +164,25 @@ export function BarsChart({
         <ChartTooltip
           showDatePill={false}
           content={({ point }) => (
-            <div className="min-w-52 p-3 text-sm">
-              <p className="mb-2 font-semibold">
+            <div className="min-w-60 text-sm">
+              <p className="border-b border-white/10 px-3 py-2.5 font-semibold text-chart-tooltip-foreground">
                 {String(point.label ?? point.name)}
               </p>
+              <div className="space-y-2 px-3 py-2.5">
               {series.map((seriesItem) => (
-                <p key={seriesItem.key} className="flex justify-between gap-6">
-                  <span>{seriesItem.label}</span>
-                  <span className="font-mono">
+                <p key={seriesItem.key} className="flex items-center justify-between gap-6">
+                  <span className="flex items-center gap-2 text-chart-tooltip-muted">
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: colorKey && typeof point[colorKey] === 'string' ? String(point[colorKey]) : seriesItem.color }} />
+                    {seriesItem.label}
+                  </span>
+                  <span className="font-mono font-semibold tabular-nums text-chart-tooltip-foreground">
                     {percentage
                       ? percent(Number(point[seriesItem.key]))
                       : money(Number(point[seriesItem.key]))}
                   </span>
                 </p>
               ))}
+              </div>
             </div>
           )}
         />
@@ -175,7 +226,7 @@ export function DonutChart({
           <PieCenter>
             {({ value, label, isHovered }) => (
               <div className="px-3 text-center">
-                <p className="metric text-primary whitespace-nowrap text-[clamp(0.6875rem,12cqw,1.25rem)] leading-none">
+                <p className="metric whitespace-nowrap text-[clamp(1rem,16cqw,1.75rem)] font-semibold leading-none text-primary">
                   {isHovered
                     ? percent(data[hover ?? -1]?.percentage ?? ratio(value, total))
                     : compactMoney(total)}
@@ -220,7 +271,7 @@ export function DonutChart({
               <span className="text-sm whitespace-normal">{item.name}</span>
             </span>
             <span className="pl-2 text-right">
-              <span className="data-value block text-sm">
+              <span className="data-value block text-base font-semibold text-foreground">
                 {percent(item.percentage ?? ratio(item.value, total))}
               </span>
               <span className="text-muted-foreground block text-xs">

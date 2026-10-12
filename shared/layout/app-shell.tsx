@@ -65,7 +65,7 @@ const PLANS_PAGE = {
   icon: CircleDollarSign,
 };
 
-function Navigation() {
+function Navigation({ onSearch }: { onSearch: () => void }) {
   const path = usePathname();
   const { navigate } = useAnalytics();
   const { setOpen, setOpenMobile } = useSidebar();
@@ -82,7 +82,7 @@ function Navigation() {
   }, [setOpen]);
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="h-(--header-height) justify-center border-b px-5">
         <Button
           variant="ghost"
@@ -95,8 +95,26 @@ function Navigation() {
         </Button>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        <SidebarGroup className="pt-5">
+      <SidebarContent className="px-2.5">
+        <SidebarGroup className="pb-2 pt-4">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Buscar no MonitoraME"
+                onClick={onSearch}
+                className="min-h-10 gap-3 border border-sidebar-border bg-background/70 text-muted-foreground shadow-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <Search className="size-4" />
+                <span>Buscar</span>
+                <span className="ml-auto rounded border border-sidebar-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                  Ctrl K
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup className="pt-2">
           <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
             Poder Público
           </SidebarGroupLabel>
@@ -119,7 +137,7 @@ function Navigation() {
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="min-h-11 gap-3 text-sm data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:font-medium"
+                  className="min-h-10 gap-3 rounded-md text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs"
                 >
                   <item.icon className="size-4" />
                   <span>{item.label}</span>
@@ -174,35 +192,26 @@ function ShellContent({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <Navigation />
+      <Navigation onSearch={() => setSearch(true)} />
       <SidebarInset className="min-w-0 bg-background">
-        <header className="h-(--header-height) border-b bg-card px-4 sm:px-8 flex items-center gap-3 sticky top-0 z-20">
+        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/95 px-4 backdrop-blur sm:px-8">
           <SidebarTrigger
             aria-label="Abrir ou recolher navegação"
             className="size-10 text-muted-foreground"
           />
           <Separator orientation="vertical" className="h-5!" />
           <div className="flex items-center gap-2 text-sm min-w-0">
-            <span className="text-muted-foreground hidden sm:block">Poder Público</span>
+            <span className="text-muted-foreground hidden sm:block">Análises públicas</span>
             <ChevronRight className="text-muted-foreground size-3 hidden sm:block" />
             <span className="font-medium truncate">{current.label}</span>
           </div>
 
           <div className="flex items-center ml-auto gap-3">
             <Button
-              variant="outline"
-              className="text-muted-foreground bg-background gap-3 hidden lg:flex min-w-64 justify-start"
-              onClick={() => setSearch(true)}
-            >
-              <Search className="size-4" />
-              <span className="font-normal">Buscar no MonitoraME</span>
-              <span className="ml-auto text-xs font-mono border rounded px-1.5 py-0.5">⌘ K</span>
-            </Button>
-            <Button
               variant="ghost"
               size="icon"
               aria-label="Buscar no MonitoraME"
-              className="lg:hidden"
+              className="md:hidden"
               onClick={() => setSearch(true)}
             >
               <Search className="size-4" />

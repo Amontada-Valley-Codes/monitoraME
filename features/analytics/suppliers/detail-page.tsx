@@ -222,7 +222,7 @@ function ExpenseElementsPie({ elements }: { elements: SupplierExpenseElement[] }
       >
         <PieCenter>
           {({ value, label, isHovered }) => <div className="px-4 text-center">
-            <p className="metric whitespace-nowrap text-[clamp(1rem,8cqw,0.875rem)] leading-none text-primary">{isHovered ? compactMoney(value) : '7 elementos'}</p>
+            <p className="metric whitespace-nowrap text-[clamp(1rem,16cqw,1.75rem)] font-semibold leading-none text-primary">{isHovered ? compactMoney(value) : '7 elementos'}</p>
             <p className="mt-1 line-clamp-2 text-[0.6875rem] leading-tight text-muted-foreground">{isHovered ? label : 'valor considerado'}</p>
           </div>}
         </PieCenter>
