@@ -9,13 +9,13 @@ import {
   Braces,
   Building2,
   ChartNoAxesCombined,
-  CheckCircle2,
   ChevronDown,
   CircleDollarSign,
   FileSearch,
   Landmark,
   MapPin,
   MessageCircle,
+  ShieldCheck,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -125,30 +125,6 @@ const processSteps = [
   },
 ];
 
-const testimonials = [
-  {
-    quote:
-      'Com o MonitoraME descobrimos que menos de 14% das compras da nossa região beneficiavam pequenas empresas locais. Com os relatórios, reajustamos nossos editais para cumprir a LC 123.',
-    initials: 'MC',
-    name: 'Marcos Carneiro',
-    role: 'Controlador Municipal · Sobral/CE',
-  },
-  {
-    quote:
-      'Receber as notificações de dispensas e licitações do município permitiu à minha marcenaria vencer três cotações públicas neste semestre. Um divisor de águas.',
-    initials: 'AL',
-    name: 'Ana Lúcia Vasconcelos',
-    role: 'Empreendedora MEI · Quixadá/CE',
-  },
-  {
-    quote:
-      'A facilidade para consultar a retenção e a evasão orienta os municípios cearenses a criar processos mais transparentes e compatíveis com a realidade local.',
-    initials: 'RF',
-    name: 'Prof. Roberto Farias',
-    role: 'Pesquisador em Políticas Públicas',
-  },
-];
-
 export function LandingPage() {
   const protectedNavigate = useProtectedNavigate();
   const [municipality, setMunicipality] = useState('');
@@ -189,7 +165,6 @@ export function LandingPage() {
             <Link className="transition-colors hover:text-foreground" href="#sobre">Sobre</Link>
             <Link className="transition-colors hover:text-foreground" href="#modulos">Módulos</Link>
             <Link className="transition-colors hover:text-foreground" href="#metodologia">Metodologia</Link>
-            <Link className="transition-colors hover:text-foreground" href="#casos">Casos</Link>
             <Link className="transition-colors hover:text-foreground" href="#contato">Contato</Link>
             <Link className="flex items-center gap-1 transition-colors hover:text-foreground" href="#fontes">
               Dados abertos <ChevronDown className="size-3" />
@@ -197,7 +172,7 @@ export function LandingPage() {
           </nav>
 
           <Button asChild className="rounded-full bg-foreground px-5 text-xs text-background hover:bg-foreground/85">
-            <Link href="/analitico">Acessar painel</Link>
+            <Link href="/analitico">Acessar compras públicas</Link>
           </Button>
         </div>
       </header>
@@ -230,10 +205,10 @@ export function LandingPage() {
               </div>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
-                  <Link href="/analitico">Explore municípios</Link>
+                  <Link href="/analitico">Consultar compras por município</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full bg-card px-6">
-                  <Link href="/analitico/metodologia">Ver metodologia</Link>
+                  <Link href="/analitico/metodologia">Entender como analisamos os dados</Link>
                 </Button>
               </div>
             </div>
@@ -280,7 +255,7 @@ export function LandingPage() {
                     </p>
                   )}
                   <Button type="submit" className="mt-4 h-13 w-full rounded-xl bg-brand text-sm text-white hover:bg-brand/85">
-                    Consultar <ArrowRight className="size-4" />
+                    Ver dados deste município <ArrowRight className="size-4" />
                   </Button>
                 </form>
                 <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-[10px] text-primary-foreground/55">
@@ -292,7 +267,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="fontes" className="border-b bg-secondary/25">
+        <section id="fontes" className="border-b border-primary/10 bg-secondary/55">
           <div className="mx-auto max-w-5xl px-5 py-9 text-center sm:px-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
               Fontes integradas, harmonizadas e auditadas em tempo real
@@ -337,8 +312,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl border-t px-5 py-20 sm:px-8 lg:py-28">
-          <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
+        <section className="border-y border-primary/10 bg-secondary/30">
+          <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20 lg:py-28">
             <div className="lg:sticky lg:top-28 lg:self-start">
               <p className="eyebrow text-primary">Inteligência aplicada</p>
               <h2 className="mt-4 max-w-sm text-3xl font-bold leading-[1.05] sm:text-4xl">
@@ -348,13 +323,13 @@ export function LandingPage() {
                 Integramos fontes públicas e transformamos registros dispersos em análises que apoiam a competitividade dos pequenos negócios e o uso estratégico do orçamento municipal.
               </p>
               <Button asChild variant="outline" className="mt-7 rounded-full bg-card px-5">
-                <Link href="#modulos">Conhecer todos os módulos</Link>
+                <Link href="#modulos">Ver módulos de análise</Link>
               </Button>
             </div>
 
             <div id="modulos" className="grid scroll-mt-28 gap-4 sm:grid-cols-2">
               {modules.map(({ title, description, icon: Icon, featured }) => (
-                <Card key={title} className={`min-h-70 justify-between shadow-none transition-transform duration-300 hover:-translate-y-1 ${featured ? 'border-primary bg-brand text-white' : 'bg-card'}`}>
+                <Card key={title} className={`min-h-70 justify-between shadow-none transition-transform duration-300 hover:-translate-y-1 ${featured ? 'border-primary bg-brand text-white' : 'border-primary/10 bg-card'}`}>
                   <CardHeader>
                     <div className={`mb-5 flex size-10 items-center justify-center rounded-xl ${featured ? 'bg-white/15 text-white' : 'bg-secondary text-primary'}`}>
                       <Icon className="size-5" />
@@ -365,9 +340,12 @@ export function LandingPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <span className={`inline-flex items-center gap-2 text-xs font-medium ${featured ? 'text-white' : 'text-foreground'}`}>
-                      Saiba mais <ArrowRight className="size-3.5" />
-                    </span>
+                    <Link
+                      href="/analitico"
+                      className={`inline-flex items-center gap-2 text-xs font-medium transition-opacity hover:opacity-70 ${featured ? 'text-white' : 'text-foreground'}`}
+                    >
+                      Ver análises no painel público <ArrowRight className="size-3.5" />
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -375,7 +353,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="metodologia" className="border-y bg-card">
+        <section id="metodologia" className="bg-card">
           <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
             <div className="mx-auto max-w-2xl text-center">
               <p className="eyebrow text-primary">Do dado à decisão</p>
@@ -399,38 +377,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section id="casos" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
-          <div className="flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <p className="eyebrow text-primary">Impacto real</p>
-              <h2 className="mt-4 text-3xl font-bold sm:text-4xl">O que dizem os parceiros e usuários</h2>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CheckCircle2 className="size-4 text-primary" /> Resultados em todo o Ceará
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className="h-full gap-5 bg-card shadow-none">
-                <CardContent className="flex h-full flex-col pt-1">
-                  <p className="flex-1 text-sm italic leading-6 text-muted-foreground">“{testimonial.quote}”</p>
-                  <div className="mt-7 flex items-center gap-3 border-t pt-5">
-                    <span className="flex size-9 items-center justify-center rounded-full bg-secondary font-mono text-[10px] font-semibold text-primary">
-                      {testimonial.initials}
-                    </span>
-                    <span>
-                      <strong className="block text-xs">{testimonial.name}</strong>
-                      <span className="text-[10px] text-muted-foreground">{testimonial.role}</span>
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section id="contato" className="scroll-mt-20 border-y bg-card">
+        <section id="contato" className="scroll-mt-20 border-y border-primary/10 bg-secondary/35">
           <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20 lg:py-24">
             <div>
               <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary">
@@ -450,13 +397,13 @@ export function LandingPage() {
                   rel="noreferrer"
                 >
                   <MessageCircle className="size-4" />
-                  Falar pelo WhatsApp
+                  Conversar com a equipe no WhatsApp
                 </a>
               </Button>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <Card className="h-full bg-background shadow-none">
+              <Card className="h-full border-primary/10 bg-card shadow-none">
                 <CardHeader>
                   <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
                     <Building2 className="size-5" />
@@ -468,7 +415,7 @@ export function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className="h-full bg-background shadow-none">
+              <Card className="h-full border-primary/10 bg-card shadow-none">
                 <CardHeader>
                   <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
                     <Landmark className="size-5" />
@@ -494,28 +441,84 @@ export function LandingPage() {
             </div>
             <div className="relative mt-7 flex flex-wrap gap-3 lg:mt-0 lg:shrink-0">
               <Button asChild className="rounded-full bg-brand px-6 text-white hover:bg-brand/85">
-                <Link href="/analitico">Acessar área pública</Link>
+                <Link href="/analitico">Consultar compras públicas</Link>
               </Button>
               <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white">
-                <Link href="/register">Sou MPE ou gestor <ArrowRight className="size-4" /></Link>
+                <Link href="/register">Criar conta para MPE ou gestor <ArrowRight className="size-4" /></Link>
               </Button>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t bg-card">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-8 text-[10px] text-muted-foreground sm:px-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-4">
-            <Logo className="h-4 w-auto text-foreground" />
-            <span>© 2026 MonitoraME. Dados abertos nos termos da LAI.</span>
+      <footer className="bg-[#0b1f3a] text-white">
+        <div className="mx-auto max-w-7xl px-5 pb-8 pt-14 sm:px-8 lg:pt-16">
+          <div className="grid gap-10 border-b border-white/10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.45fr_0.8fr_0.8fr_1fr] lg:gap-12">
+            <div className="max-w-sm">
+              <Link href="/" aria-label="MonitoraME — página inicial" className="inline-block text-white">
+                <Logo className="h-6 w-auto" />
+              </Link>
+              <p className="mt-5 text-sm leading-6 text-white/65">
+                Inteligência de dados para tornar as compras públicas mais transparentes, estratégicas e acessíveis no Ceará.
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70">
+                <ShieldCheck className="size-3.5 text-[#8fb4ff]" />
+                Dados públicos tratados com responsabilidade
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Institucional</h2>
+              <nav aria-label="Links institucionais" className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
+                <Link href="#sobre" className="transition-colors hover:text-white">Sobre a MonitoraME</Link>
+                <Link href="#metodologia" className="transition-colors hover:text-white">Metodologia</Link>
+                <Link href="#fontes" className="transition-colors hover:text-white">Fontes de dados</Link>
+                <Link href="#contato" className="transition-colors hover:text-white">Fale conosco</Link>
+              </nav>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Plataforma</h2>
+              <nav aria-label="Links da plataforma" className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
+                <Link href="/analitico" className="transition-colors hover:text-white">Consultar compras públicas</Link>
+                <Link href="/analitico/municipios" className="transition-colors hover:text-white">Consultar por município</Link>
+                <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Como os dados são tratados</Link>
+                <Link href="/register" className="transition-colors hover:text-white">Criar conta na plataforma</Link>
+              </nav>
+            </div>
+
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Fontes de dados</h2>
+              <div className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
+                <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
+                  TCE Ceará
+                </a>
+                <a href="https://pncp.gov.br/app/" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
+                  PNCP
+                </a>
+                <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
+                  Receita Federal
+                </a>
+                <p className="border-t border-white/10 pt-3 leading-5">Dados abertos tratados nos termos da Lei de Acesso à Informação.</p>
+                <a
+                  href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME."
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 font-medium text-white transition-colors hover:text-[#8fb4ff]"
+                >
+                  <MessageCircle className="size-3.5" /> Conversar pelo WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/analitico/metodologia" className="hover:text-foreground">Termos de uso</Link>
-            <Link href="/analitico/metodologia" className="hover:text-foreground">Privacidade & LGPD</Link>
-            <Link href="#contato" className="hover:text-foreground">Contato</Link>
-            <Link href="/analitico" className="hover:text-foreground">API aberta</Link>
-            <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="hover:text-foreground">Portal de dados públicos</a>
+
+          <div className="flex flex-col gap-4 pt-7 text-[10px] text-white/45 sm:flex-row sm:items-center sm:justify-between">
+            <span>© 2026 MonitoraME. Todos os direitos reservados.</span>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Termos de uso</Link>
+              <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Privacidade e LGPD</Link>
+              <span>Ceará, Brasil</span>
+            </div>
           </div>
         </div>
       </footer>
