@@ -40,6 +40,14 @@ const ORIGIN_LABELS: Record<string, string> = {
 export const companySizeLabel = (value: string) => SIZE_LABELS[value] ?? value;
 export const supplierOriginLabel = (value: string) => ORIGIN_LABELS[value] ?? value;
 
+const CANCELLATION_MODALITY_LABELS: Record<string, string> = {
+  P: 'Parcial',
+  T: 'Total',
+};
+
+export const cancellationModalityLabel = (value: string) =>
+  CANCELLATION_MODALITY_LABELS[value] ?? nullableLabel(value);
+
 export function cancellationSummary(items: unknown[]): {
   count: number;
   label: string;

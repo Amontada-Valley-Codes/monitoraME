@@ -3,10 +3,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { money } from '../../../shared/lib/format';
 import { commitmentsHttp, fetchCommitmentDetail, fetchCommitments } from './api';
-import { cancellationSummary, nullableLabel } from './detail-format';
+import { cancellationModalityLabel, cancellationSummary, nullableLabel } from './detail-format';
 import { getCommitmentErrorContent, getCommitmentViewState } from './error-state';
 import { buildCommitmentApiPath, buildCommitmentDetailHref, safeCommitmentListPath, safeDecodeCommitmentKey, supplierHref } from './navigation';
-import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, patchCommitmentFilters } from './query';
+import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from './query';
 import { createSingleFlight } from './single-flight';
 
 const mock = new MockAdapter(commitmentsHttp);
@@ -33,6 +33,14 @@ describe('consulta de empenhos', () => {
     expect(patchCommitmentFilters(current, { search: '10100004' }).page).toBe(1);
     expect(nextCommitmentSort('net_value', 'desc', 'net_value')).toEqual({ sort_by: 'net_value', sort_order: 'asc' });
     expect(nextCommitmentSort('net_value', 'asc', 'date')).toEqual({ sort_by: 'date', sort_order: 'desc' });
+  });
+
+  it('normaliza códigos completos de elemento de despesa para o enum da API', () => {
+    expect(normalizeExpenseElementCode('339040')).toBe('40');
+    expect(normalizeExpenseElementCode('40')).toBe('40');
+    expect(normalizeExpenseElementCode('999999')).toBeNull();
+    expect(parseCommitmentFilters(new URLSearchParams('expense_element_codes=339040&expense_element_codes=40')).expense_element_codes).toEqual(['40']);
+    expect(serializeCommitmentFilters({ ...DEFAULT_COMMITMENT_FILTERS, expense_element_codes: ['339040'] }).getAll('expense_element_codes')).toEqual(['40']);
   });
 
   it('codifica a chave e restaura integralmente a URL de origem', () => {
@@ -77,6 +85,12 @@ describe('consulta de empenhos', () => {
     expect(nullableLabel(undefined)).toBe('—');
     expect(cancellationSummary([]).label).toBe('Sem anulações');
     expect(cancellationSummary([{ qualquer: 'formato' }, 'texto', null]).count).toBe(3);
+  });
+
+  it('traduz a modalidade de anulação retornada pela API', () => {
+    expect(cancellationModalityLabel('P')).toBe('Parcial');
+    expect(cancellationModalityLabel('T')).toBe('Total');
+    expect(cancellationModalityLabel('X')).toBe('X');
   });
 
   it('deriva CNPJ pelo documento e ignora tipo_documento numérico', () => {

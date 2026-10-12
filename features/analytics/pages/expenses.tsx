@@ -16,7 +16,7 @@ import { EmptyState, LoadingState } from '@/shared/components/states';
 import { SelectField } from '@/shared/components/select-field';
 import { number } from '@/shared/lib/format';
 import { fetchCommitments } from '../commitments/api';
-import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from '../commitments/query';
+import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from '../commitments/query';
 import type { CommitmentListFilters, CommitmentListResponse, CommitmentSortField } from '../commitments/types';
 import { buildCommitmentDetailHref } from '../commitments/navigation';
 import { CommitmentTable } from '../commitments/table';
@@ -139,15 +139,15 @@ export default function Expenses() {
       <div className="space-y-7 p-6">
         <FilterChecks title="Porte empresarial" options={COMPANY_SIZES} selected={draft.company_sizes} onChange={(company_sizes) => setDraft({ ...draft, company_sizes })} />
         <FilterChecks title="Origem do fornecedor" options={SUPPLIER_ORIGINS} selected={draft.supplier_origins} onChange={(supplier_origins) => setDraft({ ...draft, supplier_origins })} />
-        <FilterChecks title="Elemento de despesa" options={CATEGORIES.map((item) => [item.id, `${item.id} · ${item.name}`] as const)} selected={draft.expense_element_codes} onChange={(expense_element_codes) => setDraft({ ...draft, expense_element_codes })} />
+        <FilterChecks title="Elemento de despesa" options={CATEGORIES.map((item) => { const code = normalizeExpenseElementCode(item.id) ?? item.id; return [code, `${code} · ${item.name}`] as const; })} selected={draft.expense_element_codes} onChange={(expense_element_codes) => setDraft({ ...draft, expense_element_codes })} />
       </div>
       <SheetFooter><Button onClick={() => { updateFilters({ company_sizes: draft.company_sizes, supplier_origins: draft.supplier_origins, expense_element_codes: draft.expense_element_codes }); setFilterPanelOpen(false); }}>Aplicar filtros</Button><Button variant="outline" onClick={() => setDraft({ ...draft, company_sizes: [], supplier_origins: [], expense_element_codes: [] })}>Limpar seleção</Button></SheetFooter>
     </SheetContent></Sheet>
 
     {viewState === 'loading' ? <LoadingState /> : viewState === 'error' && error ? <CommitmentError error={error} onRetry={() => setVersion((value) => value + 1)} /> : viewState === 'empty' ?
       <EmptyState title="Nenhum empenho encontrado" description="Ajuste o período ou os filtros para consultar outros registros." onReset={() => replaceFilters(DEFAULT_COMMITMENT_FILTERS)} /> :
-      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos"><CommitmentTable items={data.items} sortBy={filters.sort_by} sortOrder={filters.sort_order} onSort={changeSort} onOpen={openDetail} />
-      <div className="flex flex-col items-center justify-between gap-3 border-t px-4 py-3 sm:flex-row"><p className="text-sm text-muted-foreground" aria-live="polite">{number(firstItem)}–{number(lastItem)} de {number(data.pagination.total_items)}</p><div className="flex items-center gap-2"><span className="text-sm text-muted-foreground">Página {number(data.pagination.page)} de {number(Math.max(1, data.pagination.total_pages))}</span><Button variant="outline" size="icon" aria-label="Página anterior" disabled={!data.pagination.has_previous} onClick={() => updateFilters({ page: filters.page - 1 }, false)}><ChevronLeft /></Button><Button variant="outline" size="icon" aria-label="Próxima página" disabled={!data.pagination.has_next} onClick={() => updateFilters({ page: filters.page + 1 }, false)}><ChevronRight /></Button></div></div>
+      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos"><div className="flex flex-wrap items-center justify-between gap-3 border-b bg-card px-5 py-4"><div><h2 className="font-semibold text-foreground">Empenhos encontrados</h2><p className="mt-0.5 text-sm text-muted-foreground">{number(data.pagination.total_items)} registros no recorte selecionado</p></div><p className="text-xs text-muted-foreground">Selecione uma linha para consultar os detalhes</p></div><CommitmentTable items={data.items} sortBy={filters.sort_by} sortOrder={filters.sort_order} onSort={changeSort} onOpen={openDetail} />
+      <div className="flex flex-col items-center justify-between gap-3 border-t bg-muted/20 px-5 py-3 sm:flex-row"><p className="text-sm text-muted-foreground" aria-live="polite">Exibindo {number(firstItem)}–{number(lastItem)} de {number(data.pagination.total_items)}</p><div className="flex items-center gap-2"><span className="mr-1 text-sm text-muted-foreground">Página {number(data.pagination.page)} de {number(Math.max(1, data.pagination.total_pages))}</span><Button variant="outline" size="icon" aria-label="Página anterior" disabled={!data.pagination.has_previous} onClick={() => updateFilters({ page: filters.page - 1 }, false)}><ChevronLeft /></Button><Button variant="outline" size="icon" aria-label="Próxima página" disabled={!data.pagination.has_next} onClick={() => updateFilters({ page: filters.page + 1 }, false)}><ChevronRight /></Button></div></div>
       </section>}
   </>;
 }

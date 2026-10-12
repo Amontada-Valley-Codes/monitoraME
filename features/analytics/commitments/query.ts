@@ -19,6 +19,17 @@ export const DEFAULT_COMMITMENT_FILTERS: CommitmentListFilters = {
 };
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const EXPENSE_ELEMENT_CODES = new Set(['30', '32', '35', '39', '40', '51', '52']);
+
+export function normalizeExpenseElementCode(value: string): string | null {
+  const code = value.trim();
+  if (EXPENSE_ELEMENT_CODES.has(code)) return code;
+  if (/^\d{6}$/.test(code)) {
+    const element = code.slice(-2);
+    return EXPENSE_ELEMENT_CODES.has(element) ? element : null;
+  }
+  return null;
+}
 
 export function parseCommitmentFilters(params: URLSearchParams): CommitmentListFilters {
   const page = Number(params.get('page'));
@@ -41,7 +52,9 @@ export function parseCommitmentFilters(params: URLSearchParams): CommitmentListF
     ...(municipality ? { municipality_tce_code: municipality } : {}),
     company_sizes: params.getAll('company_sizes').filter(Boolean),
     supplier_origins: params.getAll('supplier_origins').filter(Boolean),
-    expense_element_codes: params.getAll('expense_element_codes').filter(Boolean),
+    expense_element_codes: [...new Set(params.getAll('expense_element_codes')
+      .map(normalizeExpenseElementCode)
+      .filter((value): value is string => value !== null))],
     ...(search ? { search: search.slice(0, 200) } : {}),
     page: Number.isInteger(page) && page > 0 ? page : 1,
     page_size: pageSize === 20 || pageSize === 100 ? pageSize : 50,
@@ -74,7 +87,8 @@ export function serializeCommitmentFilters(filters: CommitmentListFilters): URLS
   for (const value of filters.company_sizes) params.append('company_sizes', value);
   for (const value of filters.supplier_origins) params.append('supplier_origins', value);
   for (const value of filters.expense_element_codes) {
-    params.append('expense_element_codes', value);
+    const code = normalizeExpenseElementCode(value);
+    if (code) params.append('expense_element_codes', code);
   }
   if (filters.search) params.set('search', filters.search);
   params.set('page', String(filters.page));
