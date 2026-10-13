@@ -207,6 +207,26 @@
 }
 
 @layer components {
+  .analytics-shell-scale {
+    width: 111.111111%;
+    min-height: 111.111111svh;
+    overflow-x: clip;
+    zoom: 0.9;
+  }
+
+  .analytics-shell-scale [data-slot="sidebar-inset"] {
+    min-height: 111.111111svh;
+  }
+
+  .analytics-page-content {
+    min-height: calc(111.111111svh - var(--header-height));
+  }
+
+  .analytics-shell-scale [data-global-loading] {
+    width: 111.111111vw;
+    height: 111.111111vh;
+  }
+
   .page-content {
     width: 100%;
     max-width: var(--content-max);

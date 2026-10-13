@@ -7,8 +7,8 @@ import { ArrowLeft, ArrowUpRight, CircleAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { money } from '@/shared/lib/format';
+import { LoadingState } from '@/shared/components/states';
 import { AnalyticsApiError, fetchCommitmentDetail } from './api';
 import { cancellationModalityLabel, companySizeLabel, formatCivilDate, formatCompetence, formatTimestamp, nullableLabel, supplierOriginLabel } from './detail-format';
 import { getCommitmentErrorContent } from './error-state';
@@ -44,7 +44,7 @@ export function CommitmentDetailView({ commitmentKey, from }: { commitmentKey: s
 }
 
 function DetailSkeleton() {
-  return <div aria-busy="true" aria-label="Carregando empenho" className="space-y-5"><Skeleton className="h-28 rounded-lg" /><div className="grid gap-4 md:grid-cols-3">{[1, 2, 3].map((item) => <Skeleton key={item} className="h-32 rounded-lg" />)}</div><Skeleton className="h-72 rounded-lg" /></div>;
+  return <LoadingState label="Carregando empenho" />;
 }
 
 function DetailError({ error, from, onRetry }: { error: AnalyticsApiError; from: string; onRetry: () => void }) {
