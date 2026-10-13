@@ -160,8 +160,17 @@ export function GlobalFilters() {
   const isInvalidDateRange = dateStart > dateEnd;
 
   return (
-    <div className="no-print mb-6">
-      <div className="flex flex-wrap items-center gap-3">
+    <section className="no-print panel mb-6 overflow-visible">
+      <div className="flex items-center justify-between gap-4 border-b px-4 py-3 sm:px-5">
+        <div>
+          <h2 className="text-sm font-semibold">Filtros da análise</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">Defina município, período e recortes dos indicadores.</p>
+        </div>
+        <p className="hidden text-xs text-muted-foreground xl:block">
+          Referência cadastral: ago/2026
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 p-4 sm:px-5">
         <MunicipalityPicker
           value={filters.municipality}
           onChange={(municipality) => setFilters({ municipality })}
@@ -277,13 +286,10 @@ export function GlobalFilters() {
           </Button>
         )}
 
-        <p className="ml-auto hidden text-xs text-muted-foreground xl:block">
-          Referência cadastral: ago/2026
-        </p>
       </div>
 
       {filters.origin !== 'all' && (
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
           Indicadores geográficos ocultos enquanto há recorte de origem, para
           evitar percentuais de 100%.
         </p>
@@ -387,6 +393,6 @@ export function GlobalFilters() {
           </SheetFooter>
         </SheetContent>
       </Sheet>
-    </div>
+    </section>
   );
 }

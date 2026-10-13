@@ -125,7 +125,16 @@ export interface CommitmentDetail {
     numero_empenho_substituto: string | null;
     numero_nota_anulacao_informado: string | null;
   };
-  anulacoes: unknown[];
+  anulacoes: CommitmentCancellation[];
   publicacao: { run_id: number; status: string; publicado_em: string };
+}
+
+export interface CommitmentCancellation {
+  chave_anulacao: string;
+  numero_anulacao: string;
+  data_anulacao: string;
+  modalidade_anulacao: string;
+  descricao_anulacao: string;
+  valor_anulacao_centavos: number;
 }
 

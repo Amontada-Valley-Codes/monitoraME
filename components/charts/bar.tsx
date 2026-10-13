@@ -60,6 +60,8 @@ export interface BarProps {
   fill?: string;
   /** Fill color while this bar is hovered. Defaults to the regular fill. */
   hoverFill?: string;
+  /** Optional data key containing the fill color for each category. */
+  colorKey?: string;
   /** Color for tooltip dot. Use when fill is a gradient/pattern. Default: uses fill value */
   stroke?: string;
   /** Line cap style for bar ends: "round", "butt", or a number for custom radius. Default: "round" */
@@ -183,6 +185,7 @@ const BarInner = memo(function BarInner({
   yAxisId,
   fill = chartCssVars.linePrimary,
   hoverFill,
+  colorKey,
   lineCap = "round",
   animate = true,
   animationType = "grow",
@@ -387,7 +390,9 @@ const BarInner = memo(function BarInner({
 
         const isFaded =
           (hoveredBarIndex !== null && hoveredBarIndex !== i) || isLegendDimmed;
-        const barFill = hoveredBarIndex === i && hoverFill ? hoverFill : fill;
+        const datumColor = colorKey ? d[colorKey] : undefined;
+        const datumFill = typeof datumColor === "string" ? datumColor : fill;
+        const barFill = hoveredBarIndex === i && hoverFill ? hoverFill : datumFill;
 
         // Use categoryValue as key since it's the unique identifier from data
         const barKey = `bar-${dataKey}-${categoryValue}`;
