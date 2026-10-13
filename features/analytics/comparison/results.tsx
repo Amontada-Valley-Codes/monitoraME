@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/chart';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { compactMoney, money, number, percent, points } from '@/shared/lib/format';
-import { BarsChart, type Series } from '../components/charts';
+import { BarsChart, expenseShortLabel, type Series } from '../components/charts';
 import {
   companySizeLabel,
   formatCompetence,
@@ -67,7 +67,7 @@ export function ComparisonResults({ data }: { data: ComparisonResponse }) {
 
   const expenseData = data.sections.elementos_despesa.map((item) => ({
     name: item.codigo,
-    label: item.nome,
+    label: expenseShortLabel(item.codigo, item.nome),
     left: item.left.value ?? undefined,
     right: item.right.value ?? undefined,
   }));
@@ -254,7 +254,7 @@ function SidePie({
               <PieCenter>
                 {({ value, label: activeLabel, isHovered }) => (
                   <div className="px-3 text-center">
-                    <p className="metric whitespace-nowrap text-[clamp(0.6875rem,12cqw,1.25rem)] leading-none text-primary">
+                    <p className="metric whitespace-nowrap text-[clamp(1rem,16cqw,1.75rem)] font-semibold leading-none text-primary">
                       {percent(value)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">

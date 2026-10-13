@@ -76,27 +76,27 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --color-chart-scale-pattern-color: var(----chart-scale-pattern-color);
-  --color-chart-scale-05: var(----chart-scale-05);
-  --color-chart-scale-04: var(----chart-scale-04);
-  --color-chart-scale-03: var(----chart-scale-03);
-  --color-chart-scale-02: var(----chart-scale-02);
-  --color-chart-scale-01: var(----chart-scale-01);
-  --color-chart-label: var(----chart-label);
-  --color-chart-marker-foreground: var(----chart-marker-foreground);
-  --color-chart-marker-border: var(----chart-marker-border);
-  --color-chart-marker-background: var(----chart-marker-background);
-  --color-chart-tooltip-muted: var(----chart-tooltip-muted);
-  --color-chart-tooltip-foreground: var(----chart-tooltip-foreground);
-  --color-chart-tooltip-background: var(----chart-tooltip-background);
-  --chart-brush-border: var(----chart-brush-border);
-  --color-chart-grid: var(----chart-grid);
-  --color-chart-crosshair: var(----chart-crosshair);
-  --chart-line-secondary: var(----chart-line-secondary);
-  --chart-line-primary: var(----chart-line-primary);
-  --color-chart-foreground-muted: var(----chart-foreground-muted);
-  --color-chart-foreground: var(----chart-foreground);
-  --color-chart-background: var(----chart-background);
+  --color-chart-scale-pattern-color: var(--chart-scale-pattern-color);
+  --color-chart-scale-05: var(--chart-scale-05);
+  --color-chart-scale-04: var(--chart-scale-04);
+  --color-chart-scale-03: var(--chart-scale-03);
+  --color-chart-scale-02: var(--chart-scale-02);
+  --color-chart-scale-01: var(--chart-scale-01);
+  --color-chart-label: var(--chart-label);
+  --color-chart-marker-foreground: var(--chart-marker-foreground);
+  --color-chart-marker-border: var(--chart-marker-border);
+  --color-chart-marker-background: var(--chart-marker-background);
+  --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+  --color-chart-tooltip-background: var(--chart-tooltip-background);
+  --chart-brush-border: var(--border);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-crosshair: var(--chart-crosshair);
+  --chart-line-secondary: var(--chart-2);
+  --chart-line-primary: var(--chart-1);
+  --color-chart-foreground-muted: var(--chart-foreground-muted);
+  --color-chart-foreground: var(--chart-foreground);
+  --color-chart-background: var(--chart-background);
 }
 
 @layer base {
@@ -207,6 +207,26 @@
 }
 
 @layer components {
+  .analytics-shell-scale {
+    width: 111.111111%;
+    min-height: 111.111111svh;
+    overflow-x: clip;
+    zoom: 0.9;
+  }
+
+  .analytics-shell-scale [data-slot="sidebar-inset"] {
+    min-height: 111.111111svh;
+  }
+
+  .analytics-page-content {
+    min-height: calc(111.111111svh - var(--header-height));
+  }
+
+  .analytics-shell-scale [data-global-loading] {
+    width: 111.111111vw;
+    height: 111.111111vh;
+  }
+
   .page-content {
     width: 100%;
     max-width: var(--content-max);

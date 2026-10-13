@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react';
-import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 export function KpiCard({
@@ -22,55 +21,41 @@ export function KpiCard({
   highlight?: boolean;
   inverse?: boolean;
 }) {
-  change = change !== null && Math.abs(change) < 0.05 ? 0 : change;
-  const good =
-    change === null || change === 0
-      ? false
-      : inverse
-        ? change < 0
-        : change > 0;
-  const Trend =
-    change === null || change === 0
-      ? Minus
-      : change > 0
-        ? TrendingUp
-        : TrendingDown;
+  void change;
+  void inverse;
 
   return (
     <Card
-      className={`min-h-(--chart-compact-height) gap-0 py-0 shadow-none ${
+      className={`min-h-40 gap-0 overflow-hidden py-0 shadow-none ${
         highlight ? 'border-primary/30 bg-secondary/40' : ''
       }`}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-sm font-medium leading-snug text-muted-foreground">
-            {label}
-          </p>
-          <Icon
-            className={`size-5 shrink-0 ${
-              highlight ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          />
-        </div>
-        <div
-          className={`metric mt-4 text-2xl whitespace-nowrap xl:text-[1.75rem] ${
-            highlight ? 'text-primary' : ''
-          }`}
-        >
-          {value}
-        </div>
-        {/* <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1 text-xs font-medium ${
-              good ? 'text-success' : 'text-muted-foreground'
+      <CardContent className="flex min-h-40 flex-col p-0">
+        <div className="flex-1 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-medium leading-snug text-muted-foreground">
+              {label}
+            </p>
+            <span
+              className={`flex size-9 shrink-0 items-center justify-center rounded-md border ${
+                highlight
+                  ? 'border-primary/20 bg-primary/10 text-primary'
+                  : 'bg-muted/50 text-muted-foreground'
+              }`}
+            >
+              <Icon className="size-4" />
+            </span>
+          </div>
+          <div
+            className={`metric mt-4 whitespace-nowrap text-3xl xl:text-[2.125rem] ${
+              highlight ? 'text-primary' : ''
             }`}
           >
-            <Trend className="size-3.5" />
-          </span>
-        </div> */}
-        <p className="mt-2 text-xs text-muted-foreground">{detail}</p>
-        <p className="mt-3 border-t pt-2 text-xs text-muted-foreground">
+            {value}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">{detail}</p>
+        </div>
+        <p className="border-t bg-muted/20 px-5 py-2.5 text-xs text-muted-foreground">
           Porte: {sizeScope}
         </p>
       </CardContent>

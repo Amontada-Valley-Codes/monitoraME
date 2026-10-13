@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { ArrowUpRight, ChartPie, MapPin, Store, Wallet } from 'lucide-react';
 
-import { BarsChart, DonutChart, TrendChart } from './charts';
+import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { KpiCard } from '@/shared/components/kpi-card';
 import { compactMoney, money, percent } from '@/shared/lib/format';
@@ -31,7 +31,7 @@ export function OverviewKpis({
   if (!data || !view) return null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:grid-rows-2 xl:gap-x-6 xl:gap-y-4">
+    <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2 xl:grid-rows-2">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <KpiCard
           label="Participação de ME e MEI"
@@ -79,12 +79,16 @@ export function OverviewKpis({
 
 export function OverviewExpenses({ params }: { params: PipelineOverviewParams }) {
   const { data, status, retry } = useOverviewExpenseElements(params);
-  const rows = data ?? [];
+  const rows = (data ?? []).map((item, index) => ({
+    ...item,
+    color: expenseColor(item.key, index),
+    shortLabel: expenseShortLabel(item.key, item.name),
+  }));
   return (
     <ChartPanel
       title="Elementos de despesas"
       description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
-      legend={[{ label: 'Valor empenhado líquido', color: 'var(--chart-1)' }]}
+      legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
@@ -94,11 +98,13 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
         <BarsChart
           data={rows.map((item) => ({
             name: item.key.slice(-2),
-            label: item.name,
+            label: item.shortLabel,
+            color: item.color,
             value: item.value,
           }))}
           series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]}
           fullWidth
+          colorKey="color"
         />
       </div>
     </ChartPanel>

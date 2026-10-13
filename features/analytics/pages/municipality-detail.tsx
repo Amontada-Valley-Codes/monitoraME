@@ -20,7 +20,7 @@ import { COMPLETE_REGISTRATION_PATH, PUBLIC_ENTRY_PATH } from '@/shared/auth/con
 import { saveReturnTo } from '@/shared/auth/return-to';
 import { useSession } from '@/shared/auth/session-context';
 import { MUNICIPALITIES } from '../data/fixtures';
-import { BarsChart, DonutChart, TrendChart } from '../components/charts';
+import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from '../components/charts';
 import { PageHeader } from '../components/page-header';
 import { TceMunicipalitySelect } from '../components/tce-municipality-select';
 import { TCE_MUNICIPALITIES } from '../pipeline/municipalities';
@@ -101,7 +101,7 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
   const kpis = data.kpis ?? {};
   const sizes = (data.participacao_por_porte_empresarial ?? []).map((item) => ({ key: item.porte ?? 'NAO_IDENTIFICADO', name: sizeNames[item.porte ?? ''] ?? item.porte ?? 'Não identificado', value: item.valor_centavos ?? 0, percentage: item.percentual, color: sizeColors[item.porte ?? ''] ?? 'var(--chart-4)' }));
   const destinations = (data.destino_recursos ?? []).map((item) => ({ key: item.destino ?? 'ORIGEM_NAO_IDENTIFICADA', name: destinationNames[item.destino ?? ''] ?? item.destino ?? 'Não identificado', value: item.valor_centavos ?? 0, percentage: item.percentual, color: destinationColors[item.destino ?? ''] ?? 'var(--chart-4)' }));
-  const expenses = (data.elementos_despesa ?? []).map((item) => ({ key: item.codigo ?? item.nome ?? 'elemento', name: item.nome ?? item.codigo ?? 'Elemento', value: item.valor_liquido_centavos ?? 0 }));
+  const expenses = (data.elementos_despesa ?? []).map((item, index) => ({ key: item.codigo ?? item.nome ?? 'elemento', name: item.nome ?? item.codigo ?? 'Elemento', shortLabel: expenseShortLabel(item.codigo ?? '', item.nome ?? item.codigo ?? 'Elemento'), value: item.valor_liquido_centavos ?? 0, color: expenseColor(item.codigo ?? '', index) }));
   const evolutionByMonth = new Map((data.evolucao_compras_consideradas ?? []).map((item) => [item.periodo, item]));
   const missing = new Set(data.competencias_ausentes ?? []);
   const published = new Set(data.competencias_publicadas ?? []);
@@ -117,7 +117,7 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
 
     <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:grid-rows-2 xl:gap-x-6 xl:gap-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><KpiCard label="Participação de ME e MEI" value={percent(kpis.percentual_participacao_me ?? null)} detail="Percentual consolidado para o período" change={null} icon={ChartPie} sizeScope="ME + MEI" highlight /><KpiCard label="Total de compras de ME" value={kpis.total_compras_ME_centavos == null ? '—' : compactMoney(kpis.total_compras_ME_centavos)} detail="Valor líquido em reais" change={null} icon={Wallet} sizeScope="ME" /></div>
-      <ChartPanel className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1" title="Elementos de despesas" description="Valores líquidos consolidados" legend={[{ label: 'Valor empenhado líquido', color: 'var(--chart-1)' }]} rows={expenses.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!expenses.length}><div className="h-(--chart-height)"><BarsChart data={expenses.map((item) => ({ name: item.key.slice(-2), label: item.name, value: item.value }))} series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]} /></div></ChartPanel>
+      <ChartPanel className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1" title="Elementos de despesas" description="Valores líquidos consolidados" legend={expenses.map((item) => ({ label: item.shortLabel, color: item.color }))} rows={expenses.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!expenses.length}><div className="h-(--chart-height)"><BarsChart data={expenses.map((item) => ({ name: item.key.slice(-2), label: item.shortLabel, color: item.color, value: item.value }))} series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]} colorKey="color" /></div></ChartPanel>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-1 xl:row-start-2"><KpiCard label="Compras com fornecedores locais" value={percent(kpis.percentual_compras_fornecedores_locais ?? null)} detail="No município comprador" change={null} icon={MapPin} /><KpiCard label="Recursos fora do município" value={percent(kpis.percentual_recursos_fora_municipio ?? null)} detail="Percentual consolidado para o período" change={null} icon={ArrowUpRight} inverse /></div>
     </div>
 

@@ -43,8 +43,8 @@ export function ChartPanel({
   const [view, setView] = useState('chart');
 
   return (
-    <section className={`panel min-w-0 p-5 sm:p-6 ${className}`}>
-      <div className="flex flex-wrap justify-between gap-3">
+    <section className={`panel min-w-0 overflow-hidden ${className}`}>
+      <div className="flex flex-wrap justify-between gap-3 px-5 py-4 sm:px-6">
         <div>
           <h2 className="text-base font-semibold">{title}</h2>
           {description && (
@@ -75,12 +75,13 @@ export function ChartPanel({
       </div>
 
       {legend && (
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
+        <div role="list" aria-label={`Legenda: ${title}`} className="border-t bg-muted/20 px-5 py-3 sm:px-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
           {legend.map((item) => (
-            <span key={item.label} className="flex items-center gap-2">
+            <span role="listitem" key={item.label} className="flex items-center gap-2">
               <span
-                className="size-2.5 rounded-sm"
-                style={{ background: item.color }}
+                aria-hidden="true"
+                className="size-2.5 shrink-0 rounded-sm ring-1 ring-foreground/10"
+                style={{ backgroundColor: item.color }}
               />
               {item.label}
             </span>
@@ -88,7 +89,7 @@ export function ChartPanel({
         </div>
       )}
 
-      <div className={`mt-4 ${contentClassName}`}>
+      <div className={`border-t p-5 sm:p-6 ${contentClassName}`}>
         {state === 'loading' ? (
           <Skeleton className="chart-box w-full" />
         ) : state === 'error' ? (

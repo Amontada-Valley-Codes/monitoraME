@@ -30,6 +30,13 @@
   --chart-3: #5f7886;
   --chart-4: #b0c6ff;
   --chart-5: #737784;
+  --expense-1: #3568b8;
+  --expense-2: #1b7f79;
+  --expense-3: #7656b5;
+  --expense-4: #a66a19;
+  --expense-5: #287f9b;
+  --expense-6: #b45662;
+  --expense-7: #5d718f;
   --size-me: #147d69;
   --size-mei: #a3d9ca;
   --size-other: #b5c8e4;
@@ -45,7 +52,7 @@
   --chart-line-secondary: var(--chart-2);
   --chart-crosshair: var(--primary);
   --chart-grid: var(--border);
-  --chart-tooltip-background: var(--navy);
+  --chart-tooltip-background: #132846;
   --chart-tooltip-foreground: #ffffff;
   --chart-tooltip-muted: #b5c8e4;
   --chart-marker-background: var(--muted);
@@ -60,9 +67,9 @@
   --space-unit: 0.25rem;
   --page-padding: 2rem;
   --card-padding: 1.5rem;
-  --sidebar-size: 16rem;
+  --sidebar-size: 17rem;
   --rail-size: 4.25rem;
-  --header-height: 4.5rem;
+  --header-height: 4rem;
   --chart-height: 17.5rem;
   --chart-compact-height: 12rem;
   --content-max: 100rem;
@@ -111,6 +118,13 @@
   --chart-3: #9bb5c3;
   --chart-4: #6f94df;
   --chart-5: #b5bdcc;
+  --expense-1: #8fb4f4;
+  --expense-2: #70c7bb;
+  --expense-3: #bea2ed;
+  --expense-4: #e5b86d;
+  --expense-5: #7bc2d8;
+  --expense-6: #e89aa4;
+  --expense-7: #a5b6d0;
   --size-me: #64cfb5;
   --size-mei: #83bcae;
   --size-other: #6e87aa;
@@ -121,6 +135,7 @@
   --origin-unknown: #657289;
   --chart-tooltip-foreground: #edf3ff;
   --chart-tooltip-muted: #aab5c9;
+  --chart-tooltip-background: #152a4a;
   --shadow-panel: 0 1px 2px rgb(0 0 0 / 24%);
   --shadow-popover:
     0 10px 28px -8px rgb(0 0 0 / 48%), 0 3px 8px -3px rgb(0 0 0 / 32%);

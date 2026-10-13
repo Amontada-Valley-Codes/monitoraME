@@ -12,6 +12,7 @@ import {
   ChevronRight,
   RefreshCw,
   CircleDollarSign,
+  MessageCircle,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -38,11 +39,12 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { LogoIcon, LogoContent } from '@/shared/components/logo';
+import { Logo, LogoIcon } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
 import { useProtectedNavigate } from '@/shared/auth/protected-navigation';
+import { LoadingState } from '@/shared/components/states';
 
 const normalizeMunicipality = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 
@@ -65,38 +67,57 @@ const PLANS_PAGE = {
   icon: CircleDollarSign,
 };
 
-function Navigation() {
+function Navigation({ onSearch }: { onSearch: () => void }) {
   const path = usePathname();
-  const { navigate } = useAnalytics();
-  const { setOpen, setOpenMobile } = useSidebar();
+  const { navigate, state: loadState } = useAnalytics();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const protectedNavigate = useProtectedNavigate();
   const isCommitmentDetail = path.startsWith('/analytics/empenhos/');
   const isSupplierDetail = path.startsWith('/analytics/fornecedores/');
 
-  useEffect(() => {
-    const media = window.matchMedia('(min-width:1280px)');
-    const change = () => setOpen(media.matches);
-    change();
-    media.addEventListener('change', change);
-    return () => media.removeEventListener('change', change);
-  }, [setOpen]);
-
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="h-(--header-height) justify-center border-b px-5">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="p-0 justify-start hover:bg-transparent"
-          aria-label="MonitoraME início"
-        >
-          <LogoIcon className="size-7 shrink-0 text-brand-ink" />
-          <LogoContent className="size-auto! h-6! w-36! text-brand-ink group-data-[collapsible=icon]:hidden" />
-        </Button>
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="h-(--header-height) justify-center border-b px-3 group-data-[collapsible=icon]:px-2">
+        <div className="flex w-full items-center gap-2">
+          <Button
+            variant="ghost"
+            disabled={loadState === 'loading'}
+            onClick={() => {
+              navigate('/');
+              setOpenMobile(false);
+            }}
+            className="min-w-0 flex-1 justify-start p-0 hover:bg-transparent group-data-[collapsible=icon]:justify-center"
+            aria-label="MonitoraME início"
+          >
+            {isMobile || state === 'expanded'
+              ? <Logo className="size-6 w-auto max-w-full text-brand-ink" />
+              : <LogoIcon className="size-6 shrink-0 text-brand-ink" />}
+          </Button>
+          {isMobile && <SidebarTrigger aria-label="Fechar navegação" title="Fechar navegação (Ctrl+B)" className="size-9 shrink-0" />}
+        </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        <SidebarGroup className="pt-5">
+      <SidebarContent className="px-2.5">
+        <SidebarGroup className="pb-2 pt-4">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Buscar no MonitoraME"
+                onClick={onSearch}
+                disabled={loadState === 'loading'}
+                className="min-h-10 gap-3 border border-sidebar-border bg-background/70 text-muted-foreground shadow-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <Search className="size-4" />
+                <span>Buscar</span>
+                <span className="ml-auto rounded border border-sidebar-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                  Ctrl K
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup className="pt-2">
           <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
             Poder Público
           </SidebarGroupLabel>
@@ -115,11 +136,12 @@ function Navigation() {
                       : path === item.path || path.startsWith(`${item.path}/`)
                   }
                   onClick={() => {
+                    if (loadState === 'loading') return;
                     if (item.path === '/analitico/municipios') void protectedNavigate(item.path);
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="min-h-11 gap-3 text-sm data-[active=true]:bg-primary data-[active=true]:text-white data-[active=true]:font-medium"
+                  className="min-h-10 gap-3 rounded-md text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs"
                 >
                   <item.icon className="size-4" />
                   <span>{item.label}</span>
@@ -139,6 +161,7 @@ function ShellContent({ children }: { children: ReactNode }) {
   const { navigate, reload, state, filters } = useAnalytics();
   const protectedNavigate = useProtectedNavigate();
   const [search, setSearch] = useState(false);
+  const { state: sidebarState, isMobile, openMobile } = useSidebar();
 
   const current = path.startsWith('/analytics/empenhos/')
     ? NAV.find((item) => item.path === '/analitico/empenhos')!
@@ -152,19 +175,22 @@ function ShellContent({ children }: { children: ReactNode }) {
     const listener = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
+        if (state === 'loading') return;
         setSearch((v) => !v);
       }
     };
     window.addEventListener('keydown', listener);
     return () => window.removeEventListener('keydown', listener);
-  }, []);
+  }, [state]);
 
   const go = (path: string) => {
+    if (state === 'loading') return;
     navigate(path);
     setSearch(false);
   };
 
   const openMunicipality = (name: string) => {
+    if (state === 'loading') return;
     const code = TCE_MUNICIPALITIES.find((item) => normalizeMunicipality(item.name) === normalizeMunicipality(name))?.code;
     if (!code) return;
     const params = new URLSearchParams({ municipality_tce_code: code, start_date: filters.start, end_date: filters.end });
@@ -174,35 +200,32 @@ function ShellContent({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <Navigation />
-      <SidebarInset className="min-w-0 bg-background">
-        <header className="h-(--header-height) border-b bg-card px-4 sm:px-8 flex items-center gap-3 sticky top-0 z-20">
+      <Navigation onSearch={() => setSearch(true)} />
+      <SidebarInset className="min-w-0 overflow-clip border-l border-border/70 bg-background">
+        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/95 px-4 backdrop-blur sm:px-8">
           <SidebarTrigger
-            aria-label="Abrir ou recolher navegação"
+            aria-label={isMobile
+              ? openMobile ? 'Fechar navegação' : 'Abrir navegação'
+              : sidebarState === 'expanded' ? 'Recolher navegação' : 'Expandir navegação'}
+            title={isMobile
+              ? openMobile ? 'Fechar navegação (Ctrl+B)' : 'Abrir navegação (Ctrl+B)'
+              : sidebarState === 'expanded' ? 'Recolher navegação (Ctrl+B)' : 'Expandir navegação (Ctrl+B)'}
             className="size-10 text-muted-foreground"
           />
           <Separator orientation="vertical" className="h-5!" />
           <div className="flex items-center gap-2 text-sm min-w-0">
-            <span className="text-muted-foreground hidden sm:block">Poder Público</span>
+            <span className="text-muted-foreground hidden sm:block">Análises públicas</span>
             <ChevronRight className="text-muted-foreground size-3 hidden sm:block" />
             <span className="font-medium truncate">{current.label}</span>
           </div>
 
           <div className="flex items-center ml-auto gap-3">
             <Button
-              variant="outline"
-              className="text-muted-foreground bg-background gap-3 hidden lg:flex min-w-64 justify-start"
-              onClick={() => setSearch(true)}
-            >
-              <Search className="size-4" />
-              <span className="font-normal">Buscar no MonitoraME</span>
-              <span className="ml-auto text-xs font-mono border rounded px-1.5 py-0.5">⌘ K</span>
-            </Button>
-            <Button
               variant="ghost"
               size="icon"
               aria-label="Buscar no MonitoraME"
-              className="lg:hidden"
+              className="md:hidden"
+              disabled={state === 'loading'}
               onClick={() => setSearch(true)}
             >
               <Search className="size-4" />
@@ -229,7 +252,10 @@ function ShellContent({ children }: { children: ReactNode }) {
               variant={path.startsWith(PLANS_PAGE.path) ? 'secondary' : 'outline'}
               size="sm"
               aria-label="Abrir planos"
-              onClick={() => navigate(PLANS_PAGE.path)}
+              disabled={state === 'loading'}
+              onClick={() => {
+                if (state !== 'loading') navigate(PLANS_PAGE.path);
+              }}
             >
               <CircleDollarSign className="size-4 text-primary" />
               <span className="hidden sm:inline text-primary">Planos</span>
@@ -237,21 +263,31 @@ function ShellContent({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div id="main-content" tabIndex={-1} className="page-content outline-none">
+        <div id="main-content" tabIndex={-1} className="analytics-page-content page-content flex flex-col outline-none">
           {children}
-          <footer className="mt-10 pt-5 border-t flex flex-wrap justify-between gap-3 text-xs text-muted-foreground">
-            <span>MonitoraME · Inteligência em compras públicas</span>
-            <Button
-              variant="link"
-              className="text-xs p-0 min-h-0 h-auto text-muted-foreground"
-              onClick={() => navigate('/analitico/metodologia')}
-            >
-              Fontes, recortes e metodologia
-              <ChevronRight className="size-3" />
-            </Button>
+          <footer className="mt-auto pt-10 text-xs text-muted-foreground">
+            <div className="flex flex-col gap-4 border-t py-5 lg:flex-row lg:items-center lg:justify-between">
+              <nav aria-label="Navegação do rodapé" className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                {[['Visão geral', '/analitico'], ['Empenhos', '/analitico/empenhos'], ['Fornecedores', '/analitico/fornecedores'], ['Metodologia', '/analitico/metodologia']].map(([label, href]) => <Button key={href} variant="link" disabled={state === 'loading'} className="h-auto min-h-0 p-0 text-xs font-normal text-muted-foreground hover:text-primary" onClick={() => navigate(href)}>{label}</Button>)}
+              </nav>
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <span className="font-medium text-foreground">Fontes:</span>
+                <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="transition-colors hover:text-primary">TCE Ceará</a>
+                <a href="https://pncp.gov.br/app/" target="_blank" rel="noreferrer" className="transition-colors hover:text-primary">PNCP</a>
+                <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noreferrer" className="transition-colors hover:text-primary">Receita Federal</a>
+                <span className="hidden h-4 w-px bg-border sm:block" aria-hidden />
+                <a href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME." target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"><MessageCircle className="size-3.5" />Contato</a>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t py-4 text-[0.6875rem] text-muted-foreground/80">
+              <span>© {new Date().getFullYear()} MonitoraME</span>
+              <span>Ceará, Brasil · Dados públicos de fontes oficiais</span>
+            </div>
           </footer>
         </div>
       </SidebarInset>
+
+      {state === 'loading' && <LoadingState label="Carregando módulo analítico" />}
 
       <CommandDialog
         open={search}
@@ -309,10 +345,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         Pular para o conteúdo
       </a>
       <SidebarProvider
+        className="analytics-shell-scale"
         style={
           {
             '--sidebar-width': 'var(--sidebar-size)',
             '--sidebar-width-icon': 'var(--rail-size)',
+            '--sidebar-height': '111.111111svh',
           } as CSSProperties
         }
       >

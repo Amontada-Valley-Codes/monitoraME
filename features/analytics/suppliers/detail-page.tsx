@@ -17,8 +17,8 @@ import { PieSlice } from '@/components/charts/pie-slice';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
 import { compactMoney, money, number, percent } from '@/shared/lib/format';
+import { LoadingState } from '@/shared/components/states';
 import { AnalyticsApiError } from '../commitments/api';
 import { companySizeLabel, formatCivilDate, formatCompetence, formatTimestamp, nullableLabel, supplierOriginLabel } from '../commitments/detail-format';
 import { getCommitmentErrorContent } from '../commitments/error-state';
@@ -127,7 +127,7 @@ function PeriodRequired({ startDate, endDate, onChange }: {
 }
 
 function DetailSkeleton() {
-  return <div aria-busy="true" aria-label="Carregando fornecedor" className="space-y-5"><Skeleton className="h-40 rounded-lg" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-28 rounded-lg" />)}</div><Skeleton className="h-80 rounded-lg" /></div>;
+  return <LoadingState label="Carregando fornecedor" />;
 }
 
 function DetailError({ error, listHref, onRetry }: { error: AnalyticsApiError; listHref: string; onRetry: () => void }) {
@@ -222,7 +222,7 @@ function ExpenseElementsPie({ elements }: { elements: SupplierExpenseElement[] }
       >
         <PieCenter>
           {({ value, label, isHovered }) => <div className="px-4 text-center">
-            <p className="metric whitespace-nowrap text-[clamp(1rem,8cqw,0.875rem)] leading-none text-primary">{isHovered ? compactMoney(value) : '7 elementos'}</p>
+            <p className="metric whitespace-nowrap text-[clamp(1rem,16cqw,1.75rem)] font-semibold leading-none text-primary">{isHovered ? compactMoney(value) : '7 elementos'}</p>
             <p className="mt-1 line-clamp-2 text-[0.6875rem] leading-tight text-muted-foreground">{isHovered ? label : 'valor considerado'}</p>
           </div>}
         </PieCenter>
