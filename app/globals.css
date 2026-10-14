@@ -40,6 +40,10 @@
   /* Brand / Status */
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
+  --color-landing-ink: var(--landing-ink);
+  --color-landing-blue: var(--landing-blue);
+  --color-landing-paper: var(--landing-paper);
+  --color-landing-tint: var(--landing-tint);
   --color-navy: var(--navy);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
