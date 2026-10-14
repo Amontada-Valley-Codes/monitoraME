@@ -21,3 +21,8 @@ export interface CompanyProfileEntity {
   municipiosInteresse: string[];
   modalidadesPreferidas: string[];
 }
+
+export interface UpdatePreferencesDTO {
+  cnaes: CNAEItem[];
+  municipiosInteresse: string[];
+}
