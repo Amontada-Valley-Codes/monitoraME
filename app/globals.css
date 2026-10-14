@@ -211,6 +211,10 @@
 }
 
 @layer components {
+  .login-page-scale {
+    zoom: 0.9;
+  }
+
   .analytics-shell-scale {
     width: 111.111111%;
     min-height: 111.111111svh;
