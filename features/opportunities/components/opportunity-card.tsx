@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { ArrowRight, Bookmark, CircleCheck, MoreHorizontal } from 'lucide-react';
+import { ArrowRight, CircleCheck, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Opportunity } from '../types';
+import { SaveOpportunityButton } from './save-opportunity-button';
 
 type OpportunityCardProps = {
   opportunity: Opportunity;
@@ -113,14 +114,7 @@ export function OpportunityCard({
             </Link>
           </Button>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Salvar oportunidade"
-          >
-            <Bookmark className="size-4 text-muted-foreground" />
-          </Button>
+          <SaveOpportunityButton opportunity={opportunity} compact />
         </div>
       </div>
     </article>

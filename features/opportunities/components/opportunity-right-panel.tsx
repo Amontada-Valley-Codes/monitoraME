@@ -37,20 +37,6 @@ export function OpportunityRightPanel() {
           </CardContent>
         </Card>
 
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Dados do PNCP são 100% livres e públicos. Tenha IA para resumir
-            exigências de habilitação, funil Kanban de propostas e radar de
-            concorrentes.
-          </p>
-
-          <button
-            type="button"
-            className="mt-5 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            Conhecer Recursos Pro
-          </button>
-        </div>
-
         <div className="mt-5 border-t border-slate-200 pt-4 text-xs leading-6 text-slate-400">
           <p>
             Termos de Serviço · Privacidade · LAI Ceará · Acessibilidade

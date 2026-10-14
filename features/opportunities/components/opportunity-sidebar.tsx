@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/shared/components/logo';
 
-export function OpportunitySidebar() {
+export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-(--sidebar-size) shrink-0 flex-col border-r bg-sidebar px-3 py-4 text-sidebar-foreground xl:flex">
       <div className="flex min-h-0 flex-1 flex-col">
@@ -28,16 +28,18 @@ export function OpportunitySidebar() {
         </div>
 
         <nav className="space-y-1" aria-label="Oportunidades">
-          <Button asChild className="h-11 w-full justify-start gap-3 px-3">
-            <Link href="/oportunidades" aria-current="page">
+          <Button asChild variant={active === 'open' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
+            <Link href="/oportunidades" aria-current={active === 'open' ? 'page' : undefined}>
               <LayoutDashboard className="size-4" />
               <span>Editais abertos</span>
             </Link>
           </Button>
 
-          <Button variant="ghost" className="h-11 w-full justify-start gap-3 px-3">
-            <Bookmark className="size-4" />
-            <span>Editais salvos</span>
+          <Button asChild variant={active === 'saved' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
+            <Link href="/oportunidades/salvos" aria-current={active === 'saved' ? 'page' : undefined}>
+              <Bookmark className="size-4" />
+              <span>Editais salvos</span>
+            </Link>
           </Button>
         </nav>
 
