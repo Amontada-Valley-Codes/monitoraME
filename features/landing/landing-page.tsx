@@ -269,10 +269,6 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
           <div className="relative mx-auto flex min-h-180 max-w-7xl items-center px-5 py-24 sm:px-8 lg:min-h-190">
             <div className="max-w-2xl pt-6">
-              <div className="mb-7 inline-flex items-center gap-2 border border-white/20 bg-white/8 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-[#76a5ff]" /> Inteligência
-                em compras públicas
-              </div>
               <h1 className="max-w-2xl text-[clamp(2.9rem,6vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
                 Dados públicos.<br />Decisões que{' '}
                 <span className="text-[#8fb4ff]">movem</span> territórios.

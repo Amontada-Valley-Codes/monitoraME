@@ -212,10 +212,48 @@
 
 @layer components {
   .analytics-shell-scale {
+    --background: #edf1f7;
+    --card: #f9fbfe;
+    --card-foreground: #172033;
+    --muted: #e4eaf3;
+    --muted-foreground: #556174;
+    --accent: #dce7f5;
+    --accent-foreground: #174b9c;
+    --border: #ccd6e5;
+    --input: #aebbd0;
+    --sidebar: #e2eaf6;
+    --sidebar-foreground: #33425a;
+    --sidebar-accent: #c9daf4;
+    --sidebar-accent-foreground: #174b9c;
+    --sidebar-border: #c3cee0;
     width: 111.111111%;
     min-height: 111.111111svh;
     overflow-x: clip;
     zoom: 0.9;
+  }
+
+  .dark .analytics-shell-scale {
+    --background: #0b1220;
+    --card: #111b2d;
+    --card-foreground: #edf3ff;
+    --muted: #182235;
+    --muted-foreground: #aab5c9;
+    --accent: #1c3152;
+    --accent-foreground: #d7e3ff;
+    --border: #2b3950;
+    --input: #53617a;
+    --sidebar: #0f192a;
+    --sidebar-foreground: #c3cde0;
+    --sidebar-accent: #1c3152;
+    --sidebar-accent-foreground: #d7e3ff;
+    --sidebar-border: #2b3950;
+  }
+
+  .analytics-shell-scale .metric {
+    font-family: var(--font-heading);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.035em;
   }
 
   .analytics-shell-scale [data-slot="sidebar-inset"] {
