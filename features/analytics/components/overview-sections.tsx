@@ -41,6 +41,7 @@ export function OverviewKpis({
           icon={ChartPie}
           sizeScope="ME + MEI"
           highlight
+          tone="blue"
         />
         <KpiCard
           label="Total de compras de ME"
@@ -49,6 +50,7 @@ export function OverviewKpis({
           change={null}
           icon={Wallet}
           sizeScope="ME"
+          tone="violet"
         />
       </div>
 
@@ -63,6 +65,7 @@ export function OverviewKpis({
           detail="No município comprador"
           change={null}
           icon={MapPin}
+          tone="teal"
         />
         <KpiCard
           label="Recursos fora do município"
@@ -71,6 +74,7 @@ export function OverviewKpis({
           change={null}
           icon={ArrowUpRight}
           inverse
+          tone="amber"
         />
       </div>
     </div>

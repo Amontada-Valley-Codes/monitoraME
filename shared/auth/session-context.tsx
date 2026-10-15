@@ -7,6 +7,7 @@ export type SessionStatus = 'loading' | 'anonymous' | 'authenticated';
 type SessionContextValue = {
   status: SessionStatus;
   accountStatus: string | null;
+  accountRole: string | null;
   refresh: () => Promise<SessionStatus>;
   clear: () => Promise<void>;
   waitUntilReady: (timeoutMs?: number) => Promise<SessionStatus>;
@@ -31,17 +32,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<SessionStatus>('loading');
   const [accountStatus, setAccountStatus] = useState<string | null>(null);
+  const [accountRole, setAccountRole] = useState<string | null>(null);
   const refresh = useCallback(async (): Promise<SessionStatus> => {
     try {
       const response = await fetch('/api/session', { cache: 'no-store' });
-      const body = await response.json() as { authenticated?: boolean; accountStatus?: string | null };
+      const body = await response.json() as { authenticated?: boolean; accountStatus?: string | null; accountRole?: string | null };
       const next = body.authenticated ? 'authenticated' : 'anonymous';
       setStatus(next);
       setAccountStatus(body.accountStatus ?? null);
+      setAccountRole(body.accountRole ?? null);
       return next;
     } catch {
       setStatus('anonymous');
       setAccountStatus(null);
+      setAccountRole(null);
       return 'anonymous';
     }
   }, []);
@@ -71,6 +75,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await fetch('/api/session', { method: 'DELETE' }).catch(() => undefined);
     setStatus('anonymous');
     setAccountStatus(null);
+    setAccountRole(null);
     queryClient.clear();
     notifySessionChanged();
   }, [queryClient]);
@@ -84,7 +89,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return result ?? 'anonymous';
   }, [refresh, status]);
 
-  return <SessionContext.Provider value={{ status, accountStatus, refresh, clear, waitUntilReady }}>{children}</SessionContext.Provider>;
+  return <SessionContext.Provider value={{ status, accountStatus, accountRole, refresh, clear, waitUntilReady }}>{children}</SessionContext.Provider>;
 }
 
 export function useSession() {
