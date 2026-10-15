@@ -88,21 +88,21 @@ export function TrendChart({
         <ChartTooltip
           showDatePill={false}
           content={({ point }) => (
-            <div className="min-w-60 text-sm">
-              <p className="border-b border-white/10 px-3 py-2.5 font-semibold text-chart-tooltip-foreground">
+            <div className="min-w-52 px-3.5 py-3 text-sm">
+              <p className="mb-2.5 text-[0.6875rem] font-medium tracking-wide text-chart-tooltip-muted">
                 {String(point.label ?? '')}
               </p>
-              <div className="space-y-2 px-3 py-2.5">
+              <div className="space-y-2">
               {series.map((seriesItem) => (
                 <div
                   key={seriesItem.key}
                   className="flex items-center justify-between gap-6"
                 >
-                  <span className="flex items-center gap-2 text-chart-tooltip-muted">
+                  <span className="flex min-w-0 items-center gap-2 text-xs text-chart-tooltip-muted">
                     <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: seriesItem.color }} />
                     {seriesItem.label}
                   </span>
-                  <span className="font-mono font-semibold tabular-nums text-chart-tooltip-foreground">
+                  <span className="font-semibold tabular-nums text-chart-tooltip-foreground">
                     {chartMoney(point[seriesItem.key])}
                   </span>
                 </div>
@@ -164,18 +164,18 @@ export function BarsChart({
         <ChartTooltip
           showDatePill={false}
           content={({ point }) => (
-            <div className="min-w-60 text-sm">
-              <p className="border-b border-white/10 px-3 py-2.5 font-semibold text-chart-tooltip-foreground">
+            <div className="min-w-52 px-3.5 py-3 text-sm">
+              <p className="mb-2.5 text-[0.6875rem] font-medium tracking-wide text-chart-tooltip-muted">
                 {String(point.label ?? point.name)}
               </p>
-              <div className="space-y-2 px-3 py-2.5">
+              <div className="space-y-2">
               {series.map((seriesItem) => (
                 <p key={seriesItem.key} className="flex items-center justify-between gap-6">
-                  <span className="flex items-center gap-2 text-chart-tooltip-muted">
+                  <span className="flex min-w-0 items-center gap-2 text-xs text-chart-tooltip-muted">
                     <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: colorKey && typeof point[colorKey] === 'string' ? String(point[colorKey]) : seriesItem.color }} />
                     {seriesItem.label}
                   </span>
-                  <span className="font-mono font-semibold tabular-nums text-chart-tooltip-foreground">
+                  <span className="font-semibold tabular-nums text-chart-tooltip-foreground">
                     {percentage
                       ? percent(Number(point[seriesItem.key]))
                       : money(Number(point[seriesItem.key]))}

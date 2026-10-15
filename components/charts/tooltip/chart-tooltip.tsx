@@ -191,6 +191,15 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     ? (tooltipData?.yPositions[firstLineDataKey] ?? 0)
     : 0;
   const yWithMargin = firstLineY + margin.top;
+  const pointY = useMemo(() => {
+    if (!tooltipData) {
+      return 0;
+    }
+    const positions = Object.values(tooltipData.yPositions).filter(
+      (position): position is number => Number.isFinite(position)
+    );
+    return positions.length > 0 ? Math.min(...positions) : 0;
+  }, [tooltipData]);
 
   const tooltipRows = useMemo(() => {
     if (!tooltipData) {
@@ -315,18 +324,18 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
 
       {/* Tooltip Box */}
       <TooltipBox
-        animate={boxMotion.animate}
+        animate={isHorizontal ? boxMotion.animate : false}
         backgroundColor={backgroundColor}
         className={className}
         containerHeight={height}
         containerRef={containerRef}
         containerWidth={width}
         panelStyle={panelStyle}
+        placement={isHorizontal ? "side" : "above"}
         springConfig={boxMotion.springConfig}
-        top={isHorizontal ? undefined : margin.top}
         visible={visible}
         x={xWithMargin}
-        y={isHorizontal ? yWithMargin : margin.top}
+        y={isHorizontal ? yWithMargin : pointY + margin.top}
       >
         {content && tooltipData
           ? content({

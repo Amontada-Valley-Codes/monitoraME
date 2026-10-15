@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   ArrowLeft,
-  Bookmark,
   Building2,
   CircleCheck,
   Download,
@@ -26,6 +25,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { OpportunitySidebar } from './opportunity-sidebar';
 import type { Opportunity } from '../types';
+import { SaveOpportunityButton } from './save-opportunity-button';
+import { NotificationBell } from './notification-bell';
 
 type OpportunityDetailsProps = {
   opportunity: Opportunity;
@@ -130,9 +131,9 @@ export function OpportunityDetails({
               </h1>
             </div>
 
-            <Button variant="ghost" size="icon" className="ml-auto" aria-label="Compartilhar edital">
+            <div className="ml-auto flex items-center gap-1"><NotificationBell /><Button variant="ghost" size="icon" aria-label="Compartilhar edital">
               <Share2 className="size-4 text-muted-foreground" />
-            </Button>
+            </Button></div>
           </header>
 
           <div className="space-y-4 p-4 sm:p-6">
@@ -201,10 +202,7 @@ export function OpportunityDetails({
                       </a>
                     </Button>
                   )}
-                  <Button variant="outline">
-                    <Bookmark className="size-4" />
-                    Salvar certame
-                  </Button>
+                  <SaveOpportunityButton opportunity={opportunity} />
                 </div>
               </CardContent>
             </Card>

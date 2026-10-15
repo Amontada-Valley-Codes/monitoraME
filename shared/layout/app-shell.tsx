@@ -76,8 +76,8 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
   const isSupplierDetail = path.startsWith('/analytics/fornecedores/');
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="h-(--header-height) justify-center border-b px-3 group-data-[collapsible=icon]:px-2">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="h-(--header-height) justify-center border-b border-sidebar-border bg-sidebar/80 px-3 group-data-[collapsible=icon]:px-2">
         <div className="flex w-full items-center gap-2">
           <Button
             variant="ghost"
@@ -105,7 +105,7 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
                 tooltip="Buscar no MonitoraME"
                 onClick={onSearch}
                 disabled={loadState === 'loading'}
-                className="min-h-10 gap-3 border border-sidebar-border bg-background/70 text-muted-foreground shadow-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                className="min-h-10 gap-3 border border-sidebar-border bg-card/70 text-sidebar-foreground shadow-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               >
                 <Search className="size-4" />
                 <span>Buscar</span>
@@ -141,7 +141,7 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="min-h-10 gap-3 rounded-md text-sm data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs"
+                  className="relative min-h-10 gap-3 rounded-md text-sm transition-colors before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs data-[active=true]:before:bg-primary"
                 >
                   <item.icon className="size-4" />
                   <span>{item.label}</span>
@@ -202,7 +202,7 @@ function ShellContent({ children }: { children: ReactNode }) {
     <>
       <Navigation onSearch={() => setSearch(true)} />
       <SidebarInset className="min-w-0 overflow-clip border-l border-border/70 bg-background">
-        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/95 px-4 backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/90 px-4 shadow-[0_1px_0_rgb(23_32_51/3%)] backdrop-blur sm:px-8">
           <SidebarTrigger
             aria-label={isMobile
               ? openMobile ? 'Fechar navegação' : 'Abrir navegação'

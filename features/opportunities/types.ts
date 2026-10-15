@@ -10,4 +10,10 @@ export type Opportunity = {
   state: string;
   source: string;
   officialUrl?: string;
+  closingDate: string;
+  matchScore: number;
+  confidence: number;
+  matchReasons: string[];
+  relatedCnaes: string[];
+  status: 'open' | 'suspended' | 'closed' | 'cancelled';
 };
