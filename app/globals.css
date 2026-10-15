@@ -211,6 +211,10 @@
 }
 
 @layer components {
+  .login-page-scale {
+    zoom: 0.9;
+  }
+  
   .saved-calendar .fc {
     --fc-border-color: var(--border);
     --fc-page-bg-color: var(--card);

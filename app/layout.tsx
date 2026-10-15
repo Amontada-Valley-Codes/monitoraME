@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
-  title: "MonitoraME — Inteligência em compras públicas",
+  title: "MonitoraME - Monitoramento das Compras Públicas",
   description:
     "Dados públicos transformados em inteligência para municípios e pequenos negócios do Ceará.",
 };

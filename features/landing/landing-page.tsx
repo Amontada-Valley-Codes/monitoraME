@@ -125,7 +125,7 @@ const processSteps = [
   [
     '02',
     'Organizamos',
-    'Padronizamos códigos, portes empresariais e recortes territoriais.',
+    'Padronizamos despesas, portes empresariais e recortes territoriais.',
   ],
   [
     '03',
@@ -188,11 +188,10 @@ export function LandingPage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
       <header
-        className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${
-          headerScrolled
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${headerScrolled
             ? 'border-border/65 bg-card/82 shadow-[0_10px_35px_-24px_rgb(0_20_41/45%)] backdrop-blur-xl'
             : 'border-transparent bg-transparent shadow-none backdrop-blur-none'
-        }`}
+          }`}
       >
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8">
           <Link
@@ -204,9 +203,8 @@ export function LandingPage() {
           </Link>
           <nav
             aria-label="Navegação principal"
-            className={`hidden items-center gap-7 text-xs font-medium transition-colors duration-300 lg:flex ${
-              headerScrolled ? 'text-muted-foreground' : 'text-white/75'
-            }`}
+            className={`hidden items-center gap-7 text-xs font-medium transition-colors duration-300 lg:flex ${headerScrolled ? 'text-muted-foreground' : 'text-white/75'
+              }`}
           >
             <Link className={headerNavLinkClass} href="#plataforma">
               Plataforma
@@ -228,21 +226,19 @@ export function LandingPage() {
             <Button
               asChild
               variant="ghost"
-              className={`hidden rounded-full px-4 text-xs transition-colors sm:inline-flex ${
-                headerScrolled
+              className={`hidden rounded-full px-4 text-xs transition-colors sm:inline-flex ${headerScrolled
                   ? 'text-foreground hover:bg-muted'
                   : 'text-white hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               <Link href="/login">Entrar</Link>
             </Button>
             <Button
               asChild
-              className={`rounded-full px-5 text-xs transition-colors ${
-                headerScrolled
+              className={`rounded-full px-5 text-xs transition-colors ${headerScrolled
                   ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/80'
                   : 'bg-white! text-[#0a1930]! shadow-lg shadow-black/10 hover:bg-white/90!'
-              }`}
+                }`}
             >
               <Link href="/analitico">
                 Acessar compras públicas <ArrowRight className="size-3.5" />
@@ -258,7 +254,7 @@ export function LandingPage() {
           className="relative min-h-180 overflow-hidden bg-landing-ink text-white lg:min-h-190"
         >
           <Image
-            src="/landing/hero-team.png"
+            src="/landing/hero-david.webp"
             alt="Profissionais analisando informações públicas em um ambiente de trabalho colaborativo"
             fill
             priority
@@ -269,13 +265,19 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
           <div className="relative mx-auto flex min-h-180 max-w-7xl items-center px-5 py-24 sm:px-8 lg:min-h-190">
             <div className="max-w-2xl pt-6">
-              <h1 className="max-w-2xl text-[clamp(2.9rem,6vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
-                Dados públicos.<br />Decisões que{' '}
-                <span className="text-[#8fb4ff]">movem</span> territórios.
+              <div className="mb-7 inline-flex items-center gap-2 border border-white/20 bg-white/8 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-[#76a5ff]" /> Inteligência
+                em compras públicas
+              </div>
+              <h1 className="max-w-2xl text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
+                Mais oportunidade para quem vende e clareza para quem decide.
+                {/* Dados públicos.<br />Decisões que{' '}
+                <span className="text-[#8fb4ff]">movem</span> territórios. */}
               </h1>
               <p className="mt-7 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
-                Transformamos compras públicas complexas em uma visão clara para
-                gestores e oportunidades reais para pequenos negócios.
+                Reunimos dados dispersos de compras públicas para mostrar aos municípios
+                o impacto das contratações e aos pequenos negócios as oportunidades
+                certas para o seu perfil.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <Button
@@ -312,11 +314,11 @@ export function LandingPage() {
               </div>
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 hidden h-28 w-14 items-center justify-center bg-landing-blue text-white lg:flex">
+          {/* <div className="absolute bottom-0 left-0 hidden h-28 w-14 items-center justify-center bg-landing-blue text-white lg:flex">
             <span className="-rotate-90 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.2em]">
               Ceará · Brasil
             </span>
-          </div>
+          </div> */}
         </section>
 
         <section
@@ -449,11 +451,11 @@ export function LandingPage() {
                   A informação certa para quem faz a economia local acontecer.
                 </h2>
               </div>
-              <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              {/* <p className="max-w-2xl text-base leading-7 text-muted-foreground">
                 O monitoraME conecta a necessidade de transparência da gestão
                 pública à camada de crescimento dos pequenos negócios. Menos tempo
                 interpretando bases; mais clareza para agir.
-              </p>
+              </p> */}
             </div>
             <div className="mt-14 grid gap-4 lg:grid-cols-3">
               {audiences.map(({ title, description, icon: Icon }) => (
@@ -567,37 +569,33 @@ export function LandingPage() {
               {modules.map(({ title, description, icon: Icon, tone }, index) => (
                 <article
                   key={title}
-                  className={`group relative min-h-80 overflow-hidden p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-10 ${
-                    tone === 'dark'
+                  className={`group relative min-h-80 overflow-hidden p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-10 ${tone === 'dark'
                       ? 'bg-landing-ink text-white'
                       : tone === 'blue'
                         ? 'bg-landing-blue text-white'
                         : 'border border-border/80 bg-card text-foreground shadow-[0_12px_35px_-30px_rgb(0_20_41/35%)]'
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`metric absolute right-6 top-4 text-7xl font-semibold ${
-                      tone === 'light' ? 'text-primary/7' : 'text-white/7'
-                    }`}
+                    className={`metric absolute right-6 top-4 text-7xl font-semibold ${tone === 'light' ? 'text-primary/7' : 'text-white/7'
+                      }`}
                   >
                     0{index + 1}
                   </span>
                   <div
-                    className={`flex size-12 items-center justify-center rounded-full ${
-                      tone === 'light'
+                    className={`flex size-12 items-center justify-center rounded-full ${tone === 'light'
                         ? 'bg-secondary text-primary'
                         : 'bg-white/12 text-white'
-                    }`}
+                      }`}
                   >
                     <Icon className="size-5" />
                   </div>
                   <h3 className="mt-16 max-w-md text-2xl font-bold">{title}</h3>
                   <p
-                    className={`mt-4 max-w-lg text-sm leading-6 ${
-                      tone === 'light'
+                    className={`mt-4 max-w-lg text-sm leading-6 ${tone === 'light'
                         ? 'text-muted-foreground'
                         : 'text-white/68'
-                    }`}
+                      }`}
                   >
                     {description}
                   </p>
@@ -625,8 +623,8 @@ export function LandingPage() {
                   <DatabaseZap className="size-5" />
                 </span>
                 <p className="eyebrow mt-7 text-primary">Da base à decisão</p>
-                <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
-                  Complexidade nos bastidores. Simplicidade na sua tela.
+                <h2 className="mt-4 text-5xl font-bold leading-[1.05] sm:text-4xl">
+                  Simplicidade na sua tela.
                 </h2>
                 <p className="mt-6 text-sm leading-7 text-muted-foreground">
                   Nossa metodologia organiza o caminho do dado para que você possa se
@@ -692,7 +690,7 @@ export function LandingPage() {
             </div>
             <div className="relative hidden min-h-96 overflow-hidden bg-landing-ink lg:block">
               <Image
-                src="/landing/hero-team.png"
+                src="/landing/hero-david.webp"
                 alt="Equipe trabalhando com dados públicos"
                 fill
                 sizes="36vw"
