@@ -1,143 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
-import { Resolver, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { authSchema, AuthFormData, completeAuthSchema, CompleteAuthFormData } from "../schemas/auth.schema";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowRight, Check, Eye, EyeOff, IdCard, LoaderCircle, LockKeyhole, Mail, Phone, UserRound } from "lucide-react";
+import { Resolver, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
-type SubmitResult = { error?: string } | void;
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { authSchema, type AuthFormData, completeAuthSchema, type CompleteAuthFormData } from "../schemas/auth.schema";
 
+type SubmitResult = { error?: string } | void;
 type RegisterFormProps =
   | { mode?: "register"; onSubmitAction: (data: AuthFormData) => Promise<SubmitResult> }
   | { mode: "complete"; onSubmitAction: (data: CompleteAuthFormData) => Promise<SubmitResult> };
 
+const fieldClass = "h-11 rounded-lg bg-background pl-10";
+
 export function RegisterForm(props: RegisterFormProps) {
   const isCompletion = props.mode === "complete";
   const [loading, setLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<CompleteAuthFormData>({
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const { register, handleSubmit, control, formState: { errors } } = useForm<CompleteAuthFormData>({
     resolver: zodResolver(isCompletion ? completeAuthSchema : authSchema) as Resolver<CompleteAuthFormData>,
   });
 
-  const senhaValue = watch("senha") || "";
+  const password = useWatch({ control, name: "senha" }) || "";
+  const requirements = [
+    [password.length >= 8, "8 caracteres"],
+    [/[A-Z]/.test(password), "Uma maiúscula"],
+    [/[0-9]/.test(password), "Um número"],
+    [/[^A-Za-z0-9]/.test(password), "Um símbolo"],
+  ] as const;
 
-  // Avaliação de força da senha para feedback visual
-  const hasMinLen = senhaValue.length >= 8;
-  const hasUpper = /[A-Z]/.test(senhaValue);
-  const hasNumber = /[0-9]/.test(senhaValue);
-  const hasSpecial = /[^A-Za-z0-9]/.test(senhaValue);
-
-  const handleFormSubmit = async (data: CompleteAuthFormData) => {
+  const onSubmit = async (data: CompleteAuthFormData) => {
     try {
       setLoading(true);
       const result = await props.onSubmitAction(data);
-      if (result?.error) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success("Conta criada com sucesso!");
+      if (result?.error) return toast.error(result.error);
+      toast.success(isCompletion ? "Cadastro concluído!" : "Conta criada com sucesso!");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Ocorreu um erro ao criar a conta.");
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar a conta.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-          Criar Conta
-        </h2>
-        <p className="text-sm text-slate-500">
-          Registe-se para aceder ao portal municipal e monitorar dados
+    <div className="mx-auto w-full max-w-md">
+      <div className="mb-7">
+        <span className="eyebrow text-primary">{isCompletion ? "Última etapa" : "Comece agora"}</span>
+        <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">{isCompletion ? "Complete seu cadastro." : "Crie sua conta."}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {isCompletion ? "Revise seus dados e defina a senha que usará nos próximos acessos." : "Preencha seus dados para acessar as análises e oportunidades do MonitoraME."}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Nome Completo</label>
-          <Input placeholder="Seu nome" {...register("name")} />
-          {errors.name && <span className="text-xs text-red-500 mt-1 block">{errors.name.message}</span>}
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-3.5">
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <Field id="register-name" label="Nome completo" error={errors.name?.message} icon={<UserRound />}>
+            <Input id="register-name" autoComplete="name" placeholder="Seu nome" aria-invalid={Boolean(errors.name)} className={fieldClass} {...register("name")} />
+          </Field>
+          <Field id="register-cpf" label="CPF" error={errors.cpf?.message} icon={<IdCard />}>
+            <Input id="register-cpf" inputMode="numeric" placeholder="000.000.000-00" aria-invalid={Boolean(errors.cpf)} className={fieldClass} {...register("cpf")} />
+          </Field>
         </div>
 
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">CPF</label>
-          <Input placeholder="000.000.000-00" {...register("cpf")} />
-          {errors.cpf && <span className="text-xs text-red-500 mt-1 block">{errors.cpf.message}</span>}
-        </div>
-
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">E-mail</label>
-          <Input type="email" placeholder="seu@email.com" {...register("email")} />
-          {errors.email && <span className="text-xs text-red-500 mt-1 block">{errors.email.message}</span>}
-        </div>
+        <Field id="register-email" label="E-mail" error={errors.email?.message} icon={<Mail />}>
+          <Input id="register-email" type="email" autoComplete="email" placeholder="seu@email.com" aria-invalid={Boolean(errors.email)} className={fieldClass} {...register("email")} />
+        </Field>
 
         {isCompletion && (
-          <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Telefone (com DDD)</label>
-            <Input placeholder="+55 (88) 99999-9999" {...register("phone")} />
-            {errors.phone && <span className="text-xs text-red-500 mt-1 block">{errors.phone.message}</span>}
-          </div>
+          <Field id="register-phone" label="Telefone com DDD" error={errors.phone?.message} icon={<Phone />}>
+            <Input id="register-phone" inputMode="tel" autoComplete="tel" placeholder="(85) 99999-9999" aria-invalid={Boolean(errors.phone)} className={fieldClass} {...register("phone")} />
+          </Field>
         )}
 
-        <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>
-          <Input type="password" placeholder="Mínimo 8 caracteres, maiúsculas, números e símbolos" {...register("senha")} />
-          
-          {/* Indicador visual dinâmico de força da senha */}
-          <div className="mt-2 space-y-1 text-xs">
-            <p className="text-slate-600 font-medium">Requisitos para senha forte:</p>
-            <div className="grid grid-cols-2 gap-1 text-slate-500">
-              <span className={hasMinLen ? "text-green-600 font-semibold" : "text-slate-400"}>
-                {hasMinLen ? "✓" : "○"} Mínimo 8 caracteres
-              </span>
-              <span className={hasUpper ? "text-green-600 font-semibold" : "text-slate-400"}>
-                {hasUpper ? "✓" : "○"} Letra maiúscula
-              </span>
-              <span className={hasNumber ? "text-green-600 font-semibold" : "text-slate-400"}>
-                {hasNumber ? "✓" : "○"} Número
-              </span>
-              <span className={hasSpecial ? "text-green-600 font-semibold" : "text-slate-400"}>
-                {hasSpecial ? "✓" : "○"} Caractere especial (!@#$)
-              </span>
-            </div>
-          </div>
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <PasswordField id="register-password" label="Senha" visible={showPassword} onToggle={() => setShowPassword((value) => !value)} error={errors.senha?.message}>
+            <Input id="register-password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Crie uma senha" aria-invalid={Boolean(errors.senha)} className="h-11 rounded-lg bg-background px-10" {...register("senha")} />
+          </PasswordField>
+          <PasswordField id="register-confirm-password" label="Confirmar senha" visible={showConfirmation} onToggle={() => setShowConfirmation((value) => !value)} error={errors.confirmarSenha?.message}>
+            <Input id="register-confirm-password" type={showConfirmation ? "text" : "password"} autoComplete="new-password" placeholder="Repita a senha" aria-invalid={Boolean(errors.confirmarSenha)} className="h-11 rounded-lg bg-background px-10" {...register("confirmarSenha")} />
+          </PasswordField>
+        </div>
 
-          {errors.senha && <span className="text-xs text-red-500 mt-1 block">{errors.senha.message}</span>}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-1 border border-border/70 bg-muted/35 p-3">
+          {requirements.map(([met, label]) => (
+            <span key={label} className={`flex items-center gap-1.5 text-[10px] ${met ? "font-semibold text-success" : "text-muted-foreground"}`}>
+              <span className={`flex size-3.5 items-center justify-center rounded-full border ${met ? "border-success bg-success text-white" : "border-input"}`}>{met && <Check className="size-2.5" />}</span>
+              {label}
+            </span>
+          ))}
         </div>
 
         <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Confirmar Senha</label>
-          <Input type="password" placeholder="Confirme sua senha" {...register("confirmarSenha")} />
-          {errors.confirmarSenha && <span className="text-xs text-red-500 mt-1 block">{errors.confirmarSenha.message}</span>}
-        </div>
-
-        <div className="flex items-center space-x-2 pt-2">
-          <input type="checkbox" id="termos" {...register("termos")} className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900" />
-          <label htmlFor="termos" className="text-xs text-slate-600">
-            Concordo com os <span className="font-semibold underline">Termos de Uso</span>
+          <label htmlFor="register-terms" className="flex cursor-pointer items-start gap-2.5 text-xs leading-5 text-muted-foreground">
+            <input id="register-terms" type="checkbox" {...register("termos")} className="mt-0.5 size-4 rounded border-input accent-primary" />
+            <span>Li e concordo com os <span className="font-semibold text-foreground underline underline-offset-2">Termos de Uso</span> e a Política de Privacidade.</span>
           </label>
+          {errors.termos && <p role="alert" className="mt-1 text-xs text-destructive">{errors.termos.message}</p>}
         </div>
-        {errors.termos && <span className="text-xs text-red-500 block">{errors.termos.message as string}</span>}
 
-        <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800 mt-2" disabled={loading}>
-          {loading ? "A criar conta..." : "Criar Conta →"}
+        <Button type="submit" className="h-12 w-full rounded-lg text-sm font-semibold" disabled={loading}>
+          {loading ? <><LoaderCircle className="size-4 animate-spin" />Salvando...</> : <>{isCompletion ? "Concluir e acessar" : "Criar conta"}<ArrowRight className="size-4" /></>}
         </Button>
       </form>
 
-      <div className="text-center text-xs text-slate-500 mt-6">
-        Já possui uma conta? <Link href="/login" className="font-semibold text-slate-800 underline">Faça login</Link>
-      </div>
+      <p className="mt-5 text-center text-xs text-muted-foreground">Já possui uma conta? <Link href="/login" className="font-semibold text-primary hover:underline">Faça login</Link></p>
     </div>
   );
+}
+
+function Field({ id, label, error, icon, children }: { id: string; label: string; error?: string; icon: React.ReactElement; children: React.ReactNode }) {
+  return <div><label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-foreground">{label}</label><div className="relative"><span className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-muted-foreground [&>svg]:size-4">{icon}</span>{children}</div>{error && <p role="alert" className="mt-1 text-xs text-destructive">{error}</p>}</div>;
+}
+
+function PasswordField({ id, label, visible, onToggle, error, children }: { id: string; label: string; visible: boolean; onToggle: () => void; error?: string; children: React.ReactNode }) {
+  return <div><label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-foreground">{label}</label><div className="relative"><LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />{children}<button type="button" onClick={onToggle} aria-label={visible ? "Ocultar senha" : "Mostrar senha"} className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">{visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></div>{error && <p role="alert" className="mt-1 text-xs text-destructive">{error}</p>}</div>;
 }
