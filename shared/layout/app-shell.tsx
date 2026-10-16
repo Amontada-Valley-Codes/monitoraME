@@ -11,7 +11,6 @@ import {
   Search,
   ChevronRight,
   RefreshCw,
-  CircleDollarSign,
   MessageCircle,
 } from 'lucide-react';
 import {
@@ -64,7 +63,6 @@ export const NAV = [
 const PLANS_PAGE = {
   path: '/analitico/planos',
   label: 'Planos',
-  icon: CircleDollarSign,
 };
 
 function Navigation({ onSearch }: { onSearch: () => void }) {
@@ -248,18 +246,6 @@ function ShellContent({ children }: { children: ReactNode }) {
               </TooltipTrigger>
               <TooltipContent>Atualizar consulta</TooltipContent>
             </Tooltip>
-            <Button
-              variant={path.startsWith(PLANS_PAGE.path) ? 'secondary' : 'outline'}
-              size="sm"
-              aria-label="Abrir planos"
-              disabled={state === 'loading'}
-              onClick={() => {
-                if (state !== 'loading') navigate(PLANS_PAGE.path);
-              }}
-            >
-              <CircleDollarSign className="size-4 text-primary" />
-              <span className="hidden sm:inline text-primary">Planos</span>
-            </Button>
           </div>
         </header>
 

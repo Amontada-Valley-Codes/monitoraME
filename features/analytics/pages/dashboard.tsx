@@ -14,7 +14,7 @@ import {
   OverviewEvolution,
   OverviewExpenses,
   OverviewKpis,
-  OverviewReading,
+  // OverviewReading,
 } from '../components/overview-sections';
 import { usePipelineOverview } from '../pipeline/use-overview';
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
@@ -102,18 +102,11 @@ export default function Dashboard() {
             <OverviewDestinations params={params} />
           </div>
 
-          <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <div className="mb-5 grid grid-cols-1 gap-4 ">
             <OverviewEvolution params={params} />
-            <OverviewReading params={params} />
+            {/* <OverviewReading params={params} /> */}
           </div>
 
-          <Alert className="mt-6 bg-transparent text-muted-foreground">
-            <Info className="size-4" />
-            <AlertDescription>
-              Dados públicos consolidados. Período consultado: {view.period}. Valores
-              monetários recebidos em centavos e formatados em reais somente na tela.
-            </AlertDescription>
-          </Alert>
         </>
       )}
     </>

@@ -39,7 +39,7 @@ export function CommitmentDetailView({ commitmentKey, from }: { commitmentKey: s
   const loading = state.key !== requestKey;
   return <div>
     <Button asChild variant="ghost" className="mb-5 pl-0"><Link href={from}><ArrowLeft />Voltar aos empenhos</Link></Button>
-    {loading ? <DetailSkeleton /> : state.error ? <DetailError error={state.error} from={from} onRetry={() => setVersion((value) => value + 1)} /> : state.data ? <DetailContent detail={state.data} /> : null}
+    {loading ? <DetailSkeleton /> : state.error ? <DetailError error={state.error} from={from} onRetry={() => setVersion((value) => value + 1)} /> : state.data ? <DetailContent detail={state.data} from={from} /> : null}
   </div>;
 }
 
@@ -59,8 +59,12 @@ function DetailError({ error, from, onRetry }: { error: AnalyticsApiError; from:
 
 const SupportCode = ({ value }: { value: string }) => <p className="mt-3 font-mono text-xs text-muted-foreground">Código de suporte: {value}</p>;
 
-function DetailContent({ detail }: { detail: CommitmentDetail }) {
-  const providerLink = supplierHref(detail.fornecedor);
+function DetailContent({ detail, from }: { detail: CommitmentDetail; from: string }) {
+  const providerLink = supplierHref(detail.fornecedor, {
+    from,
+    commitmentDate: detail.data_empenho,
+    exercise: detail.classificacao_orcamentaria.exercicio,
+  });
   const cancellations = detail.anulacoes ?? [];
   const sede = [detail.fornecedor.municipio_sede, detail.fornecedor.uf_sede].filter(Boolean).join(' / ') || '—';
   const references: Array<[string, string | null]> = [

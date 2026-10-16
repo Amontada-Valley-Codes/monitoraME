@@ -1,4 +1,50 @@
-import type { ComparisonMode, ComparisonRequest, ComparisonSideDraft, ValueComparison } from './types';
+import type { ComparisonMode, ComparisonRequest, ComparisonSideDraft, SideResult, ValueComparison } from './types';
+
+export const COMPARISON_EXERCISES = ['2025', '2024', '2023', '2022', '2021'] as const;
+
+export function comparisonExerciseFilters(exercise: string) {
+  const normalized = /^\d{4}$/.test(exercise) ? exercise : '2025';
+  return {
+    start_date: `${normalized}-01-01`,
+    end_date: `${normalized}-12-31`,
+  };
+}
+
+export function comparisonLocationLabel(side: SideResult): string {
+  const municipality = side.overview.municipio;
+  const databaseName = side.overview.base_analitica?.municipio_comprador;
+  const municipalityName = municipality?.nome ?? (
+    databaseName
+      ? databaseName.toLocaleLowerCase('pt-BR').replace(/(^|\s)\p{L}/gu, (letter) => letter.toLocaleUpperCase('pt-BR'))
+      : side.label
+  );
+
+  return [municipalityName, municipality?.uf ?? side.filters.uf]
+    .filter(Boolean)
+    .join(' / ');
+}
+
+export function comparisonSideSummary(side: SideResult) {
+  const requested = side.overview.competencias_solicitadas.length;
+  const published = side.overview.competencias_publicadas.length;
+  const failures = side.overview.falhas_competencias.length;
+  const missing = side.overview.competencias_ausentes.length;
+  const publishedPercentage = requested > 0 ? (published / requested) * 100 : null;
+
+  return {
+    location: comparisonLocationLabel(side),
+    status:
+      side.overview.status_exercicio ??
+      (failures > 0 || missing > 0 ? 'Cobertura parcial' : 'Dados publicados'),
+    commitments:
+      side.overview.totais_filtrados?.empenhos ?? side.overview.totais_brutos.empenhos,
+    coverageLabel: side.overview.cobertura_cadastral
+      ? 'Cobertura cadastral'
+      : 'Competências publicadas',
+    coverage:
+      side.overview.cobertura_cadastral?.percentual ?? publishedPercentage,
+  };
+}
 
 export function deriveComparisonMode(left: ComparisonSideDraft, right: ComparisonSideDraft): ComparisonMode | null {
   const sameMunicipality = left.filters.municipality_ibge_code === right.filters.municipality_ibge_code;
@@ -40,12 +86,20 @@ export function evolutionRows(items: Array<{
 }>) {
   return items.map((item) => ({
     position: item.position,
+    date: comparisonPeriodDate(item.left_period ?? item.right_period, item.position),
     label: item.left_period === item.right_period
       ? periodLabel(item.left_period)
       : `${periodLabel(item.left_period)} × ${periodLabel(item.right_period)}`,
     left: item.left_published ? item.compras_consideradas_centavos.left.value : null,
     right: item.right_published ? item.compras_consideradas_centavos.right.value : null,
   }));
+}
+
+function comparisonPeriodDate(value: string | null, position: number): Date {
+  const match = value ? /^(\d{4})-(\d{2})$/.exec(value) : null;
+  return match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, 15, 12)
+    : new Date(2000, Math.max(0, position - 1), 15, 12);
 }
 
 function periodLabel(value: string | null): string {

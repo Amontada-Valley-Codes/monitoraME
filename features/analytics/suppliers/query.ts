@@ -19,6 +19,16 @@ export const DEFAULT_SUPPLIER_FILTERS: SupplierListFilters = {
   sort_order: 'desc',
 };
 
+export const SUPPLIER_EXERCISES = ['2025', '2024', '2023', '2022', '2021'] as const;
+
+export function supplierExerciseFilters(exercise: string) {
+  const normalized = /^\d{4}$/.test(exercise) ? exercise : '2025';
+  return {
+    start_date: `${normalized}-01-01`,
+    end_date: `${normalized}-12-31`,
+  };
+}
+
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const COMPANY_SIZE_VALUES = new Set(['ME', 'MEI', 'EPP', 'OTHER', 'UNKNOWN']);
 const SUPPLIER_ORIGIN_VALUES = new Set([
@@ -77,18 +87,17 @@ export function parseSupplierFilters(params: URLSearchParams): SupplierListFilte
   const pageSize = Number(params.get('page_size'));
   const sortBy = params.get('sort_by');
   const startDate = params.get('start_date');
-  const endDate = params.get('end_date');
+  const requestedExercise = startDate && isCivilDate(startDate)
+    ? startDate.slice(0, 4)
+    : DEFAULT_SUPPLIER_FILTERS.start_date.slice(0, 4);
+  const closedExercise = supplierExerciseFilters(requestedExercise);
   const municipality = params.get('municipality_tce_code')?.trim();
   const search = params.get('search')?.trim();
 
   return {
     uf: params.get('uf') === 'CE' ? 'CE' : DEFAULT_SUPPLIER_FILTERS.uf,
-    start_date: startDate && isCivilDate(startDate)
-      ? startDate
-      : DEFAULT_SUPPLIER_FILTERS.start_date,
-    end_date: endDate && isCivilDate(endDate)
-      ? endDate
-      : DEFAULT_SUPPLIER_FILTERS.end_date,
+    start_date: closedExercise.start_date,
+    end_date: closedExercise.end_date,
     ...(municipality && /^\d{3}$/.test(municipality)
       ? { municipality_tce_code: municipality }
       : {}),
