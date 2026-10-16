@@ -322,7 +322,7 @@ function ChartLegendContent({
                   }}
                 />
               )}
-              {itemConfig?.label ?? item.value ?? item.dataKey}
+              {itemConfig?.label ?? String(item.value ?? item.dataKey ?? "")}
             </div>
           )
         })}

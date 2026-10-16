@@ -4,5 +4,11 @@ import { SessionProvider } from '@/shared/auth/session-context';
 import { Providers } from './providers';
 
 export default function Home() {
-  return <Providers><SessionProvider><LeadCtaProvider><LandingPage /></LeadCtaProvider></SessionProvider></Providers>;
+  return <Providers>
+    <SessionProvider>
+      <LeadCtaProvider>
+        <LandingPage />
+      </LeadCtaProvider>
+    </SessionProvider>
+  </Providers>;
 }

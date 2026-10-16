@@ -1,13 +1,15 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, LoginFormData } from "../schemas/login.schema";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { toast } from "sonner";
+import { useState } from 'react';
+import Link from 'next/link';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowRight, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { loginSchema, type LoginFormData } from '../schemas/login.schema';
 
 interface LoginFormProps {
   onSubmitAction: (data: LoginFormData) => Promise<void>;
@@ -15,67 +17,99 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmitAction }: LoginFormProps) {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
+  } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
   const handleFormSubmit = async (data: LoginFormData) => {
     try {
       setLoading(true);
       await onSubmitAction(data);
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro ao entrar. Tente novamente.");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Não foi possível entrar. Tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">
-          Bem-vindo de volta!
-        </h2>
-        <p className="text-sm text-slate-500">
-          Volte a monitorar compras públicas, dados municipais e receba novas propostas
+    <div className="mx-auto w-full max-w-md">
+      <div className="mb-9">
+        <span className="eyebrow text-primary">Acesso à plataforma</span>
+        <h2 className="mt-4 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">Bem-vindo de volta.</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          Entre para acompanhar oportunidades e analisar as compras públicas do seu território.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(handleFormSubmit)} noValidate className="space-y-5">
         <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">E-mail</label>
-          <Input type="email" placeholder="seu@email.com" {...register("email")} />
-          {errors.email && <span className="text-xs text-red-500 mt-1 block">{errors.email.message}</span>}
+          <label htmlFor="login-email" className="mb-2 block text-xs font-semibold text-foreground">E-mail</label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="login-email"
+              type="email"
+              autoComplete="email"
+              placeholder="seu@email.com"
+              aria-invalid={Boolean(errors.email)}
+              className="h-12 rounded-lg bg-background pl-11"
+              {...register('email')}
+            />
+          </div>
+          {errors.email && <p role="alert" className="mt-2 text-xs text-destructive">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Senha</label>
-          <Input type="password" placeholder="Sua senha" {...register("password")} />
-          {errors.password && <span className="text-xs text-red-500 mt-1 block">{errors.password.message}</span>}
+          <div className="mb-2 flex items-center justify-between">
+            <label htmlFor="login-password" className="text-xs font-semibold text-foreground">Senha</label>
+          </div>
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="Digite sua senha"
+              aria-invalid={Boolean(errors.password)}
+              className="h-12 rounded-lg bg-background px-11"
+              {...register('password')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              className="absolute right-3 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+          {errors.password && <p role="alert" className="mt-2 text-xs text-destructive">{errors.password.message}</p>}
         </div>
 
-        <Button type="submit" className="w-full bg-slate-900 text-white hover:bg-slate-800" disabled={loading}>
-          {loading ? "A entrar..." : "Entrar →"}
+        <Button type="submit" className="h-12 w-full rounded-lg text-sm font-semibold" disabled={loading}>
+          {loading ? <><LoaderCircle className="size-4 animate-spin" />Entrando...</> : <>Acessar plataforma <ArrowRight className="size-4" /></>}
         </Button>
       </form>
 
-      <div className="relative my-6 text-center">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-        <span className="relative bg-white px-3 text-xs text-slate-400 uppercase">ou</span>
+      <div className="my-8 flex items-center gap-4" aria-hidden="true">
+        <span className="h-px flex-1 bg-border" />
+        <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">Novo por aqui?</span>
+        <span className="h-px flex-1 bg-border" />
       </div>
 
-      <Button variant="outline" className="w-full mb-6 border-slate-200">
-        🌐 Continuar com o Google
+      <Button asChild variant="outline" className="h-12 w-full rounded-lg bg-card text-sm">
+        <Link href="/register">Criar uma conta gratuita <ArrowRight className="size-4" /></Link>
       </Button>
 
-      <div className="text-center text-xs text-slate-500">
-        Não possui uma conta? <Link href="/register" className="font-semibold text-slate-800 underline">Cadastre-se</Link>
-      </div>
+      <p className="mt-6 text-center text-xs leading-5 text-muted-foreground">
+        Precisa apenas consultar informações?{' '}
+        <Link href="/analitico" className="font-semibold text-primary hover:underline">Acesse os dados públicos</Link>
+      </p>
     </div>
   );
 }

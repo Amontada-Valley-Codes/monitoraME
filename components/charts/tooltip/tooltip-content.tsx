@@ -18,29 +18,29 @@ export interface TooltipContentProps {
 
 export function TooltipContent({ title, rows, children }: TooltipContentProps) {
   return (
-    <div className="overflow-hidden">
-      <div className="px-3 py-2.5">
+    <div className="overflow-hidden px-3.5 py-3">
+      <div>
         {title && (
-          <div className="mb-2 border-b border-white/10 pb-2 text-left text-xs font-semibold text-chart-tooltip-foreground">
+          <div className="mb-2.5 text-left text-[0.6875rem] font-medium tracking-wide text-chart-tooltip-muted">
             {title}
           </div>
         )}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {rows.map((row) => (
             <div
-              className="flex items-center justify-between gap-4"
+              className="flex items-center justify-between gap-6"
               key={`${row.label}-${row.color}`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  className="size-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: row.color }}
                 />
-                <span className="text-chart-tooltip-muted text-sm">
+                <span className="truncate text-xs text-chart-tooltip-muted">
                   {row.label}
                 </span>
               </div>
-              <span className="font-semibold text-chart-tooltip-foreground text-sm tabular-nums">
+              <span className="font-semibold text-sm tabular-nums text-chart-tooltip-foreground">
                 {typeof row.value === "number" ? intFmt(row.value) : row.value}
               </span>
             </div>
@@ -48,7 +48,7 @@ export function TooltipContent({ title, rows, children }: TooltipContentProps) {
         </div>
 
         {children && (
-          <div className="mt-2 transition-opacity duration-200 ease-out">
+          <div className="mt-2.5 transition-opacity duration-200 ease-out">
             {children}
           </div>
         )}

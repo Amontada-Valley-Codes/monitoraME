@@ -40,6 +40,10 @@
   /* Brand / Status */
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
+  --color-landing-ink: var(--landing-ink);
+  --color-landing-blue: var(--landing-blue);
+  --color-landing-paper: var(--landing-paper);
+  --color-landing-tint: var(--landing-tint);
   --color-navy: var(--navy);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
@@ -207,11 +211,124 @@
 }
 
 @layer components {
+  .login-page-scale {
+    zoom: 0.9;
+  }
+  
+  .saved-calendar .fc {
+    --fc-border-color: var(--border);
+    --fc-page-bg-color: var(--card);
+    --fc-neutral-bg-color: var(--muted);
+    --fc-today-bg-color: color-mix(in srgb, var(--primary) 8%, transparent);
+    color: var(--foreground);
+    font-family: var(--font-body);
+  }
+
+  .saved-calendar .fc .fc-scrollgrid,
+  .saved-calendar .fc-theme-standard td,
+  .saved-calendar .fc-theme-standard th {
+    border-color: var(--border);
+  }
+
+  .saved-calendar .fc .fc-col-header-cell-cushion {
+    padding-block: 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .saved-calendar .fc .fc-daygrid-day-frame {
+    min-height: 7rem;
+    padding: 0.25rem;
+  }
+
+  .saved-calendar .fc .fc-daygrid-day-number {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .saved-calendar .fc .fc-day-today .fc-daygrid-day-number {
+    display: grid;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    place-items: center;
+    border-radius: 9999px;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
+  .saved-calendar .fc .picked-date .fc-daygrid-day-number {
+    display: grid;
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    place-items: center;
+    border-radius: 9999px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  .saved-calendar .fc .fc-event {
+    margin: 0.125rem;
+    cursor: pointer;
+    border: 0;
+    border-radius: 0.375rem;
+    box-shadow: none;
+  }
+
+  .saved-calendar .fc .deadline-event {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+
+  .saved-calendar .fc .opening-event {
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+
   .analytics-shell-scale {
+    --background: #edf1f7;
+    --card: #f9fbfe;
+    --card-foreground: #172033;
+    --muted: #e4eaf3;
+    --muted-foreground: #556174;
+    --accent: #dce7f5;
+    --accent-foreground: #174b9c;
+    --border: #ccd6e5;
+    --input: #aebbd0;
+    --sidebar: #e2eaf6;
+    --sidebar-foreground: #33425a;
+    --sidebar-accent: #c9daf4;
+    --sidebar-accent-foreground: #174b9c;
+    --sidebar-border: #c3cee0;
     width: 111.111111%;
     min-height: 111.111111svh;
     overflow-x: clip;
     zoom: 0.9;
+  }
+
+  .dark .analytics-shell-scale {
+    --background: #0b1220;
+    --card: #111b2d;
+    --card-foreground: #edf3ff;
+    --muted: #182235;
+    --muted-foreground: #aab5c9;
+    --accent: #1c3152;
+    --accent-foreground: #d7e3ff;
+    --border: #2b3950;
+    --input: #53617a;
+    --sidebar: #0f192a;
+    --sidebar-foreground: #c3cde0;
+    --sidebar-accent: #1c3152;
+    --sidebar-accent-foreground: #d7e3ff;
+    --sidebar-border: #2b3950;
+  }
+
+  .analytics-shell-scale .metric {
+    font-family: var(--font-heading);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.035em;
   }
 
   .analytics-shell-scale [data-slot="sidebar-inset"] {

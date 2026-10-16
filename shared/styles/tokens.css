@@ -10,6 +10,10 @@
   --primary-foreground: #ffffff;
   --brand: #4575d6;
   --brand-ink: #001429;
+  --landing-ink: #0a1930;
+  --landing-blue: #2855c5;
+  --landing-paper: #f5f7fc;
+  --landing-tint: #eaf0fa;
   --navy: #c8dcf1;
   --secondary: #ebf3fe;
   --secondary-foreground: #2058b7;
@@ -98,6 +102,10 @@
   --primary-foreground: #071426;
   --brand: #6f9df4;
   --brand-ink: #dce8ff;
+  --landing-ink: #081426;
+  --landing-blue: #3769db;
+  --landing-paper: #0b1220;
+  --landing-tint: #101b2e;
   --navy: #152a4a;
   --secondary: #192a46;
   --secondary-foreground: #c4d6ff;

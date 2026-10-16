@@ -1,35 +1,42 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
+  ArrowDownRight,
   ArrowRight,
   BarChart3,
-  Braces,
   Building2,
-  ChartNoAxesCombined,
-  ChevronDown,
+  Check,
+  CheckCircle2,
   CircleDollarSign,
+  DatabaseZap,
   FileSearch,
   Landmark,
   MapPin,
   MessageCircle,
+  SearchCheck,
   ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  ChevronsUpDown,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Logo } from '@/shared/components/logo';
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
 import { useProtectedNavigate } from '@/shared/auth/protected-navigation';
+import { Logo, LogoIcon } from '@/shared/components/logo';
 
 const connectorWords = new Set(['DA', 'DAS', 'DE', 'DO', 'DOS', 'E']);
 
@@ -57,78 +64,100 @@ const municipalities = TCE_MUNICIPALITIES.map((municipality) => ({
   label: municipalityLabel(municipality.name),
 }));
 
-const reasons = [
+const audiences = [
   {
-    title: 'Clareza para decidir melhor',
+    title: 'Empresas locais',
     description:
-      'Organizamos, filtramos e apresentamos dados públicos complexos em indicadores claros, comparáveis e úteis para decisões mais estratégicas.',
-    icon: ChartNoAxesCombined,
-  },
-  {
-    title: 'Oportunidades para empresas',
-    description:
-      'Facilitamos a descoberta de oportunidades compatíveis com a atividade e a região de cada negócio, sem substituir os canais oficiais de participação.',
+      'Descubra oportunidades compatíveis com sua atividade e seu território.',
     icon: Building2,
   },
   {
-    title: 'Inteligência para a gestão pública',
+    title: 'Gestão pública',
     description:
-      'Mostramos quanto dos recursos permanece no território, a participação das microempresas e onde fortalecer a economia local.',
+      'Acompanhe participação de MPEs, recursos locais e qualidade das compras.',
     icon: Landmark,
+  },
+  {
+    title: 'Controle e análise',
+    description:
+      'Transforme bases públicas dispersas em uma leitura comparável e confiável.',
+    icon: SearchCheck,
   },
 ];
 
 const modules = [
   {
-    title: 'Auditoria Cota LC 123/06',
+    title: 'Auditoria da LC 123/06',
     description:
-      'Validação automática das reservas de 25% em certames e licitações exclusivas de até R$ 80 mil para micro e pequenas empresas.',
-    icon: Braces,
-    featured: true,
+      'Identifique reservas de 25% e licitações exclusivas de até R$ 80 mil para micro e pequenas empresas.',
+    icon: ShieldCheck,
+    tone: 'dark',
   },
   {
-    title: 'Radar de Oportunidades MPE',
+    title: 'Radar de oportunidades MPE',
     description:
-      'Editais abertos nos municípios cearenses, com alertas em tempo real e filtros georreferenciados.',
-    icon: BarChart3,
+      'Encontre editais abertos nos municípios cearenses com filtros por atividade e localização.',
+    icon: TrendingUp,
+    tone: 'light',
   },
   {
-    title: 'Retenção vs. Evasão Fiscal',
+    title: 'Retenção e evasão de recursos',
     description:
-      'Métricas econômicas que mostram quanto do valor pago permanece na economia regional ou se perde para outros estados.',
+      'Entenda quanto do valor contratado permanece na economia do município ou segue para outras regiões.',
     icon: CircleDollarSign,
+    tone: 'light',
   },
   {
-    title: 'Raio-X de Credores & Contratos',
+    title: 'Raio-X de credores e contratos',
     description:
-      'Mapeamento transparente de fornecedores, vínculos e atividades contratadas com cruzamento automatizado.',
+      'Mapeie fornecedores, vínculos, empenhos e atividades contratadas com dados públicos harmonizados.',
     icon: FileSearch,
+    tone: 'blue',
   },
 ];
 
 const processSteps = [
-  {
-    title: 'Ingestão mensal',
-    description: 'Extração programada e segura dos dados brutos de empenho, liquidação e pagamento.',
-  },
-  {
-    title: 'Harmonização',
-    description: 'Normalização de códigos, portes empresariais e recortes territoriais.',
-  },
-  {
-    title: 'Inteligência cívica',
-    description: 'Detecção de alertas por regras de negócio, compras fracionadas e ausência de cota.',
-  },
-  {
-    title: 'Ação & fomento',
-    description: 'Painéis intuitivos para gestores e alertas para fornecedores locais de cada município.',
-  },
+  [
+    '01',
+    'Coletamos',
+    'Integramos bases públicas de compras, empenhos e fornecedores.',
+  ],
+  [
+    '02',
+    'Organizamos',
+    'Padronizamos despesas, portes empresariais e recortes territoriais.',
+  ],
+  [
+    '03',
+    'Analisamos',
+    'Aplicamos regras de negócio e transformamos registros em indicadores.',
+  ],
+  [
+    '04',
+    'Você decide',
+    'Entregamos uma leitura simples para orientar ação e planejamento.',
+  ],
 ];
+
+const whatsappUrl =
+  'https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME.';
 
 export function LandingPage() {
   const protectedNavigate = useProtectedNavigate();
   const [municipality, setMunicipality] = useState('');
+  const [municipalityOpen, setMunicipalityOpen] = useState(false);
   const [error, setError] = useState('');
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const selectedMunicipality = municipalities.find(
+    (item) => item.code === municipality,
+  );
+
+  useEffect(() => {
+    const updateHeader = () => setHeaderScrolled(window.scrollY > 24);
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    return () => window.removeEventListener('scroll', updateHeader);
+  }, []);
 
   function submitMunicipality(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -152,371 +181,621 @@ export function LandingPage() {
     void protectedNavigate(`/analitico/municipios?${searchParams.toString()}`);
   }
 
+  const headerNavLinkClass = headerScrolled
+    ? 'transition-colors hover:text-primary'
+    : 'transition-colors hover:text-white';
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur">
+    <div className="min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${headerScrolled
+            ? 'border-border/65 bg-card/82 shadow-[0_10px_35px_-24px_rgb(0_20_41/45%)] backdrop-blur-xl'
+            : 'border-transparent bg-transparent shadow-none backdrop-blur-none'
+          }`}
+      >
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" aria-label="MonitoraME — página inicial" className="text-foreground">
+          <Link
+            href="/"
+            aria-label="MonitoraME — página inicial"
+            className={`transition-colors duration-300 ${headerScrolled ? 'text-brand-ink' : 'text-white'}`}
+          >
             <Logo className="h-6 w-auto sm:h-7" />
           </Link>
-
-          <nav aria-label="Navegação principal" className="hidden items-center gap-7 text-xs text-muted-foreground md:flex">
-            <Link className="transition-colors hover:text-foreground" href="#inicio">Início</Link>
-            <Link className="transition-colors hover:text-foreground" href="#sobre">Sobre</Link>
-            <Link className="transition-colors hover:text-foreground" href="#modulos">Módulos</Link>
-            <Link className="transition-colors hover:text-foreground" href="#metodologia">Metodologia</Link>
-            <Link className="transition-colors hover:text-foreground" href="#contato">Contato</Link>
-            <Link className="flex items-center gap-1 transition-colors hover:text-foreground" href="#fontes">
-              Dados abertos <ChevronDown className="size-3" />
+          <nav
+            aria-label="Navegação principal"
+            className={`hidden items-center gap-7 text-xs font-medium transition-colors duration-300 lg:flex ${headerScrolled ? 'text-muted-foreground' : 'text-white/75'
+              }`}
+          >
+            <Link className={headerNavLinkClass} href="#plataforma">
+              Plataforma
+            </Link>
+            <Link className={headerNavLinkClass} href="#solucoes">
+              Soluções
+            </Link>
+            <Link
+              className={headerNavLinkClass}
+              href="#metodologia"
+            >
+              Metodologia
+            </Link>
+            <Link className={headerNavLinkClass} href="#contato">
+              Contato
             </Link>
           </nav>
-
-          <Button asChild className="rounded-full bg-foreground px-5 text-xs text-background hover:bg-foreground/85">
-            <Link href="/analitico">Acessar compras públicas</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              asChild
+              variant="ghost"
+              className={`hidden rounded-full px-4 text-xs transition-colors sm:inline-flex ${headerScrolled
+                  ? 'text-foreground hover:bg-muted'
+                  : 'text-white hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              <Link href="/login">Entrar</Link>
+            </Button>
+            <Button
+              asChild
+              className={`rounded-full px-5 text-xs transition-colors ${headerScrolled
+                  ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/80'
+                  : 'bg-white! text-[#0a1930]! shadow-lg shadow-black/10 hover:bg-white/90!'
+                }`}
+            >
+              <Link href="/analitico">
+                Acessar compras públicas <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
       <main>
-        <section id="inicio" className="relative border-b">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_38%,color-mix(in_srgb,var(--primary)_10%,transparent),transparent_29%)]" />
-          <div className="relative mx-auto grid min-h-145 max-w-7xl items-center gap-14 px-5 py-20 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:py-24">
-            <div className="max-w-2xl">
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-secondary/60 px-3 py-1.5 text-[11px] font-medium text-primary">
-                <span className="size-1.5 rounded-full bg-primary" />
-                Observatório de Compras Públicas · Ceará
+        <section
+          id="inicio"
+          className="relative min-h-180 overflow-hidden bg-landing-ink text-white lg:min-h-190"
+        >
+          <Image
+            src="/landing/hero-david.webp"
+            alt="Profissionais analisando informações públicas em um ambiente de trabalho colaborativo"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[66%_center]"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-ink)_0%,color-mix(in_srgb,var(--landing-ink)_96%,transparent)_38%,color-mix(in_srgb,var(--landing-ink)_40%,transparent)_72%,color-mix(in_srgb,var(--landing-ink)_12%,transparent)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
+          <div className="relative mx-auto flex min-h-180 max-w-7xl items-center px-5 py-24 sm:px-8 lg:min-h-190">
+            <div className="max-w-2xl pt-6">
+              <div className="mb-7 inline-flex items-center gap-2 border border-white/20 bg-white/8 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
+                <span className="size-1.5 rounded-full bg-[#76a5ff]" /> Inteligência
+                em compras públicas
               </div>
-              <h1 className="max-w-xl text-4xl font-bold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-[4.3rem]">
-                Inteligência e <span className="text-primary">transparência</span> nas compras públicas.
+              <h1 className="max-w-2xl text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
+                Mais oportunidade para quem vende e clareza para quem decide.
+                {/* Dados públicos.<br />Decisões que{' '}
+                <span className="text-[#8fb4ff]">movem</span> territórios. */}
               </h1>
-              <p className="mt-7 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-                A MonitoraME transforma dados públicos complexos em informações claras para decisões melhores nas compras públicas, com foco especial nas microempresas.
+              <p className="mt-7 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
+                Reunimos dados dispersos de compras públicas para mostrar aos municípios
+                o impacto das contratações e aos pequenos negócios as oportunidades
+                certas para o seu perfil.
               </p>
-              <div className="mt-6 flex max-w-xl items-start gap-3 rounded-2xl border border-primary/15 bg-secondary/60 p-4">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                  <Landmark className="size-4" />
-                </span>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  <strong className="block font-semibold text-foreground">
-                    É necessário um governo mais orientado a dados.
-                  </strong>
-                  Informação clara fortalece decisões públicas mais estratégicas, eficientes e transparentes.
-                </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 rounded-full bg-card px-6 text-foreground hover:bg-card/88 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80"
+                >
+                  <Link href="#consulta">
+                    Consultar meu município <ArrowDownRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-white/25 bg-white/5 px-6 text-white hover:bg-white/12 hover:text-white"
+                >
+                  <Link href="/analitico">Explorar dados públicos</Link>
+                </Button>
               </div>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="rounded-full px-6 shadow-sm">
-                  <Link href="/analitico">Consultar compras por município</Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="rounded-full bg-card px-6">
-                  <Link href="/analitico/metodologia">Entender como analisamos os dados</Link>
-                </Button>
+              <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-6 text-xs text-white/64">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-[#8fb4ff]" />
+                  Dados oficiais
+                </span>
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-[#8fb4ff]" />
+                  Cobertura municipal
+                </span>
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-[#8fb4ff]" />
+                  Leitura simplificada
+                </span>
               </div>
             </div>
+          </div>
+          {/* <div className="absolute bottom-0 left-0 hidden h-28 w-14 items-center justify-center bg-landing-blue text-white lg:flex">
+            <span className="-rotate-90 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.2em]">
+              Ceará · Brasil
+            </span>
+          </div> */}
+        </section>
 
-            <Card id="consulta" className="relative mx-auto w-full max-w-135 scroll-mt-28 overflow-hidden border-white/10 bg-foreground py-0 text-primary-foreground shadow-[0_26px_70px_-35px_rgb(0_20_41/55%)]">
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,transparent_10%,color-mix(in_srgb,var(--primary)_24%,transparent)_100%)]" />
-              <CardHeader className="relative px-7 pt-7 sm:px-9 sm:pt-9">
-                <div className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-primary-foreground/70">
-                  <span className="size-2 rounded-full bg-brand" /> Consulta aberta
-                </div>
-                <CardTitle className="text-2xl font-bold text-white">Consulte seu município</CardTitle>
-                <CardDescription className="max-w-md text-xs leading-5 text-primary-foreground/70">
-                  Acesse instantaneamente as informações de despesas, credores e conformidade da LC 123.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="relative px-7 pb-7 sm:px-9 sm:pb-9">
-                <form onSubmit={submitMunicipality} noValidate>
-                  <label htmlFor="municipality" className="sr-only">Município do Ceará</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-primary-foreground/65" />
-                    <Input
+        <section
+          id="consulta"
+          className="relative z-10 -mt-14 scroll-mt-28 px-5 sm:px-8"
+        >
+          <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="bg-landing-blue p-7 text-white sm:p-9">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/65">
+                Consulta aberta
+              </p>
+              <h2 className="mt-3 text-2xl font-bold text-white">
+                Comece pelo seu município.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-white/72">
+                Veja despesas, fornecedores e a participação das microempresas no
+                território.
+              </p>
+            </div>
+            <form
+              onSubmit={submitMunicipality}
+              noValidate
+              className="flex flex-col justify-center gap-3 p-7 sm:p-9 md:flex-row md:items-start"
+            >
+              <div className="min-w-0 flex-1">
+                <label
+                  htmlFor="municipality"
+                  className="mb-2 block text-xs font-semibold text-foreground"
+                >
+                  Município do Ceará
+                </label>
+                <Popover
+                  open={municipalityOpen}
+                  onOpenChange={setMunicipalityOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
                       id="municipality"
-                      list="municipalities"
-                      value={municipality}
-                      onChange={(event) => {
-                        setMunicipality(event.target.value);
-                        if (error) setError('');
-                      }}
-                      placeholder="Digite o município"
-                      autoComplete="off"
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={municipalityOpen}
                       aria-invalid={Boolean(error)}
                       aria-describedby={error ? 'municipality-error' : undefined}
-                      className="h-13 rounded-xl border-white/15 bg-black/25 pl-11 text-sm text-white placeholder:text-white/45 focus-visible:border-brand focus-visible:ring-brand/30"
-                    />
-                    <datalist id="municipalities">
-                      {municipalities.map((item) => (
-                        <option key={item.code} value={item.label} />
-                      ))}
-                    </datalist>
-                  </div>
-                  {error && (
-                    <p id="municipality-error" role="alert" className="mt-2 text-xs text-red-300">
-                      {error}
-                    </p>
-                  )}
-                  <Button type="submit" className="mt-4 h-13 w-full rounded-xl bg-brand text-sm text-white hover:bg-brand/85">
-                    Ver dados deste município <ArrowRight className="size-4" />
-                  </Button>
-                </form>
-                <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-[10px] text-primary-foreground/55">
-                  <span>{municipalities.length} municípios integrados</span>
-                  <span className="flex items-center gap-1.5"><span className="size-1 rounded-full bg-brand" /> Base atualizada</span>
-                </div>
-              </CardContent>
-            </Card>
+                      className="h-12 w-full justify-between rounded-lg bg-background px-4 font-normal"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        <MapPin className="size-4 shrink-0 text-primary" />
+                        <span
+                          className={
+                            selectedMunicipality
+                              ? 'truncate text-foreground'
+                              : 'truncate text-muted-foreground'
+                          }
+                        >
+                          {selectedMunicipality?.label ??
+                            'Selecione um município'}
+                        </span>
+                      </span>
+                      <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-(--radix-popover-trigger-width) overflow-hidden p-0"
+                    align="start"
+                  >
+                    <Command>
+                      <CommandInput placeholder="Pesquisar por nome ou código..." />
+                      <CommandList className="max-h-72">
+                        <CommandEmpty>Município não encontrado.</CommandEmpty>
+                        <CommandGroup heading="Municípios do Ceará">
+                          {municipalities.map((item) => (
+                            <CommandItem
+                              key={item.code}
+                              value={`${item.label} ${item.code}`}
+                              onSelect={() => {
+                                setMunicipality(item.code);
+                                setMunicipalityOpen(false);
+                                setError('');
+                              }}
+                              className="py-2.5"
+                            >
+                              <Check
+                                className={`size-4 ${municipality === item.code ? 'opacity-100' : 'opacity-0'}`}
+                              />
+                              <span className="min-w-0 flex-1 truncate">
+                                {item.label}
+                              </span>
+                              <span className="font-mono text-[10px] text-muted-foreground">
+                                {item.code}
+                              </span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                {error && (
+                  <p
+                    id="municipality-error"
+                    role="alert"
+                    className="mt-2 text-xs text-destructive"
+                  >
+                    {error}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="mt-6 h-12 rounded-lg px-6 md:shrink-0"
+              >
+                Ver dados do município <ArrowRight className="size-4" />
+              </Button>
+            </form>
           </div>
         </section>
 
-        <section id="fontes" className="border-b border-primary/10 bg-secondary/55">
-          <div className="mx-auto max-w-5xl px-5 py-9 text-center sm:px-8">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
-              Fontes integradas, harmonizadas e auditadas em tempo real
-            </p>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-xs font-medium text-muted-foreground sm:gap-x-14">
-              {['Compras municipais', 'Contratações nacionais', 'Cadastro empresarial', 'Dados territoriais'].map((source) => (
-                <span key={source} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-primary" />{source}</span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="sobre" className="scroll-mt-20 bg-card">
-          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
-            <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-20">
+        <section
+          id="plataforma"
+          className="scroll-mt-20 bg-landing-paper px-5 py-24 sm:px-8 lg:py-32"
+        >
+          <div className="mx-auto max-w-7xl">
+            <div className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
               <div>
-                <p className="eyebrow text-primary">Informação que gera valor</p>
-                <h2 className="mt-4 max-w-lg text-3xl font-bold leading-[1.05] sm:text-4xl">
-                  Por que escolher a MonitoraME?
+                <p className="eyebrow text-primary">
+                  Uma plataforma, diferentes perspectivas
+                </p>
+                <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
+                  A informação certa para quem faz a economia local acontecer.
                 </h2>
               </div>
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                Em vez de apenas disponibilizar dados, a MonitoraME organiza, filtra e apresenta indicadores que tornam as compras públicas mais acessíveis, estratégicas e transparentes para empresas, prefeituras e gestores.
-              </p>
+              {/* <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                O monitoraME conecta a necessidade de transparência da gestão
+                pública à camada de crescimento dos pequenos negócios. Menos tempo
+                interpretando bases; mais clareza para agir.
+              </p> */}
             </div>
-
-            <div className="mt-12 grid gap-4 md:grid-cols-3">
-              {reasons.map(({ title, description, icon: Icon }) => (
-                <Card key={title} className="h-full gap-5 bg-background shadow-none">
-                  <CardHeader>
-                    <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-secondary text-primary">
-                      <Icon className="size-5" />
-                    </div>
-                    <CardTitle className="text-lg">{title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-primary/10 bg-secondary/30">
-          <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20 lg:py-28">
-            <div className="lg:sticky lg:top-28 lg:self-start">
-              <p className="eyebrow text-primary">Inteligência aplicada</p>
-              <h2 className="mt-4 max-w-sm text-3xl font-bold leading-[1.05] sm:text-4xl">
-                Como transformamos dados públicos em oportunidades?
-              </h2>
-              <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
-                Integramos fontes públicas e transformamos registros dispersos em análises que apoiam a competitividade dos pequenos negócios e o uso estratégico do orçamento municipal.
-              </p>
-              <Button asChild variant="outline" className="mt-7 rounded-full bg-card px-5">
-                <Link href="#modulos">Ver módulos de análise</Link>
-              </Button>
-            </div>
-
-            <div id="modulos" className="grid scroll-mt-28 gap-4 sm:grid-cols-2">
-              {modules.map(({ title, description, icon: Icon, featured }) => (
-                <Card key={title} className={`min-h-70 justify-between shadow-none transition-transform duration-300 hover:-translate-y-1 ${featured ? 'border-primary bg-brand text-white' : 'border-primary/10 bg-card'}`}>
-                  <CardHeader>
-                    <div className={`mb-5 flex size-10 items-center justify-center rounded-xl ${featured ? 'bg-white/15 text-white' : 'bg-secondary text-primary'}`}>
-                      <Icon className="size-5" />
-                    </div>
-                    <CardTitle className="text-lg">{title}</CardTitle>
-                    <CardDescription className={`text-xs leading-5 ${featured ? 'text-white/80' : ''}`}>
-                      {description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Link
-                      href="/analitico"
-                      className={`inline-flex items-center gap-2 text-xs font-medium transition-opacity hover:opacity-70 ${featured ? 'text-white' : 'text-foreground'}`}
-                    >
-                      Ver análises no painel público <ArrowRight className="size-3.5" />
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="metodologia" className="bg-card">
-          <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="eyebrow text-primary">Do dado à decisão</p>
-              <h2 className="mt-4 text-3xl font-bold sm:text-4xl">Processo comprovado de auditoria</h2>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Garantimos integridade e segurança analítica em cada etapa da jornada de dados.
-              </p>
-            </div>
-
-            <div className="relative mt-16 grid gap-10 md:grid-cols-4 md:gap-5">
-              <div className="absolute left-[12.5%] right-[12.5%] top-11 hidden h-px bg-border md:block" />
-              {processSteps.map((step, index) => (
-                <div key={step.title} className="relative text-center">
-                  <span className="metric text-4xl font-semibold text-primary/25">{String(index + 1).padStart(2, '0')}</span>
-                  <span className="relative z-10 mx-auto mt-5 block size-2.5 rounded-full border-2 border-card bg-primary ring-4 ring-card" />
-                  <h3 className="mt-6 text-sm font-semibold">{step.title}</h3>
-                  <p className="mx-auto mt-3 max-w-60 text-xs leading-5 text-muted-foreground">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="contato" className="scroll-mt-20 border-y border-primary/10 bg-secondary/35">
-          <div className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20 lg:py-24">
-            <div>
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-secondary text-primary">
-                <MessageCircle className="size-6" />
-              </div>
-              <p className="eyebrow mt-7 text-primary">Entre em contato</p>
-              <h2 className="mt-4 max-w-md text-3xl font-bold leading-[1.05] sm:text-4xl">
-                Vamos transformar dados em decisões melhores?
-              </h2>
-              <p className="mt-6 max-w-lg text-sm leading-7 text-muted-foreground">
-                Converse com a equipe da MonitoraME para conhecer a plataforma, entender os indicadores e descobrir como aplicá-los à realidade da sua empresa ou município.
-              </p>
-              <Button asChild className="mt-7 rounded-full px-6">
-                <a
-                  href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME."
-                  target="_blank"
-                  rel="noreferrer"
+            <div className="mt-14 grid gap-4 lg:grid-cols-3">
+              {audiences.map(({ title, description, icon: Icon }) => (
+                <article
+                  key={title}
+                  className="group border border-border/80 bg-card p-7 shadow-[0_12px_35px_-30px_rgb(0_20_41/30%)] sm:p-8"
                 >
-                  <MessageCircle className="size-4" />
-                  Conversar com a equipe no WhatsApp
-                </a>
-              </Button>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card className="h-full border-primary/10 bg-card shadow-none">
-                <CardHeader>
-                  <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
-                    <Building2 className="size-5" />
+                  <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                    <Icon className="size-5" />
                   </div>
-                  <CardTitle className="text-lg">Para empresas e MPEs</CardTitle>
-                  <CardDescription className="text-sm leading-6">
-                    Encontre oportunidades alinhadas à sua atividade e região e acompanhe o mercado público com mais clareza.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-
-              <Card className="h-full border-primary/10 bg-card shadow-none">
-                <CardHeader>
-                  <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
-                    <Landmark className="size-5" />
-                  </div>
-                  <CardTitle className="text-lg">Para prefeituras e gestores</CardTitle>
-                  <CardDescription className="text-sm leading-6">
-                    Analise a participação das microempresas, a retenção de recursos e as oportunidades de fomento local.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+                  <h3 className="mt-6 text-lg font-bold">{title}</h3>
+                  <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+                    {description}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:pb-20">
-          <div className="relative mt-16 overflow-hidden rounded-3xl bg-foreground px-7 py-10 text-primary-foreground shadow-[0_24px_60px_-35px_rgb(0_20_41/60%)] sm:px-11 lg:mt-20 lg:flex lg:items-center lg:justify-between lg:gap-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,color-mix(in_srgb,var(--primary)_30%,transparent),transparent_38%)]" />
-            <div className="relative max-w-2xl">
-              <h2 className="text-2xl font-bold text-white sm:text-3xl">Monitore o seu município agora mesmo.</h2>
-              <p className="mt-3 text-sm leading-6 text-primary-foreground/70">
-                Tenha acesso instantâneo ao raio-x de empenhos, fornecedores e cumprimento de cotas públicas para micro e pequenas empresas.
+        <section className="overflow-hidden bg-landing-ink py-20 text-white lg:py-28">
+          <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+            <div>
+              <p className="eyebrow text-[#8fb4ff]">
+                O dado já existe. A clareza vem agora.
               </p>
+              <h2 className="mt-4 text-3xl font-bold leading-[1.04] text-white sm:text-5xl">
+                Enxergue o movimento das compras públicas.
+              </h2>
+              <p className="mt-6 max-w-lg text-sm leading-7 text-white/65 sm:text-base">
+                Acompanhe a evolução das compras, compare a participação das
+                microempresas e investigue fornecedores sem navegar por planilhas
+                dispersas.
+              </p>
+              <div className="mt-8 grid max-w-md grid-cols-2 gap-px overflow-hidden border border-white/12 bg-white/12">
+                <div className="bg-landing-ink p-5">
+                  <span className="metric text-3xl font-semibold text-white">
+                    {municipalities.length}
+                  </span>
+                  <span className="mt-1 block text-xs text-white/55">
+                    municípios cearenses
+                  </span>
+                </div>
+                <div className="bg-landing-ink p-5">
+                  <span className="metric text-3xl font-semibold text-white">
+                    1
+                  </span>
+                  <span className="mt-1 block text-xs text-white/55">
+                    visão integrada
+                  </span>
+                </div>
+              </div>
+              <Button
+                asChild
+                className="mt-8 rounded-full bg-landing-blue px-6 text-white hover:bg-landing-blue/80"
+              >
+                <Link href="/analitico">
+                  Acessar compras públicas <ArrowRight className="size-4" />
+                </Link>
+              </Button>
             </div>
-            <div className="relative mt-7 flex flex-wrap gap-3 lg:mt-0 lg:shrink-0">
-              <Button asChild className="rounded-full bg-brand px-6 text-white hover:bg-brand/85">
-                <Link href="/analitico">Consultar compras públicas</Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white">
-                <Link href="/register">Criar conta para MPE ou gestor <ArrowRight className="size-4" /></Link>
-              </Button>
+            <div className="relative">
+              {/* <div className="absolute -left-5 -top-5 hidden border border-white/15 bg-white/8 px-5 py-3 backdrop-blur-sm sm:block">
+                <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">
+                  Leitura territorial
+                </span>
+                <span className="mt-1 block text-sm font-semibold">
+                  Dados que explicam o cenário
+                </span>
+              </div> */}
+              <div className="overflow-hidden rounded-xl border border-white/15 bg-white shadow-2xl shadow-black/35">
+                <Image
+                  src="/project/Analytics.png"
+                  alt="Painel analítico do monitoraME com evolução de compras públicas e participação de microempresas"
+                  width={1599}
+                  height={602}
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  className="h-auto w-full"
+                />
+              </div>
+              <div className="absolute -bottom-6 right-5 hidden items-center gap-3 bg-landing-blue px-5 py-4 text-white shadow-xl sm:flex">
+                <BarChart3 className="size-5" />
+                <span className="text-xs font-semibold">
+                  Indicadores claros e comparáveis
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="solucoes"
+          className="scroll-mt-20 bg-landing-tint py-24 lg:py-32"
+        >
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="eyebrow text-primary">Inteligência aplicada</p>
+                <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-[1.05] sm:text-5xl">
+                  Do orçamento público à oportunidade local.
+                </h2>
+              </div>
+              <Link
+                href="/analitico"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+              >
+                Explorar todas as análises <ArrowRight className="size-4" />
+              </Link>
+            </div>
+            <div className="mt-14 grid gap-4 md:grid-cols-2">
+              {modules.map(({ title, description, icon: Icon, tone }, index) => (
+                <article
+                  key={title}
+                  className={`group relative min-h-80 overflow-hidden p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-10 ${tone === 'dark'
+                      ? 'bg-landing-ink text-white'
+                      : tone === 'blue'
+                        ? 'bg-landing-blue text-white'
+                        : 'border border-border/80 bg-card text-foreground shadow-[0_12px_35px_-30px_rgb(0_20_41/35%)]'
+                    }`}
+                >
+                  <span
+                    className={`metric absolute right-6 top-4 text-7xl font-semibold ${tone === 'light' ? 'text-primary/7' : 'text-white/7'
+                      }`}
+                  >
+                    0{index + 1}
+                  </span>
+                  <div
+                    className={`flex size-12 items-center justify-center rounded-full ${tone === 'light'
+                        ? 'bg-secondary text-primary'
+                        : 'bg-white/12 text-white'
+                      }`}
+                  >
+                    <Icon className="size-5" />
+                  </div>
+                  <h3 className="mt-16 max-w-md text-2xl font-bold">{title}</h3>
+                  <p
+                    className={`mt-4 max-w-lg text-sm leading-6 ${tone === 'light'
+                        ? 'text-muted-foreground'
+                        : 'text-white/68'
+                      }`}
+                  >
+                    {description}
+                  </p>
+                  <Link
+                    href="/analitico"
+                    className="absolute bottom-8 left-8 inline-flex items-center gap-2 text-xs font-semibold sm:left-10"
+                  >
+                    Ver no painel{' '}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="metodologia"
+          className="scroll-mt-20 border-y border-border bg-landing-paper py-24 lg:py-32"
+        >
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
+              <div>
+                <span className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
+                  <DatabaseZap className="size-5" />
+                </span>
+                <p className="eyebrow mt-7 text-primary">Da base à decisão</p>
+                <h2 className="mt-4 text-5xl font-bold leading-[1.05] sm:text-4xl">
+                  Simplicidade na sua tela.
+                </h2>
+                <p className="mt-6 text-sm leading-7 text-muted-foreground">
+                  Nossa metodologia organiza o caminho do dado para que você possa se
+                  concentrar no que importa: compreender e agir.
+                </p>
+              </div>
+              <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
+                {processSteps.map(([number, title, description]) => (
+                  <article key={number} className="min-h-56 bg-card p-7 sm:p-8">
+                    <span className="metric text-sm font-semibold text-primary">
+                      {number}
+                    </span>
+                    <h3 className="mt-10 text-xl font-bold">{title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                      {description}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="contato"
+          className="scroll-mt-20 bg-landing-tint px-5 py-24 sm:px-8 lg:py-32"
+        >
+          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-8 sm:p-12 lg:p-16">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65">
+                <Sparkles className="size-4" />
+                Próximo passo
+              </div>
+              <h2 className="mt-5 max-w-2xl text-3xl font-bold leading-[1.03] text-white sm:text-5xl">
+                Use dados públicos para abrir novas possibilidades.
+              </h2>
+              <p className="mt-6 max-w-xl text-base leading-7 text-white/70">
+                Explore o painel gratuitamente ou converse com nossa equipe para
+                entender como o monitoraME pode apoiar sua empresa ou município.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 rounded-full bg-card px-6 text-foreground hover:bg-card/88 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80"
+                >
+                  <Link href="/register">
+                    Criar minha conta <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 rounded-full border-white/25 bg-transparent px-6 text-white hover:bg-white/10 hover:text-white"
+                >
+                  <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                    <MessageCircle className="size-4" />
+                    Falar com a equipe
+                  </a>
+                </Button>
+              </div>
+            </div>
+            <div className="relative hidden min-h-96 overflow-hidden bg-landing-ink lg:block">
+              <Image
+                src="/landing/hero-david.webp"
+                alt="Equipe trabalhando com dados públicos"
+                fill
+                sizes="36vw"
+                className="object-cover object-[78%_center] opacity-80"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-blue),transparent_55%)]" />
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-[#0b1f3a] text-white">
+      <footer className="bg-landing-ink text-white">
         <div className="mx-auto max-w-7xl px-5 pb-8 pt-14 sm:px-8 lg:pt-16">
-          <div className="grid gap-10 border-b border-white/10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.45fr_0.8fr_0.8fr_1fr] lg:gap-12">
+          <div className="grid gap-10 border-b border-white/10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.5fr_0.8fr_0.8fr_1fr]">
             <div className="max-w-sm">
-              <Link href="/" aria-label="MonitoraME — página inicial" className="inline-block text-white">
+              <Link
+                href="/"
+                aria-label="MonitoraME — página inicial"
+                className="inline-block text-white"
+              >
                 <Logo className="h-6 w-auto" />
               </Link>
-              <p className="mt-5 text-sm leading-6 text-white/65">
-                Inteligência de dados para tornar as compras públicas mais transparentes, estratégicas e acessíveis no Ceará.
+              <p className="mt-5 text-sm leading-6 text-white/58">
+                Inteligência de dados para compras públicas mais transparentes,
+                estratégicas e acessíveis.
               </p>
-              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70">
-                <ShieldCheck className="size-3.5 text-[#8fb4ff]" />
+              <div className="mt-6 flex items-center gap-2 text-xs text-white/62">
+                <ShieldCheck className="size-4 text-[#8fb4ff]" />
                 Dados públicos tratados com responsabilidade
               </div>
             </div>
-
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Institucional</h2>
-              <nav aria-label="Links institucionais" className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
-                <Link href="#sobre" className="transition-colors hover:text-white">Sobre a MonitoraME</Link>
-                <Link href="#metodologia" className="transition-colors hover:text-white">Metodologia</Link>
-                <Link href="#fontes" className="transition-colors hover:text-white">Fontes de dados</Link>
-                <Link href="#contato" className="transition-colors hover:text-white">Fale conosco</Link>
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/45">
+                Institucional
+              </h2>
+              <nav
+                aria-label="Links institucionais"
+                className="mt-5 flex flex-col items-start gap-3 text-xs text-white/65"
+              >
+                <Link href="#plataforma" className="hover:text-white">
+                  Plataforma
+                </Link>
+                <Link href="#metodologia" className="hover:text-white">
+                  Metodologia
+                </Link>
+                <Link href="#contato" className="hover:text-white">
+                  Contato
+                </Link>
               </nav>
             </div>
-
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Plataforma</h2>
-              <nav aria-label="Links da plataforma" className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
-                <Link href="/analitico" className="transition-colors hover:text-white">Consultar compras públicas</Link>
-                <Link href="/analitico/municipios" className="transition-colors hover:text-white">Consultar por município</Link>
-                <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Como os dados são tratados</Link>
-                <Link href="/register" className="transition-colors hover:text-white">Criar conta na plataforma</Link>
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/45">
+                Acessar
+              </h2>
+              <nav
+                aria-label="Links da plataforma"
+                className="mt-5 flex flex-col items-start gap-3 text-xs text-white/65"
+              >
+                <Link href="/analitico" className="hover:text-white">
+                  Painel analítico
+                </Link>
+                <Link href="/login" className="hover:text-white">
+                  Entrar
+                </Link>
+                <Link href="/register" className="hover:text-white">
+                  Criar conta
+                </Link>
               </nav>
             </div>
-
             <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-white">Fontes de dados</h2>
-              <div className="mt-5 flex flex-col items-start gap-3 text-xs text-white/60">
-                <a href="https://www.tce.ce.gov.br/" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
-                  TCE Ceará
-                </a>
-                <a href="https://pncp.gov.br/app/" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
-                  PNCP
-                </a>
-                <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noreferrer" className="transition-colors hover:text-white">
-                  Receita Federal
-                </a>
-                <p className="border-t border-white/10 pt-3 leading-5">Dados abertos tratados nos termos da Lei de Acesso à Informação.</p>
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/45">
+                Fontes públicas
+              </h2>
+              <div className="mt-5 flex flex-col items-start gap-3 text-xs text-white/65">
                 <a
-                  href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME."
+                  href="https://www.tce.ce.gov.br/"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 font-medium text-white transition-colors hover:text-[#8fb4ff]"
+                  className="hover:text-white"
                 >
-                  <MessageCircle className="size-3.5" /> Conversar pelo WhatsApp
+                  TCE Ceará
+                </a>
+                <a
+                  href="https://pncp.gov.br/app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-white"
+                >
+                  PNCP
+                </a>
+                <a
+                  href="https://www.gov.br/receitafederal/pt-br"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-white"
+                >
+                  Receita Federal
                 </a>
               </div>
             </div>
           </div>
-
-          <div className="flex flex-col gap-4 pt-7 text-[10px] text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 pt-7 text-[10px] text-white/40 sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 MonitoraME. Todos os direitos reservados.</span>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Termos de uso</Link>
-              <Link href="/analitico/metodologia" className="transition-colors hover:text-white">Privacidade e LGPD</Link>
+            <div className="flex items-center gap-5">
+              <LogoIcon className="h-4 w-auto text-white/30" />
               <span>Ceará, Brasil</span>
             </div>
           </div>

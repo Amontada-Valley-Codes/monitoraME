@@ -1,4 +1,7 @@
-import { Search } from 'lucide-react';
+"use client";
+
+import { useState } from 'react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -7,24 +10,27 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
 export function OpportunityRightPanel() {
-  return (
-    <aside className="hidden w-80 shrink-0 bg-background px-5 py-6 lg:block 2xl:w-96 2xl:px-6">
-      <div className="sticky top-6">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            aria-label="Buscar órgãos, atas e certames"
-            placeholder="Buscar órgãos, atas e certames..."
-            className="bg-card pl-9"
-          />
-        </div>
+  const [showProCard, setShowProCard] = useState(true);
 
-        <Card className="mt-4 gap-4 py-5">
-          <CardHeader className="px-5">
+  if (!showProCard) return null;
+
+  return (
+    <aside className="hidden w-80 shrink-0 border-l bg-background px-5 py-6 lg:block 2xl:w-96 2xl:px-6">
+      <div className="sticky top-6">
+        <Card className="relative gap-4 py-5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="absolute right-3 top-3 z-10"
+            aria-label="Fechar card Conhecer planos Pro"
+            onClick={() => setShowProCard(false)}
+          >
+            <X className="size-4" />
+          </Button>
+          <CardHeader className="px-5 pr-12">
             <CardTitle className="text-lg">Inteligência MonitoraME Pro</CardTitle>
             <CardDescription className="leading-relaxed">
               Dados do PNCP são 100% livres e públicos. Tenha IA para resumir
@@ -33,33 +39,9 @@ export function OpportunityRightPanel() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-5">
-            <Button>Conhecer recursos Pro</Button>
+            <Button>Conhecer planos Pro</Button>
           </CardContent>
         </Card>
-
-          <p className="mt-2 text-sm leading-relaxed text-slate-600">
-            Dados do PNCP são 100% livres e públicos. Tenha IA para resumir
-            exigências de habilitação, funil Kanban de propostas e radar de
-            concorrentes.
-          </p>
-
-          <button
-            type="button"
-            className="mt-5 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            Conhecer Recursos Pro
-          </button>
-        </div>
-
-        <div className="mt-5 border-t border-slate-200 pt-4 text-xs leading-6 text-slate-400">
-          <p>
-            Termos de Serviço · Privacidade · LAI Ceará · Acessibilidade
-          </p>
-
-          <p className="mt-1">
-            © 2026 MonitoraME. Dados públicos e contratações abertas
-          </p>
-        </div>
       </div>
     </aside>
   );

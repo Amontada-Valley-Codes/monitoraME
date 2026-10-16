@@ -6,6 +6,13 @@ import { redirect } from "next/navigation";
 import { ApiError } from "@/services/api";
 import { isValidReturnTo } from "@/shared/auth/return-to";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login - MonitoraME",
+  description:
+    "Faça login para acessar o MonitoraME e transformar dados públicos em inteligência para municípios e pequenos negócios do Ceará.",
+};
 
 export default function LoginPage(props: { searchParams: Promise<{ returnTo?: string }> }) {
   return <Suspense fallback={null}><LoginContent {...props} /></Suspense>;

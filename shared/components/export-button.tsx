@@ -5,7 +5,6 @@ import {
   Download,
   FileDown,
   Loader2,
-  LockKeyhole,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -31,7 +30,7 @@ import {
   type ExportDataset,
 } from "@/shared/lib/export";
 
-import { useAccessGate } from "@/shared/components/access-gate";
+import { useSession } from "@/shared/auth/session-context";
 
 const EXPORT_FEATURE = {
   name: "Exportação de dados",
@@ -40,7 +39,7 @@ const EXPORT_FEATURE = {
 
 interface ExportButtonProps {
   dataset: ExportDataset;
-  filters: Filters;
+  filters?: Filters;
   compact?: boolean;
 }
 
@@ -52,10 +51,11 @@ export function ExportButton({
   const [open, setOpen] = useState(false);
   const [format, setFormat] = useState<"pdf" | "csv" | "xlsx">("xlsx");
   const [busy, setBusy] = useState(false);
-  const { hasPlan, requestAccess } = useAccessGate();
+  const { status, accountRole } = useSession();
+  const canExport = status === "authenticated" && accountRole === "PERSON";
 
   function handleExportClick() {
-    if (!requestAccess(EXPORT_FEATURE)) return;
+    if (!canExport) return;
     setOpen(true);
   }
 
@@ -71,7 +71,7 @@ export function ExportButton({
 
       downloadBlob(
         blob,
-        `MonitoraME_${dataset.title.replaceAll(" ", "_")}_${filters.start}.${format}`
+        `MonitoraME_${dataset.title.replaceAll(" ", "_")}_${filters?.start ?? "recorte"}.${format}`
       );
 
       toast.success(
@@ -88,17 +88,19 @@ export function ExportButton({
     }
   }
 
+  if (!canExport) return null;
+
   return (
     <>
       <Button
+        title={EXPORT_FEATURE.name}
         variant={compact ? "outline" : "default"}
         onClick={handleExportClick}
         disabled={!dataset.rows.length}
       >
-        {hasPlan ? <Download className="size-4" /> : <LockKeyhole className="size-4" />}
+        <Download className="size-4" />
 
         {compact ? "Exportar" : "Exportar dados"}
-        {!hasPlan && <span className="text-[10px] font-medium opacity-75">· Assinatura</span>}
       </Button>
       <Dialog
         open={open}
