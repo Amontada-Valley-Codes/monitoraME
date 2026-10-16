@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 @import "../shared/styles/fonts.css";
@@ -154,6 +155,13 @@
   }
   html {
     @apply font-sans;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
 
@@ -211,6 +219,14 @@
 }
 
 @layer components {
+  [data-hero-reveal],
+  [data-hero-proof],
+  [data-reveal-item] {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0);
+    will-change: transform, opacity;
+  }
+
   .login-page-scale {
     zoom: 0.9;
   }
@@ -423,6 +439,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-hero-reveal],
+  [data-hero-proof],
+  [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+  }
+
   *,
   *::before,
   *::after {

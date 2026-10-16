@@ -6,7 +6,7 @@ import { commitmentsHttp, fetchCommitmentDetail, fetchCommitments } from './api'
 import { cancellationModalityLabel, cancellationSummary, nullableLabel } from './detail-format';
 import { getCommitmentErrorContent, getCommitmentViewState } from './error-state';
 import { buildCommitmentApiPath, buildCommitmentDetailHref, safeCommitmentListPath, safeDecodeCommitmentKey, supplierHref } from './navigation';
-import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from './query';
+import { commitmentExerciseFilters, DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from './query';
 import { createSingleFlight } from './single-flight';
 
 const mock = new MockAdapter(commitmentsHttp);
@@ -33,6 +33,19 @@ describe('consulta de empenhos', () => {
     expect(patchCommitmentFilters(current, { search: '10100004' }).page).toBe(1);
     expect(nextCommitmentSort('net_value', 'desc', 'net_value')).toEqual({ sort_by: 'net_value', sort_order: 'asc' });
     expect(nextCommitmentSort('net_value', 'asc', 'date')).toEqual({ sort_by: 'date', sort_order: 'desc' });
+  });
+
+  it('converte o exercício em período fechado e normaliza URLs antigas', () => {
+    expect(commitmentExerciseFilters('2024')).toEqual({
+      start_date: '2024-01-01',
+      end_date: '2024-12-31',
+    });
+    expect(parseCommitmentFilters(new URLSearchParams(
+      'start_date=2024-03-10&end_date=2025-07-20',
+    ))).toMatchObject({
+      start_date: '2024-01-01',
+      end_date: '2024-12-31',
+    });
   });
 
   it('normaliza códigos completos de elemento de despesa para o enum da API', () => {
@@ -96,6 +109,15 @@ describe('consulta de empenhos', () => {
   it('deriva CNPJ pelo documento e ignora tipo_documento numérico', () => {
     const supplier = { documento: '12.345.678/0001-90', cnpj: '12345678000190', cpf: null, tipo_documento: '1' };
     expect(supplierHref(supplier)).toBe('/analytics/fornecedores/CNPJ/12345678000190');
+    expect(supplierHref(supplier, {
+      from: '/analitico/empenhos?start_date=2024-01-01&end_date=2024-12-31',
+      commitmentDate: '2025-10-10',
+      exercise: 2025,
+    })).toBe('/analytics/fornecedores/CNPJ/12345678000190?start_date=2024-01-01&end_date=2024-12-31');
+    expect(supplierHref(supplier, {
+      commitmentDate: '2025-10-10',
+      exercise: 2025,
+    })).toBe('/analytics/fornecedores/CNPJ/12345678000190?start_date=2025-01-01&end_date=2025-12-31');
     expect(supplierHref({ documento: '123.456.789-01', cnpj: null, cpf: '12345678901' })).toBeNull();
     expect(supplierHref({ documento: 'sem documento', cnpj: null, cpf: null })).toBeNull();
   });

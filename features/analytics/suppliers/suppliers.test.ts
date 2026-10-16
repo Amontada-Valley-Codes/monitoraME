@@ -12,7 +12,9 @@ import {
 import {
   DEFAULT_SUPPLIER_FILTERS,
   nextSupplierSort,
+  parseSupplierFilters,
   patchSupplierFilters,
+  supplierExerciseFilters,
 } from './query';
 
 const mock = new MockAdapter(commitmentsHttp);
@@ -50,6 +52,19 @@ describe('lista de fornecedores', () => {
     expect(nextSupplierSort('commitments_count', 'desc', 'commitments_count')).toEqual({
       sort_by: 'commitments_count',
       sort_order: 'asc',
+    });
+  });
+
+  it('converte o exercício em período fechado e normaliza URLs antigas', () => {
+    expect(supplierExerciseFilters('2024')).toEqual({
+      start_date: '2024-01-01',
+      end_date: '2024-12-31',
+    });
+    expect(parseSupplierFilters(new URLSearchParams(
+      'start_date=2024-03-10&end_date=2025-07-20',
+    ))).toMatchObject({
+      start_date: '2024-01-01',
+      end_date: '2024-12-31',
     });
   });
 

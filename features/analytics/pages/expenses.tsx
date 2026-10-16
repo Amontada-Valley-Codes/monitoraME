@@ -16,7 +16,7 @@ import { EmptyState, LoadingState } from '@/shared/components/states';
 import { SelectField } from '@/shared/components/select-field';
 import { number } from '@/shared/lib/format';
 import { fetchCommitments } from '../commitments/api';
-import { DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from '../commitments/query';
+import { COMMITMENT_EXERCISES, commitmentExerciseFilters, DEFAULT_COMMITMENT_FILTERS, nextCommitmentSort, normalizeExpenseElementCode, parseCommitmentFilters, patchCommitmentFilters, serializeCommitmentFilters } from '../commitments/query';
 import type { CommitmentListFilters, CommitmentListResponse, CommitmentSortField } from '../commitments/types';
 import { buildCommitmentDetailHref } from '../commitments/navigation';
 import { CommitmentTable } from '../commitments/table';
@@ -118,11 +118,10 @@ export default function Expenses() {
   const viewState = getCommitmentViewState(loading, Boolean(error), data?.items.length ?? 0);
 
   return <>
-    <PageHeader eyebrow="Exploração dos dados" title="Despesas empenhadas" description="Consulte empenhos públicos por período, município, fornecedor e elemento de despesa." />
+    <PageHeader eyebrow="Exploração dos dados" title="Despesas empenhadas" description="Consulte empenhos públicos por exercício, município, fornecedor e elemento de despesa." />
     <section className="panel no-print mb-6 p-4" aria-label="Filtros de empenhos">
-      <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.3fr_auto]">
-        <div><Label htmlFor="commitment-start" className="filter-label">Data inicial</Label><Input id="commitment-start" type="date" value={filters.start_date} onChange={(event) => updateFilters({ start_date: event.target.value })} /></div>
-        <div><Label htmlFor="commitment-end" className="filter-label">Data final</Label><Input id="commitment-end" type="date" value={filters.end_date} onChange={(event) => updateFilters({ end_date: event.target.value })} /></div>
+      <div className="grid gap-3 lg:grid-cols-[0.7fr_1.3fr_auto]">
+        <div><Label className="filter-label">Exercício</Label><SelectField label="Selecionar exercício" value={filters.start_date.slice(0, 4)} onChange={(exercise) => updateFilters(commitmentExerciseFilters(exercise))} options={COMMITMENT_EXERCISES.map((exercise) => ({ value: exercise, label: `Exercício ${exercise}` }))} className="h-11" /></div>
         <div><Label className="filter-label">Município comprador</Label><TceMunicipalitySelect value={filters.municipality_tce_code} onValueChange={(municipality_tce_code) => updateFilters({ municipality_tce_code })} className="h-11" /></div>
         <div className="flex items-end"><Button type="button" variant="outline" className="w-full" onClick={() => { setDraft(filters); setFilterPanelOpen(true); }}><SlidersHorizontal />Mais filtros{activeExtendedFilters > 0 && <Badge>{activeExtendedFilters}</Badge>}</Button></div>
       </div>

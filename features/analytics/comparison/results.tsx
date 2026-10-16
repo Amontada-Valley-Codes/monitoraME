@@ -2,27 +2,20 @@
 
 import { ArrowUpRight, Equal, Minus, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { PieCenter } from '@/components/charts/pie-center';
 import { PieChart } from '@/components/charts/pie-chart';
 import { PieSlice } from '@/components/charts/pie-slice';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart';
 import { ChartPanel } from '@/shared/components/chart-panel';
-import { compactMoney, money, number, percent, points } from '@/shared/lib/format';
-import { BarsChart, expenseShortLabel, type Series } from '../components/charts';
+import { money, number, percent, points } from '@/shared/lib/format';
+import { BarsChart, expenseShortLabel, TrendChart, type Series } from '../components/charts';
 import {
   companySizeLabel,
   formatCompetence,
   supplierOriginLabel,
 } from '../commitments/detail-format';
-import { comparisonState, evolutionRows } from './model';
+import { comparisonSideSummary, comparisonState, evolutionRows } from './model';
 import type { ComparisonMode, ComparisonResponse, ValueComparison } from './types';
 
 const LEFT_COLOR = 'var(--chart-1)';
@@ -182,7 +175,9 @@ export function ComparisonResults({ data }: { data: ComparisonResponse }) {
         }))}
         empty={expenseData.length === 0}
       >
-        <BarsChart data={expenseData} series={series} />
+        <div className="h-(--chart-height)">
+          <BarsChart data={expenseData} series={series} />
+        </div>
       </ChartPanel>
     </section>
   );
@@ -322,6 +317,7 @@ function SideSummary({
   side: ComparisonResponse['left'];
   tone: 'left' | 'right';
 }) {
+  const summary = comparisonSideSummary(side);
   const periods = side.overview.competencias_solicitadas;
   const period = periods.length
     ? `${formatCompetence(periods[0])}${
@@ -348,24 +344,24 @@ function SideSummary({
             <h3 className="truncate font-semibold">{side.label}</h3>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            {side.overview.municipio.nome} / {side.overview.municipio.uf} · {period}
+            {summary.location} · {period}
           </p>
         </div>
         <Badge variant="outline" className="shrink-0">
-          {side.overview.status_exercicio}
+          {summary.status}
         </Badge>
       </div>
       <dl className="mt-4 grid grid-cols-2 gap-4">
         <div>
           <dt className="text-xs text-muted-foreground">Empenhos filtrados</dt>
           <dd className="data-value mt-1 text-lg">
-            {number(side.overview.totais_filtrados.empenhos)}
+            {number(summary.commitments)}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Cobertura cadastral</dt>
+          <dt className="text-xs text-muted-foreground">{summary.coverageLabel}</dt>
           <dd className="data-value mt-1 text-lg">
-            {percent(side.overview.cobertura_cadastral.percentual)}
+            {percent(summary.coverage)}
           </dd>
         </div>
       </dl>
@@ -458,20 +454,16 @@ function EvolutionComparisonChart({
   leftLabel: string;
   rightLabel: string;
 }) {
-  const config = {
-    left: { label: leftLabel, color: LEFT_COLOR },
-    right: { label: rightLabel, color: RIGHT_COLOR },
-  } satisfies ChartConfig;
-  const legend = [
+  const series: Series[] = [
     { label: leftLabel, color: LEFT_COLOR },
     { label: rightLabel, color: RIGHT_COLOR },
-  ];
+  ].map((item, index) => ({ ...item, key: index === 0 ? 'left' : 'right' }));
 
   return (
     <ChartPanel
       title="Evolução mensal"
       description="Valores mensais de compras consideradas, sem acumulação"
-      legend={legend}
+      legend={series}
       rows={rows.map((row) => ({
         label: row.label,
         values: [
@@ -481,77 +473,7 @@ function EvolutionComparisonChart({
       }))}
       empty={rows.length === 0}
     >
-      <ChartContainer config={config} className="h-(--chart-height) w-full aspect-auto">
-        <AreaChart data={rows} margin={{ top: 12, right: 12, left: 12, bottom: 8 }}>
-          <defs>
-            <linearGradient id="comparison-left-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--color-left)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="var(--color-left)" stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="comparison-right-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--color-right)" stopOpacity={0.24} />
-              <stop offset="95%" stopColor="var(--color-right)" stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
-          <XAxis
-            dataKey="label"
-            axisLine={false}
-            tickLine={false}
-            tickMargin={10}
-            minTickGap={24}
-          />
-          <YAxis
-            axisLine={false}
-            tickLine={false}
-            tickMargin={8}
-            width={72}
-            tickFormatter={(value) => compactMoney(Number(value))}
-          />
-          <ChartTooltip
-            cursor={{ stroke: 'var(--border)', strokeDasharray: '4 4' }}
-            content={
-              <ChartTooltipContent
-                indicator="line"
-                formatter={(value, name) => (
-                  <>
-                    <span className="text-muted-foreground">
-                      {name === 'left' ? leftLabel : rightLabel}
-                    </span>
-                    <span className="ml-auto font-mono font-medium tabular-nums">
-                      {money(Number(value))}
-                    </span>
-                  </>
-                )}
-              />
-            }
-          />
-          <Area
-            type="monotone"
-            dataKey="left"
-            stroke="var(--color-left)"
-            strokeWidth={2.5}
-            fill="url(#comparison-left-fill)"
-            connectNulls={false}
-            activeDot={{ r: 4 }}
-            isAnimationActive
-            animationDuration={650}
-            animationEasing="ease-out"
-          />
-          <Area
-            type="monotone"
-            dataKey="right"
-            stroke="var(--color-right)"
-            strokeWidth={2.5}
-            fill="url(#comparison-right-fill)"
-            connectNulls={false}
-            activeDot={{ r: 4 }}
-            isAnimationActive
-            animationDuration={650}
-            animationEasing="ease-out"
-          />
-        </AreaChart>
-      </ChartContainer>
+      <TrendChart data={rows} series={series} />
     </ChartPanel>
   );
 }

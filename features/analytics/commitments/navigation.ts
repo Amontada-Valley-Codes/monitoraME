@@ -19,13 +19,46 @@ export function supplierHref(supplier: {
   documento: string;
   cnpj: string | null;
   cpf: string | null;
+}, context?: {
+  from?: string;
+  commitmentDate?: string;
+  exercise?: number | string;
 }): string | null {
   const document = supplier.documento.replace(/\D/g, '');
   const type = document.length === 14 || supplier.cnpj ? 'CNPJ'
     : document.length === 11 || supplier.cpf ? 'CPF'
       : null;
   if (type !== 'CNPJ' || document.length !== 14) return null;
-  return `/analytics/fornecedores/${type}/${encodeURIComponent(document)}`;
+  const exercise = supplierExercise(context);
+  const path = `/analytics/fornecedores/${type}/${encodeURIComponent(document)}`;
+  if (!exercise) return path;
+
+  const params = new URLSearchParams({
+    start_date: `${exercise}-01-01`,
+    end_date: `${exercise}-12-31`,
+  });
+  return `${path}?${params.toString()}`;
+}
+
+function supplierExercise(context?: {
+  from?: string;
+  commitmentDate?: string;
+  exercise?: number | string;
+}): string | null {
+  if (context?.from) {
+    try {
+      const params = new URL(context.from, 'https://monitorame.local').searchParams;
+      const startYear = params.get('start_date')?.match(/^(\d{4})-\d{2}-\d{2}$/)?.[1];
+      const endYear = params.get('end_date')?.match(/^(\d{4})-\d{2}-\d{2}$/)?.[1];
+      if (startYear && startYear === endYear) return startYear;
+    } catch {
+      // O detalhe do empenho ainda fornece um fallback seguro abaixo.
+    }
+  }
+
+  const exercise = String(context?.exercise ?? '');
+  if (/^\d{4}$/.test(exercise)) return exercise;
+  return context?.commitmentDate?.match(/^(\d{4})-\d{2}-\d{2}$/)?.[1] ?? null;
 }
 
 export function safeCommitmentListPath(value?: string): string {

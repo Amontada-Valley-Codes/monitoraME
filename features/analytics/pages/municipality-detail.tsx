@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Building2, ChartPie, Info, MapPin, RefreshCw, RotateCcw, Share2, TriangleAlert, Wallet } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Building2, ChartPie, Info, MapPin, RefreshCw, RotateCcw, Share2, TriangleAlert, Wallet, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { SelectField } from '@/shared/components/select-field';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
 import { KpiCard } from '@/shared/components/kpi-card';
-import { compactMoney, money, number, percent } from '@/shared/lib/format';
+import { compactMoney, money, percent } from '@/shared/lib/format';
 import { COMPLETE_REGISTRATION_PATH, PUBLIC_ENTRY_PATH } from '@/shared/auth/config';
 import { saveReturnTo } from '@/shared/auth/return-to';
 import { useSession } from '@/shared/auth/session-context';
@@ -33,6 +33,7 @@ const sizeColors: Record<string, string> = { ME: 'var(--size-me)', MEI: 'var(--s
 const destinationNames: Record<string, string> = { NO_MUNICIPIO_COMPRADOR: 'No município comprador', EM_OUTRO_MUNICIPIO: 'Em outro município do Ceará', FORA_DO_CEARA: 'Fora do Ceará', ORIGEM_NAO_IDENTIFICADA: 'Origem não identificada' };
 const destinationColors: Record<string, string> = { NO_MUNICIPIO_COMPRADOR: 'var(--origin-local)', EM_OUTRO_MUNICIPIO: 'var(--origin-state)', FORA_DO_CEARA: 'var(--origin-external)', ORIGEM_NAO_IDENTIFICADA: 'var(--origin-unknown)' };
 const DEFAULT_MUNICIPAL_YEAR = '2025';
+const REGISTRATION_NOTICE_DISMISSED_KEY = 'monitorame:municipality-registration-notice-dismissed';
 
 function normalized(value: string) { return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase(); }
 function codeFromLegacyId(id?: string) {
@@ -98,6 +99,17 @@ function MunicipalFilters({ input, initialCode }: { input: MunicipalOverviewInpu
 
 function OverviewPanels({ data, input }: { data: MunicipalOverview; input: MunicipalOverviewInput }) {
   const { accountStatus } = useSession();
+  const [showRegistrationNotice, setShowRegistrationNotice] = useState(true);
+  useEffect(() => {
+    if (sessionStorage.getItem(REGISTRATION_NOTICE_DISMISSED_KEY) !== 'true') return;
+    // The dismissal preference only exists in the browser session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setShowRegistrationNotice(false);
+  }, []);
+  const dismissRegistrationNotice = () => {
+    sessionStorage.setItem(REGISTRATION_NOTICE_DISMISSED_KEY, 'true');
+    setShowRegistrationNotice(false);
+  };
   const kpis = data.kpis ?? {};
   const sizes = (data.participacao_por_porte_empresarial ?? []).map((item) => ({ key: item.porte ?? 'NAO_IDENTIFICADO', name: sizeNames[item.porte ?? ''] ?? item.porte ?? 'Não identificado', value: item.valor_centavos ?? 0, percentage: item.percentual, color: sizeColors[item.porte ?? ''] ?? 'var(--chart-4)' }));
   const destinations = (data.destino_recursos ?? []).map((item) => ({ key: item.destino ?? 'ORIGEM_NAO_IDENTIFICADA', name: destinationNames[item.destino ?? ''] ?? item.destino ?? 'Não identificado', value: item.valor_centavos ?? 0, percentage: item.percentual, color: destinationColors[item.destino ?? ''] ?? 'var(--chart-4)' }));
@@ -111,7 +123,7 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
   const series = [{ key: 'total', label: 'Compras consideradas', color: 'var(--chart-1)' }, { key: 'mpe', label: 'Microempresas', color: 'var(--size-me)' }];
 
   return <>
-    {accountStatus === 'ONBOARDING' && <Alert className="mb-6"><Building2 /><AlertTitle>Seu acesso inicial está ativo</AlertTitle><AlertDescription><p>Conclua seu cadastro para acessar empenhos, fornecedores e comparações.</p><Button asChild size="sm" className="mt-2"><Link href={COMPLETE_REGISTRATION_PATH}>Concluir cadastro</Link></Button></AlertDescription></Alert>}
+    {accountStatus === 'ONBOARDING' && showRegistrationNotice && <Alert className="relative mb-6 pr-12"><Building2 /><AlertTitle>Seu acesso inicial está ativo</AlertTitle><AlertDescription><p>Conclua seu cadastro para acessar empenhos, fornecedores e comparações.</p><Button asChild size="sm" className="mt-2"><Link href={COMPLETE_REGISTRATION_PATH}>Concluir cadastro</Link></Button></AlertDescription><Button type="button" variant="ghost" size="icon" className="absolute right-2 top-2 size-8 text-muted-foreground hover:text-foreground" aria-label="Fechar aviso de conclusão de cadastro" onClick={dismissRegistrationNotice}><X className="size-4" /></Button></Alert>}
     {(data.competencias_ausentes?.length ?? 0) > 0 && <Alert className="mb-3"><Info /><AlertTitle>Dados incompletos neste recorte</AlertTitle><AlertDescription>Competências {data.competencias_ausentes!.join(', ')} não publicadas.</AlertDescription></Alert>}
     {(data.falhas_competencias?.length ?? 0) > 0 && <Alert variant="destructive" className="mb-6"><TriangleAlert /><AlertTitle>Falhas no processamento</AlertTitle><AlertDescription>Algumas competências não puderam ser processadas; os demais dados continuam disponíveis.</AlertDescription></Alert>}
 
@@ -123,7 +135,6 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
 
     <div className="mb-6 grid gap-6 xl:grid-cols-2"><ChartPanel title="Participação por porte empresarial" rows={sizes.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!sizes.length}><DonutChart data={sizes} total={totalSizes} /></ChartPanel><ChartPanel title="Destino dos recursos" description="Origem em relação ao município comprador" rows={destinations.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!destinations.length}><DonutChart data={destinations} total={totalDestinations} /></ChartPanel></div>
     <ChartPanel className="mb-6" title="Evolução das compras consideradas" description="Lacunas representam competências não publicadas; períodos publicados sem movimento aparecem como zero." legend={series.map((item) => ({ label: item.label, color: item.color }))} rows={evolution.map((item) => ({ label: item.label, values: item.unavailable ? ['Dados não publicados', 'Dados não publicados'] : [item.total == null ? '—' : money(item.total), item.mpe == null ? '—' : money(item.mpe)] }))} empty={!evolution.length}><TrendChart data={evolution} series={series} /></ChartPanel>
-    <Alert className="bg-transparent text-muted-foreground"><Info /><AlertDescription>Dados públicos consolidados. {number(data.totais_filtrados?.empenhos ?? 0)} empenhos considerados · cobertura cadastral de {percent(data.cobertura_cadastral?.percentual ?? null)}. Valores monetários formatados em reais.</AlertDescription></Alert>
   </>;
 }
 
@@ -153,7 +164,7 @@ export default function MunicipalityDetail({ id }: { id?: string }) {
   }, [clear, error?.status, pathname, queryClient, router, searchParams]);
 
   return <>
-    <Button variant="ghost" className="mb-3 pl-0 text-muted-foreground" onClick={() => router.push('/analitico')}><ArrowLeft />Visão geral</Button>
+    <Button variant="ghost" className="mb-3 h-auto self-start bg-transparent px-0 py-1 text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground" onClick={() => router.push('/analitico')}><ArrowLeft />Voltar à visão geral</Button>
     <PageHeader eyebrow="Inteligência territorial" title={visibleMunicipalityName ?? 'Detalhes municipais'} description={input ? `${query.isPlaceholderData ? 'CE' : query.data?.municipio?.uf ?? 'CE'} · ${civilDate(input.start_date)} a ${civilDate(input.end_date)}` : 'Selecione um município para consultar os indicadores de compras públicas.'} actions={<Button variant="outline" onClick={async () => { try { await navigator.clipboard.writeText(window.location.href); toast.success('Link com o recorte copiado.'); } catch { toast.error('Não foi possível copiar o link.'); } }}><Share2 /><span className="hidden sm:inline">Compartilhar</span></Button>} />
     <MunicipalFilters key={`${candidate.municipality_tce_code}:${candidate.start_date}:${candidate.end_date}`} input={input} initialCode={initialCode} />
     <div aria-busy={query.isFetching} aria-live="polite">{!initialCode ? <EmptyState title="Selecione um município" description="Escolha um município e um período para visualizar o panorama detalhado." /> : !parsed.success ? <Alert variant="destructive"><TriangleAlert /><AlertTitle>Parâmetros inválidos</AlertTitle><AlertDescription>Revise o município e o período informados.</AlertDescription></Alert> : query.isPending || updating ? <LoadingState /> : error && error.status !== 401 ? <div className="space-y-3"><ErrorState onRetry={() => void query.refetch()} /><Alert variant={error.status === 403 ? 'destructive' : 'default'}><TriangleAlert /><AlertTitle>{error.status === 403 ? 'Sua conta não tem autorização para acessar este recurso.' : error.status === 422 ? 'Consulta rejeitada. Revise o período e o município.' : error.status === 503 ? 'O serviço analítico está temporariamente indisponível.' : error.status === 400 ? 'Os parâmetros da consulta são inválidos.' : 'Não foi possível carregar o panorama.'}</AlertTitle>{error.requestId && <AlertDescription>Código de suporte: {error.requestId}</AlertDescription>}<Button size="sm" className="mt-2" onClick={() => void query.refetch()}><RefreshCw />Tentar novamente</Button></Alert></div> : query.data && input ? <OverviewPanels data={query.data} input={input} /> : null}</div>

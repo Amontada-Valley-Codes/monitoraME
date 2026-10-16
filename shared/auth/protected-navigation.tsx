@@ -13,7 +13,7 @@ export function useProtectedNavigate() {
   const { openLeadCta } = useLeadCta();
   return useCallback(async (href: string) => {
     const current = status === 'loading' ? await waitUntilReady(300) : status;
-    if (current === 'authenticated') router.push(href);
+    if (current === 'authenticated' || href.startsWith('/analitico/municipios')) router.push(href);
     else { saveReturnTo(href); openLeadCta(); }
   }, [openLeadCta, router, status, waitUntilReady]);
 }

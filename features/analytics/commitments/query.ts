@@ -18,6 +18,16 @@ export const DEFAULT_COMMITMENT_FILTERS: CommitmentListFilters = {
   sort_order: 'desc',
 };
 
+export const COMMITMENT_EXERCISES = ['2025', '2024', '2023', '2022', '2021'] as const;
+
+export function commitmentExerciseFilters(exercise: string) {
+  const normalized = /^\d{4}$/.test(exercise) ? exercise : '2025';
+  return {
+    start_date: `${normalized}-01-01`,
+    end_date: `${normalized}-12-31`,
+  };
+}
+
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const EXPENSE_ELEMENT_CODES = new Set(['30', '32', '35', '39', '40', '51', '52']);
 
@@ -37,18 +47,17 @@ export function parseCommitmentFilters(params: URLSearchParams): CommitmentListF
   const sortBy = params.get('sort_by');
   const sortOrder = params.get('sort_order');
   const startDate = params.get('start_date');
-  const endDate = params.get('end_date');
+  const requestedExercise = startDate && DATE_PATTERN.test(startDate)
+    ? startDate.slice(0, 4)
+    : DEFAULT_COMMITMENT_FILTERS.start_date.slice(0, 4);
+  const closedExercise = commitmentExerciseFilters(requestedExercise);
   const search = params.get('search')?.trim();
   const municipality = params.get('municipality_tce_code')?.trim();
 
   return {
     uf: params.get('uf') || DEFAULT_COMMITMENT_FILTERS.uf,
-    start_date: startDate && DATE_PATTERN.test(startDate)
-      ? startDate
-      : DEFAULT_COMMITMENT_FILTERS.start_date,
-    end_date: endDate && DATE_PATTERN.test(endDate)
-      ? endDate
-      : DEFAULT_COMMITMENT_FILTERS.end_date,
+    start_date: closedExercise.start_date,
+    end_date: closedExercise.end_date,
     ...(municipality ? { municipality_tce_code: municipality } : {}),
     company_sizes: params.getAll('company_sizes').filter(Boolean),
     supplier_origins: params.getAll('supplier_origins').filter(Boolean),

@@ -25,7 +25,7 @@ import { PageHeader } from '../components/page-header';
 import { TceMunicipalitySelect } from '../components/tce-municipality-select';
 import { fetchSuppliers } from '../suppliers/api';
 import { buildSupplierDetailHref, canOpenSupplierDetail, formatSupplierDocument } from '../suppliers/navigation';
-import { DEFAULT_SUPPLIER_FILTERS, nextSupplierSort, parseSupplierFilters, patchSupplierFilters, serializeSupplierFilters } from '../suppliers/query';
+import { DEFAULT_SUPPLIER_FILTERS, nextSupplierSort, parseSupplierFilters, patchSupplierFilters, serializeSupplierFilters, SUPPLIER_EXERCISES, supplierExerciseFilters } from '../suppliers/query';
 import type { SupplierListFilters, SupplierListResponse, SupplierSortField } from '../suppliers/types';
 
 const COMPANY_SIZES = [
@@ -138,11 +138,10 @@ export default function Suppliers() {
   const viewState = getCommitmentViewState(loading && !data, Boolean(error), data?.items.length ?? 0);
 
   return <>
-    <PageHeader eyebrow="Ecossistema empresarial" title="Fornecedores" description="Consulte os fornecedores presentes nas compras públicas do recorte selecionado." />
+    <PageHeader eyebrow="Ecossistema empresarial" title="Fornecedores" description="Consulte os fornecedores presentes nas compras públicas do exercício selecionado." />
     <section className="panel no-print mb-6 p-4" aria-label="Filtros de fornecedores">
-      <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.3fr_auto]">
-        <div><Label htmlFor="supplier-start" className="filter-label">Data inicial</Label><Input id="supplier-start" type="date" value={filters.start_date} onChange={(event) => updateFilters({ start_date: event.target.value })} /></div>
-        <div><Label htmlFor="supplier-end" className="filter-label">Data final</Label><Input id="supplier-end" type="date" value={filters.end_date} onChange={(event) => updateFilters({ end_date: event.target.value })} /></div>
+      <div className="grid gap-3 lg:grid-cols-[0.7fr_1.3fr_auto]">
+        <div><Label className="filter-label">Exercício</Label><SelectField label="Selecionar exercício" value={filters.start_date.slice(0, 4)} onChange={(exercise) => updateFilters(supplierExerciseFilters(exercise))} options={SUPPLIER_EXERCISES.map((exercise) => ({ value: exercise, label: `Exercício ${exercise}` }))} className="h-11" /></div>
         <div><Label className="filter-label">Município comprador</Label><TceMunicipalitySelect value={filters.municipality_tce_code} onValueChange={(municipality_tce_code) => updateFilters({ municipality_tce_code })} className="h-11" /></div>
         <div className="flex items-end"><Button type="button" variant="outline" className="w-full" onClick={() => { setDraft(filters); setFilterPanelOpen(true); }}><SlidersHorizontal />Mais filtros{activeExtendedFilters > 0 && <Badge>{activeExtendedFilters}</Badge>}</Button></div>
       </div>

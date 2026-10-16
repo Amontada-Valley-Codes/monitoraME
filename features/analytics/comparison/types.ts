@@ -39,17 +39,22 @@ export interface ValueComparison {
 
 export interface SideResult {
   label: string;
-  filters: unknown;
+  filters: ComparisonSideRequest['filters'];
   overview: {
-    status_exercicio: string;
-    municipio: { nome: string; uf: string; codigo_ibge: string; codigo_tce: string };
+    status_exercicio?: string | null;
+    municipio?: { nome?: string; uf?: string; codigo_ibge?: string; codigo_tce?: string } | null;
     competencias_solicitadas: string[];
     competencias_publicadas: string[];
     competencias_ausentes: string[];
     falhas_competencias: unknown[];
     totais_brutos: { empenhos: number };
-    totais_filtrados: { empenhos: number };
-    cobertura_cadastral: { empenhos: number; empenhos_com_cache: number; percentual: number };
+    totais_filtrados?: { empenhos: number } | null;
+    cobertura_cadastral?: {
+      empenhos: number;
+      empenhos_com_cache: number;
+      percentual: number;
+    } | null;
+    base_analitica?: { municipio_comprador?: string | null } | null;
     kpis: Record<string, number>;
   };
 }

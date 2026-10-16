@@ -1,13 +1,18 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
 import {
   ArrowDownRight,
   ArrowRight,
   BarChart3,
+  BellRing,
+  BookmarkCheck,
   Building2,
   Check,
   CheckCircle2,
@@ -19,9 +24,11 @@ import {
   MessageCircle,
   SearchCheck,
   ShieldCheck,
+  SlidersHorizontal,
   Sparkles,
   TrendingUp,
   ChevronsUpDown,
+  ChevronDown,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -116,6 +123,27 @@ const modules = [
   },
 ];
 
+const opportunityBenefits = [
+  {
+    title: 'Busca que reduz o ruído',
+    description:
+      'Filtre oportunidades por município, categoria, modalidade e período de publicação.',
+    icon: SlidersHorizontal,
+  },
+  {
+    title: 'Compatibilidade explicada',
+    description:
+      'Entenda por que uma compra pode fazer sentido para o perfil e a área de atuação da empresa.',
+    icon: SearchCheck,
+  },
+  {
+    title: 'Acompanhamento organizado',
+    description:
+      'Salve editais relevantes e mantenha prazos e próximas ações reunidos em um só lugar.',
+    icon: BookmarkCheck,
+  },
+];
+
 const processSteps = [
   [
     '01',
@@ -139,10 +167,54 @@ const processSteps = [
   ],
 ];
 
+const faqs = [
+  {
+    question: 'O que é o monitoraME e para quem ele foi criado?',
+    answer:
+      'O monitoraME é uma plataforma de inteligência em compras públicas. Ela organiza dados para apoiar empresas na descoberta de oportunidades, gestores públicos na análise do mercado fornecedor e equipes de controle na leitura de contratos, despesas e indicadores territoriais.',
+  },
+  {
+    question: 'Quais fontes de dados são utilizadas?',
+    answer:
+      'A plataforma integra dados públicos de fontes como o Tribunal de Contas do Estado do Ceará (TCE-CE), o Portal Nacional de Contratações Públicas (PNCP) e cadastros públicos da Receita Federal. Cada indicador depende da disponibilidade e da qualidade da informação publicada pelos órgãos de origem.',
+  },
+  {
+    question: 'Com que frequência as informações são atualizadas?',
+    answer:
+      'As rotinas de coleta e processamento acompanham a disponibilização das bases oficiais. Como cada fonte possui calendário e formato próprios, pode existir um intervalo entre a publicação do órgão e a consolidação no monitoraME. A referência temporal exibida no painel indica o período consultado.',
+  },
+  {
+    question: 'Como a plataforma ajuda micro e pequenas empresas?',
+    answer:
+      'Empresas podem localizar editais e compras compatíveis com sua atuação, filtrar oportunidades por município e analisar o histórico de fornecedores e objetos contratados. Isso reduz o tempo gasto procurando informações dispersas e melhora a preparação comercial.',
+  },
+  {
+    question: 'Como funciona a análise da Lei Complementar 123/06?',
+    answer:
+      'O sistema aplica regras analíticas aos dados disponíveis para destacar situações relacionadas ao tratamento favorecido às micro e pequenas empresas, como licitações exclusivas de até R$ 80 mil e reservas de cota. Os resultados apoiam a análise, mas não substituem a avaliação jurídica e documental de cada processo.',
+  },
+  {
+    question: 'O monitoraME substitui os portais oficiais?',
+    answer:
+      'Não. O monitoraME funciona como uma camada de organização e inteligência sobre dados públicos. Para participar de uma contratação ou validar documentos, prazos e condições, a empresa deve sempre consultar o edital e o portal oficial responsável pelo processo.',
+  },
+  {
+    question: 'Meus dados e minhas buscas ficam protegidos?',
+    answer:
+      'A navegação pública utiliza informações abertas. Recursos vinculados a uma conta seguem controles de acesso da plataforma. O monitoraME não altera registros oficiais e apresenta os dados de origem de forma tratada para facilitar consulta, comparação e tomada de decisão.',
+  },
+  {
+    question: 'Posso solicitar uma demonstração ou apoio para minha organização?',
+    answer:
+      'Sim. Empresas, municípios e equipes técnicas podem conversar com o time para entender os módulos disponíveis e avaliar o uso mais adequado ao seu contexto. Use o canal de contato ao final da página para solicitar uma apresentação.',
+  },
+];
+
 const whatsappUrl =
   'https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME.';
 
 export function LandingPage() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const protectedNavigate = useProtectedNavigate();
   const [municipality, setMunicipality] = useState('');
   const [municipalityOpen, setMunicipalityOpen] = useState(false);
@@ -157,6 +229,126 @@ export function LandingPage() {
     updateHeader();
     window.addEventListener('scroll', updateHeader, { passive: true });
     return () => window.removeEventListener('scroll', updateHeader);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!rootRef.current) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const lenis = new Lenis({
+      anchors: { offset: -80 },
+      duration: 1.05,
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+    });
+    const updateScrollTrigger = () => ScrollTrigger.update();
+    const updateLenis = (time: number) => lenis.raf(time * 1000);
+
+    lenis.on('scroll', updateScrollTrigger);
+    gsap.ticker.add(updateLenis);
+    gsap.ticker.lagSmoothing(0);
+
+    if (reduceMotion) {
+      return () => {
+        gsap.ticker.remove(updateLenis);
+        lenis.destroy();
+      };
+    }
+
+    const context = gsap.context(() => {
+      gsap
+        .timeline({ defaults: { ease: 'power3.out' } })
+        .to('[data-hero-reveal]', {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.85,
+          stagger: 0.12,
+        })
+        .to(
+          '[data-hero-proof]',
+          { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.08 },
+          '-=0.35',
+        );
+
+      gsap.utils.toArray<HTMLElement>('[data-reveal-section]').forEach((section) => {
+        const items = section.querySelectorAll<HTMLElement>('[data-reveal-item]');
+        if (!items.length) return;
+
+        gsap.to(items, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 78%',
+            once: true,
+          },
+        });
+      });
+
+      gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((element) => {
+        gsap.to(element, {
+          yPercent: 8,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.8,
+          },
+        });
+      });
+
+      gsap.to('[data-scroll-progress]', {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.2,
+        },
+      });
+
+      const faqSection = rootRef.current?.querySelector<HTMLElement>('[data-faq-section]');
+      const faqViewport = rootRef.current?.querySelector<HTMLElement>('[data-faq-viewport]');
+      const faqTrack = rootRef.current?.querySelector<HTMLElement>('[data-faq-track]');
+
+      if (faqSection && faqViewport && faqTrack) {
+        const distance = () =>
+          Math.max(0, faqTrack.scrollHeight - faqViewport.clientHeight);
+
+        gsap.to(faqTrack, {
+          y: () => -distance(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: faqSection,
+            start: 'top top',
+            end: () =>
+              `+=${Math.max(distance(), faqViewport.clientHeight * 0.85)}`,
+            pin: true,
+            pinSpacing: true,
+            scrub: 0.8,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        const resizeObserver = new ResizeObserver(() => ScrollTrigger.refresh());
+        resizeObserver.observe(faqTrack);
+        return () => resizeObserver.disconnect();
+      }
+    }, rootRef);
+
+    return () => {
+      context.revert();
+      gsap.ticker.remove(updateLenis);
+      lenis.destroy();
+    };
   }, []);
 
   function submitMunicipality(event: FormEvent<HTMLFormElement>) {
@@ -186,7 +378,12 @@ export function LandingPage() {
     : 'transition-colors hover:text-white';
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
+    <div ref={rootRef} className="min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
+      <div
+        data-scroll-progress
+        aria-hidden="true"
+        className="fixed inset-x-0 top-0 z-60 h-0.5 origin-left scale-x-0 bg-[#76a5ff]"
+      />
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${headerScrolled
             ? 'border-border/65 bg-card/82 shadow-[0_10px_35px_-24px_rgb(0_20_41/45%)] backdrop-blur-xl'
@@ -209,6 +406,9 @@ export function LandingPage() {
             <Link className={headerNavLinkClass} href="#plataforma">
               Plataforma
             </Link>
+            <Link className={headerNavLinkClass} href="#oportunidades">
+              Oportunidades
+            </Link>
             <Link className={headerNavLinkClass} href="#solucoes">
               Soluções
             </Link>
@@ -217,6 +417,9 @@ export function LandingPage() {
               href="#metodologia"
             >
               Metodologia
+            </Link>
+            <Link className={headerNavLinkClass} href="#faq">
+              Dúvidas
             </Link>
             <Link className={headerNavLinkClass} href="#contato">
               Contato
@@ -265,21 +468,15 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
           <div className="relative mx-auto flex min-h-180 max-w-7xl items-center px-5 py-24 sm:px-8 lg:min-h-190">
             <div className="max-w-2xl pt-6">
-              <div className="mb-7 inline-flex items-center gap-2 border border-white/20 bg-white/8 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                <span className="size-1.5 rounded-full bg-[#76a5ff]" /> Inteligência
-                em compras públicas
-              </div>
-              <h1 className="max-w-2xl text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
+              <h1 data-hero-reveal className="max-w-2xl text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
                 Mais oportunidade para quem vende e clareza para quem decide.
                 {/* Dados públicos.<br />Decisões que{' '}
                 <span className="text-[#8fb4ff]">movem</span> territórios. */}
               </h1>
-              <p className="mt-7 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
-                Reunimos dados dispersos de compras públicas para mostrar aos municípios
-                o impacto das contratações e aos pequenos negócios as oportunidades
-                certas para o seu perfil.
+              <p data-hero-reveal className="mt-7 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
+                Transformamos dados dispersos de compras públicas em clareza para gestores e oportunidades para pequenos negócios.
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
+              <div data-hero-reveal className="mt-9 flex flex-wrap gap-3">
                 <Button
                   asChild
                   size="lg"
@@ -299,17 +496,17 @@ export function LandingPage() {
                 </Button>
               </div>
               <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-6 text-xs text-white/64">
-                <span className="flex items-center gap-2">
+                <span data-hero-proof className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
-                  Dados oficiais
+                  TCE
                 </span>
-                <span className="flex items-center gap-2">
+                <span data-hero-proof className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
-                  Cobertura municipal
+                  PNCP
                 </span>
-                <span className="flex items-center gap-2">
+                <span data-hero-proof className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
-                  Leitura simplificada
+                  Receita Federal
                 </span>
               </div>
             </div>
@@ -323,9 +520,10 @@ export function LandingPage() {
 
         <section
           id="consulta"
+          data-reveal-section
           className="relative z-10 -mt-14 scroll-mt-28 px-5 sm:px-8"
         >
-          <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
+          <div data-reveal-item className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
             <div className="bg-landing-blue p-7 text-white sm:p-9">
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/65">
                 Consulta aberta
@@ -439,14 +637,12 @@ export function LandingPage() {
 
         <section
           id="plataforma"
+          data-reveal-section
           className="scroll-mt-20 bg-landing-paper px-5 py-24 sm:px-8 lg:py-32"
         >
           <div className="mx-auto max-w-7xl">
-            <div className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+            <div data-reveal-item className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
               <div>
-                <p className="eyebrow text-primary">
-                  Uma plataforma, diferentes perspectivas
-                </p>
                 <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
                   A informação certa para quem faz a economia local acontecer.
                 </h2>
@@ -461,6 +657,7 @@ export function LandingPage() {
               {audiences.map(({ title, description, icon: Icon }) => (
                 <article
                   key={title}
+                  data-reveal-item
                   className="group border border-border/80 bg-card p-7 shadow-[0_12px_35px_-30px_rgb(0_20_41/30%)] sm:p-8"
                 >
                   <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-white">
@@ -476,12 +673,9 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className="overflow-hidden bg-landing-ink py-20 text-white lg:py-28">
+        <section data-reveal-section className="overflow-hidden bg-landing-ink py-20 text-white lg:py-28">
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
-            <div>
-              <p className="eyebrow text-[#8fb4ff]">
-                O dado já existe. A clareza vem agora.
-              </p>
+            <div data-reveal-item>
               <h2 className="mt-4 text-3xl font-bold leading-[1.04] text-white sm:text-5xl">
                 Enxergue o movimento das compras públicas.
               </h2>
@@ -490,24 +684,7 @@ export function LandingPage() {
                 microempresas e investigue fornecedores sem navegar por planilhas
                 dispersas.
               </p>
-              <div className="mt-8 grid max-w-md grid-cols-2 gap-px overflow-hidden border border-white/12 bg-white/12">
-                <div className="bg-landing-ink p-5">
-                  <span className="metric text-3xl font-semibold text-white">
-                    {municipalities.length}
-                  </span>
-                  <span className="mt-1 block text-xs text-white/55">
-                    municípios cearenses
-                  </span>
-                </div>
-                <div className="bg-landing-ink p-5">
-                  <span className="metric text-3xl font-semibold text-white">
-                    1
-                  </span>
-                  <span className="mt-1 block text-xs text-white/55">
-                    visão integrada
-                  </span>
-                </div>
-              </div>
+              
               <Button
                 asChild
                 className="mt-8 rounded-full bg-landing-blue px-6 text-white hover:bg-landing-blue/80"
@@ -517,7 +694,7 @@ export function LandingPage() {
                 </Link>
               </Button>
             </div>
-            <div className="relative">
+            <div data-reveal-item className="relative">
               {/* <div className="absolute -left-5 -top-5 hidden border border-white/15 bg-white/8 px-5 py-3 backdrop-blur-sm sm:block">
                 <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">
                   Leitura territorial
@@ -528,6 +705,7 @@ export function LandingPage() {
               </div> */}
               <div className="overflow-hidden rounded-xl border border-white/15 bg-white shadow-2xl shadow-black/35">
                 <Image
+                  data-parallax
                   src="/project/Analytics.png"
                   alt="Painel analítico do monitoraME com evolução de compras públicas e participação de microempresas"
                   width={1599}
@@ -547,13 +725,112 @@ export function LandingPage() {
         </section>
 
         <section
+          id="oportunidades"
+          data-reveal-section
+          className="scroll-mt-20 overflow-hidden bg-landing-paper py-24 lg:py-32"
+        >
+          <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.03fr_0.97fr] lg:gap-24">
+            <div>
+              <div data-reveal-item className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-secondary px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+                <BellRing className="size-3.5" />
+                Radar de oportunidades
+              </div>
+              <h2 data-reveal-item className="mt-5 max-w-3xl text-3xl font-bold leading-[1.04] sm:text-5xl">
+                Encontre compras públicas que fazem sentido para o seu negócio.
+              </h2>
+              <p data-reveal-item className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
+                Em vez de procurar edital por edital em diferentes portais, consulte
+                oportunidades em uma experiência única, compare informações essenciais
+                e concentre sua atenção no que tem mais potencial para a sua empresa.
+              </p>
+
+              <div className="mt-9 grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
+                {opportunityBenefits.map(({ title, description, icon: Icon }) => (
+                  <article key={title} data-reveal-item className="flex gap-4">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Icon className="size-4" />
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-bold">{title}</h3>
+                      <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
+                        {description}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div data-reveal-item className="mt-10 flex flex-wrap items-center gap-4">
+                <Button asChild size="lg" className="h-12 rounded-full px-6">
+                  <Link href="/oportunidades">
+                    Acessar oportunidades públicas <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Consulta pública disponível sem cadastro
+                </span>
+              </div>
+            </div>
+
+            <div data-reveal-item className="relative">
+              <div className="absolute -inset-10 -z-10 rounded-full bg-primary/8 blur-3xl" />
+              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_30px_80px_-38px_rgb(0_20_41/42%)]">
+                <div className="flex items-center justify-between border-b border-border bg-muted/45 px-5 py-4">
+                  <div>
+                    <p className="text-sm font-bold">Oportunidades públicas</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      Uma jornada mais simples até o edital oficial
+                    </p>
+                  </div>
+                  <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-primary">
+                    <FileSearch className="size-4" />
+                  </span>
+                </div>
+                <div className="space-y-3 p-5 sm:p-6">
+                  {[
+                    ['01', 'Descubra', 'Pesquise compras por território e pelo que sua empresa oferece.'],
+                    ['02', 'Avalie', 'Compare objeto, órgão, modalidade e prazo antes de decidir.'],
+                    ['03', 'Acompanhe', 'Organize oportunidades relevantes e não perca os próximos passos.'],
+                  ].map(([number, title, description], index) => (
+                    <div
+                      key={number}
+                      className={`group flex gap-4 rounded-xl border p-5 transition-colors ${
+                        index === 0
+                          ? 'border-primary/25 bg-secondary/70'
+                          : 'border-border bg-background hover:border-primary/20'
+                      }`}
+                    >
+                      <span className="font-mono text-xs font-semibold text-primary">
+                        {number}
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-bold">{title}</h3>
+                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                          {description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-border bg-landing-ink px-6 py-5 text-white">
+                  <p className="text-xs leading-5 text-white/68">
+                    A participação e o envio de propostas continuam sendo realizados
+                    nos canais oficiais indicados por cada órgão.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
           id="solucoes"
+          data-reveal-section
           className="scroll-mt-20 bg-landing-tint py-24 lg:py-32"
         >
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div data-reveal-item className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="eyebrow text-primary">Inteligência aplicada</p>
                 <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-[1.05] sm:text-5xl">
                   Do orçamento público à oportunidade local.
                 </h2>
@@ -569,6 +846,7 @@ export function LandingPage() {
               {modules.map(({ title, description, icon: Icon, tone }, index) => (
                 <article
                   key={title}
+                  data-reveal-item
                   className={`group relative min-h-80 overflow-hidden p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-10 ${tone === 'dark'
                       ? 'bg-landing-ink text-white'
                       : tone === 'blue'
@@ -600,10 +878,12 @@ export function LandingPage() {
                     {description}
                   </p>
                   <Link
-                    href="/analitico"
+                    href={title === 'Radar de oportunidades MPE' ? '/oportunidades' : '/analitico'}
                     className="absolute bottom-8 left-8 inline-flex items-center gap-2 text-xs font-semibold sm:left-10"
                   >
-                    Ver no painel{' '}
+                    {title === 'Radar de oportunidades MPE'
+                      ? 'Ver oportunidades públicas'
+                      : 'Ver no painel'}{' '}
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </article>
@@ -614,15 +894,15 @@ export function LandingPage() {
 
         <section
           id="metodologia"
+          data-reveal-section
           className="scroll-mt-20 border-y border-border bg-landing-paper py-24 lg:py-32"
         >
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
-              <div>
+              <div data-reveal-item>
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                   <DatabaseZap className="size-5" />
                 </span>
-                <p className="eyebrow mt-7 text-primary">Da base à decisão</p>
                 <h2 className="mt-4 text-5xl font-bold leading-[1.05] sm:text-4xl">
                   Simplicidade na sua tela.
                 </h2>
@@ -633,7 +913,7 @@ export function LandingPage() {
               </div>
               <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
                 {processSteps.map(([number, title, description]) => (
-                  <article key={number} className="min-h-56 bg-card p-7 sm:p-8">
+                  <article key={number} data-reveal-item className="min-h-56 bg-card p-7 sm:p-8">
                     <span className="metric text-sm font-semibold text-primary">
                       {number}
                     </span>
@@ -649,10 +929,76 @@ export function LandingPage() {
         </section>
 
         <section
+          id="faq"
+          data-faq-section
+          data-reveal-section
+          className="flex min-h-svh scroll-mt-20 items-center overflow-hidden bg-landing-paper px-5 py-16 sm:px-8 lg:py-20"
+        >
+          <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-24">
+            <div data-reveal-item>
+              <p className="eyebrow text-primary">Perguntas frequentes</p>
+              <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
+                Clareza antes de começar.
+              </h2>
+              <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
+                Entenda como os dados são organizados, quais cuidados considerar e
+                como o monitoraME pode apoiar sua rotina.
+              </p>
+              <p className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                <ArrowDownRight className="size-4 text-primary" />
+                Continue rolando para explorar
+              </p>
+              <Button asChild variant="outline" className="mt-8 rounded-full px-6">
+                <a href={whatsappUrl} target="_blank" rel="noreferrer">
+                  Ainda tenho uma dúvida <MessageCircle className="size-4" />
+                </a>
+              </Button>
+            </div>
+
+            <div data-reveal-item className="relative min-h-0">
+              <div
+                data-faq-viewport
+                className="h-[min(68svh,42rem)] overflow-hidden border-y border-border pr-2 sm:pr-5"
+              >
+                <div data-faq-track>
+                  {faqs.map(({ question, answer }, index) => (
+                    <details
+                      key={question}
+                      className="group border-b border-border last:border-b-0"
+                    >
+                      <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-6 text-left marker:content-none sm:py-7 [&::-webkit-details-marker]:hidden">
+                        <span className="flex gap-4">
+                          <span className="mt-1 font-mono text-[10px] font-semibold text-primary">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span className="text-base font-semibold leading-6 sm:text-lg">
+                            {question}
+                          </span>
+                        </span>
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-primary transition-transform duration-300 group-open:rotate-180">
+                          <ChevronDown className="size-4" />
+                        </span>
+                      </summary>
+                      <div className="overflow-hidden">
+                        <p className="max-w-3xl pb-7 pl-10 pr-12 text-sm leading-7 text-muted-foreground sm:text-base">
+                          {answer}
+                        </p>
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-landing-paper to-transparent" />
+            </div>
+          </div>
+        </section>
+
+        <section
           id="contato"
+          data-reveal-section
           className="scroll-mt-20 bg-landing-tint px-5 py-24 sm:px-8 lg:py-32"
         >
-          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
+          <div data-reveal-item className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-8 sm:p-12 lg:p-16">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65">
                 <Sparkles className="size-4" />
@@ -694,7 +1040,8 @@ export function LandingPage() {
                 alt="Equipe trabalhando com dados públicos"
                 fill
                 sizes="36vw"
-                className="object-cover object-[78%_center] opacity-80"
+                className="scale-110 object-cover object-[78%_center] opacity-80"
+                data-parallax
               />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-blue),transparent_55%)]" />
             </div>
@@ -717,10 +1064,6 @@ export function LandingPage() {
                 Inteligência de dados para compras públicas mais transparentes,
                 estratégicas e acessíveis.
               </p>
-              <div className="mt-6 flex items-center gap-2 text-xs text-white/62">
-                <ShieldCheck className="size-4 text-[#8fb4ff]" />
-                Dados públicos tratados com responsabilidade
-              </div>
             </div>
             <div>
               <h2 className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/45">
@@ -736,6 +1079,9 @@ export function LandingPage() {
                 <Link href="#metodologia" className="hover:text-white">
                   Metodologia
                 </Link>
+                <Link href="#faq" className="hover:text-white">
+                  Perguntas frequentes
+                </Link>
                 <Link href="#contato" className="hover:text-white">
                   Contato
                 </Link>
@@ -749,6 +1095,9 @@ export function LandingPage() {
                 aria-label="Links da plataforma"
                 className="mt-5 flex flex-col items-start gap-3 text-xs text-white/65"
               >
+                <Link href="/oportunidades" className="hover:text-white">
+                  Oportunidades públicas
+                </Link>
                 <Link href="/analitico" className="hover:text-white">
                   Painel analítico
                 </Link>

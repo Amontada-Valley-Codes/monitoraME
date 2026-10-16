@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ArrowUpRight, ChartPie, MapPin, Store, Wallet } from 'lucide-react';
+import { ArrowUpRight, CalendarRange, ChartPie, MapPin, Sparkles, Store, Wallet } from 'lucide-react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
@@ -176,38 +176,62 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
   );
 }
 
-export function OverviewReading({ params }: { params: PipelineOverviewParams }) {
-  const { data, view } = useOverviewKpis(params);
-  if (!data || !view) return null;
-  const spendingPerHundred = data.meMeiPercentage === null
-    ? null
-    : money(data.meMeiPercentage * 100);
+// export function OverviewReading({ params }: { params: PipelineOverviewParams }) {
+//   const { data, view } = useOverviewKpis(params);
+//   if (!data || !view) return null;
+//   const spendingPerHundred = data.meMeiPercentage === null
+//     ? null
+//     : money(data.meMeiPercentage * 100);
+//   const participationWidth = data.meMeiPercentage === null ? 0 : Math.min(100, Math.max(0, data.meMeiPercentage));
+//   const [periodStart, periodEnd] = view.period.split(' a ');
+//   const formatDate = (value?: string) => {
+//     if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return value ?? '—';
+//     const [year, month, day] = value.split('-');
+//     return `${day}/${month}/${year}`;
+//   };
 
-  return (
-    <section className="panel flex flex-col p-6">
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-base font-semibold">Leitura do período</h2>
-        <Store className="size-4 text-muted-foreground" />
-      </div>
-      <p className="text-sm text-muted-foreground">Participação de ME e MEI</p>
-      <p className="metric mt-4 text-4xl text-primary">
-        {valueOrDash(data.meMeiPercentage, percent)}
-      </p>
-      <p className="mt-3 text-sm leading-relaxed">
-        {spendingPerHundred === null
-          ? 'Não há dados suficientes para calcular os gastos com microempresas neste período.'
-          : `A cada R$ 100,00 em compras, ${spendingPerHundred} foram gastos com microempresas.`}
-      </p>
-      <div className="mt-6 space-y-3 border-t pt-5 text-sm">
-        <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Origem dos dados</span>
-          <span className="font-medium">Dados públicos consolidados</span>
-        </div>
-        <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Período</span>
-          <span className="text-right font-medium">{view.period}</span>
-        </div>
-      </div>
-    </section>
-  );
-}
+//   return (
+//     <section className="panel relative flex flex-col overflow-hidden bg-gradient-to-br from-card via-card to-primary/5 p-6" aria-labelledby="period-reading-title">
+//       <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/70 to-emerald-400" />
+//       <div className="mb-6 flex items-start justify-between gap-4">
+//         <div>
+//           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-2.5 py-1 text-[11px] font-semibold text-primary"><Sparkles className="size-3" />Resumo executivo</span>
+//           <h2 id="period-reading-title" className="mt-3 text-lg font-semibold">Leitura do período</h2>
+//           <p className="mt-1 text-xs leading-5 text-muted-foreground">O que os números revelam sobre a participação dos pequenos negócios.</p>
+//         </div>
+//         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border bg-card text-primary shadow-sm"><Store className="size-5" /></div>
+//       </div>
+
+//       <div className="rounded-2xl border bg-card/85 p-5 shadow-sm">
+//         <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Participação de ME e MEI</p>
+//         <div className="mt-2 flex items-end justify-between gap-3">
+//           <p className="metric text-4xl font-semibold tracking-tight text-primary sm:text-5xl">{valueOrDash(data.meMeiPercentage, percent)}</p>
+//           {/* <span className="pb-1 text-right text-xs text-muted-foreground">das compras analisadas</span> */}
+//         </div>
+//         <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true"><div className="h-full rounded-full bg-linear-to-r from-primary to-emerald-500 transition-[width] duration-500" style={{ width: `${participationWidth}%` }} /></div>
+//         <p className="mt-4 text-sm leading-6 text-foreground">
+//           {spendingPerHundred === null
+//             ? 'Ainda não há dados suficientes para medir a participação dos pequenos negócios neste período.'
+//             : <>De cada <strong>R$ 100,00</strong> em compras consideradas, <strong className="text-primary">{spendingPerHundred}</strong> foram destinados a ME e MEI.</>}
+//         </p>
+//       </div>
+
+//       <dl className="mt-5 grid gap-3 text-sm">
+//         <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/55 p-3">
+//           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary"><Wallet className="size-4" /></div>
+//           <div className="min-w-0"><dt className="text-xs text-muted-foreground">Compras de microempresas</dt><dd className="mt-0.5 font-semibold">{valueOrDash(data.mePurchasesCents, money)}</dd></div>
+//         </div>
+//         <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/55 p-3">
+//           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600"><MapPin className="size-4" /></div>
+//           <div className="min-w-0"><dt className="text-xs text-muted-foreground">Compras com fornecedores locais</dt><dd className="mt-0.5 font-semibold">{valueOrDash(data.localPercentage, percent)}</dd></div>
+//         </div>
+//         <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/55 p-3">
+//           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"><CalendarRange className="size-4" /></div>
+//           <div className="min-w-0"><dt className="text-xs text-muted-foreground">Período analisado</dt><dd className="mt-0.5 font-medium tabular-nums">{formatDate(periodStart)} a {formatDate(periodEnd)}</dd></div>
+//         </div>
+//       </dl>
+
+//       <p className="mt-auto border-t pt-4 text-[11px] leading-4 text-muted-foreground">Fonte: dados públicos consolidados e tratados pelo MonitoraME.</p>
+//     </section>
+//   );
+// }
