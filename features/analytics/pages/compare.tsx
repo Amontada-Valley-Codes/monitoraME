@@ -9,12 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SelectField } from '@/shared/components/select-field';
 import { PageHeader } from '../components/page-header';
 import { MunicipalityPicker } from '../components/global-filters';
 import { MUNICIPALITIES } from '../data/fixtures';
 import { AnalyticsApiError } from '../commitments/api';
 import { fetchComparison } from '../comparison/api';
-import { buildComparisonRequest, deriveComparisonMode } from '../comparison/model';
+import { buildComparisonRequest, COMPARISON_EXERCISES, comparisonExerciseFilters, deriveComparisonMode } from '../comparison/model';
 import { ComparisonResults } from '../comparison/results';
 import type {
   ComparisonMode,
@@ -76,7 +77,7 @@ function initialSide(city: string): ComparisonSideDraft {
 }
 
 export default function Compare() {
-  const [left, setLeft] = useState(() => initialSide('2300754'));
+  const [left, setLeft] = useState(() => initialSide('2304400'));
   const [right, setRight] = useState(() => initialSide('2312908'));
   const [result, setResult] = useState<ComparisonResponse | null>(null);
   const [error, setError] = useState<AnalyticsApiError | null>(null);
@@ -192,7 +193,7 @@ export default function Compare() {
       <PageHeader
         eyebrow="Perspectiva comparativa"
         title="Comparar resultados"
-        description="Compare municípios, períodos ou ambos usando dados públicos consolidados."
+        description="Compare municípios, exercícios ou ambos usando dados públicos consolidados."
       />
       <form id="comparison-form" onSubmit={submit} className="space-y-5">
         <div className="grid gap-4 xl:grid-cols-[1fr_auto_1fr] xl:items-center">
@@ -325,25 +326,18 @@ function ComparisonSidePanel({
             all={false}
           />
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label className="filter-label">Data inicial</Label>
-            <Input
-              type="date"
-              value={side.filters.start_date}
-              max={side.filters.end_date}
-              onChange={(event) => onFilters({ start_date: event.target.value })}
-            />
-          </div>
-          <div>
-            <Label className="filter-label">Data final</Label>
-            <Input
-              type="date"
-              value={side.filters.end_date}
-              min={side.filters.start_date}
-              onChange={(event) => onFilters({ end_date: event.target.value })}
-            />
-          </div>
+        <div>
+          <Label className="filter-label">Exercício</Label>
+          <SelectField
+            label={`Selecionar exercício do ${title}`}
+            value={side.filters.start_date.slice(0, 4)}
+            onChange={(exercise) => onFilters(comparisonExerciseFilters(exercise))}
+            options={COMPARISON_EXERCISES.map((exercise) => ({
+              value: exercise,
+              label: `Exercício ${exercise}`,
+            }))}
+            className="h-11"
+          />
         </div>
         <div>
           <Label className="filter-label">Nome deste recorte</Label>
