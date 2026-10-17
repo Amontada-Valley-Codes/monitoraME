@@ -81,6 +81,7 @@ export function TrendChart({
             stroke={seriesItem.color}
             fillOpacity={seriesItem.key === series[0]?.key ? 0.13 : 0.035}
             strokeWidth={seriesItem.key === series[0]?.key ? 3 : 2}
+            showMarkers
           />
         ))}
         <XAxis numTicks={6} />

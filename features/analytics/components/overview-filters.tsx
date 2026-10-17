@@ -13,14 +13,14 @@ export function OverviewFilters() {
   const years = Array.from({ length: 5 }, (_, index) => String(currentYear - index));
 
   return (
-    <div className="no-print mb-5 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-xs">
-      <div className="flex w-full flex-col gap-1.5 sm:w-56">
-        <Label htmlFor="overview-year" className="h-5 leading-5">
+    <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-1">
+        <Label htmlFor="overview-year" className="sr-only">
           Exercício
         </Label>
-        <div className="relative flex h-11 w-full items-center">
+        <div className="relative flex h-9 w-28 items-center">
           <CalendarDays
-            className="pointer-events-none absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-primary"
+            className="pointer-events-none absolute left-2 top-1/2 z-10 size-3.5 -translate-y-1/2 text-primary"
             aria-hidden="true"
           />
           <SelectField
@@ -28,13 +28,11 @@ export function OverviewFilters() {
             onChange={(selectedYear) => update({ year: selectedYear })}
             options={years.map((item) => ({ value: item, label: item }))}
             label="Selecionar exercício"
-            className="h-11 w-full items-center gap-2 rounded-lg border-input bg-card py-0 pr-3 pl-9 text-sm font-normal shadow-xs data-[size=default]:h-11"
+            className="h-9 w-full items-center gap-1 rounded-md border-input bg-card py-0 pr-2 pl-7 text-xs font-normal shadow-none data-[size=default]:h-9"
           />
         </div>
       </div>
-      <p className="ml-auto hidden text-xs text-muted-foreground xl:block">
-        Período: 01/01/{year} a 31/12/{year}
-      </p>
+
     </div>
   );
 }

@@ -1,20 +1,16 @@
 'use client';
 
-import { Info, Share2, TriangleAlert } from 'lucide-react';
-import { toast } from 'sonner';
+import { Info, TriangleAlert } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
-import { PageHeader } from '../components/page-header';
-import { OverviewFilters } from '../components/overview-filters';
+import { ExpenseElementsTable } from '../components/expense-elements-table';
 import {
   OverviewBusinessSizes,
   OverviewDestinations,
   OverviewEvolution,
   OverviewExpenses,
   OverviewKpis,
-  // OverviewReading,
 } from '../components/overview-sections';
 import { usePipelineOverview } from '../pipeline/use-overview';
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
@@ -26,29 +22,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-overview">
-      <PageHeader
-        eyebrow="Inteligência territorial"
-        title="Panorama das compras públicas"
-        description="Acompanhe como as compras municipais movimentam a economia do Ceará."
-        actions={(
-          <Button
-            variant="outline"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(window.location.href);
-                toast.success('Link com o recorte copiado.');
-              } catch {
-                toast.error('Não foi possível copiar o link.');
-              }
-            }}
-          >
-            <Share2 className="size-4" />
-            <span className="hidden sm:inline">Compartilhar</span>
-          </Button>
-        )}
-      />
-
-      <OverviewFilters />
+      <h1 className="sr-only">Panorama das compras públicas</h1>
 
       {status === 'loading' ? (
         <LoadingState />
@@ -94,16 +68,20 @@ export default function Dashboard() {
 
           <OverviewKpis params={params} />
 
-          <div className="mb-5">
+          <div className="mb-3">
             <OverviewEvolution params={params} />
           </div>
 
-          <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="mb-3">
+            <ExpenseElementsTable rows={view.expenseElements} />
+          </div>
+
+          <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
             <OverviewBusinessSizes params={params} />
             <OverviewDestinations params={params} />
           </div>
 
-          <div className="mb-5">
+          <div className="mb-3">
             <OverviewExpenses params={params} />
           </div>
 

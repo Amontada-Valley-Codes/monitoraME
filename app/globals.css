@@ -303,6 +303,10 @@
   }
 
   .analytics-shell-scale {
+    --sidebar-size: 12.5rem;
+    --header-height: 3.25rem;
+    --page-padding: 1rem;
+    --content-max: 100rem;
     --background: #f7f9fc;
     --card: #ffffff;
     --card-foreground: #172033;
@@ -319,10 +323,9 @@
     --sidebar-border: #e2e9f2;
     --chart-1: #2058b7;
     --chart-2: #75b7cf;
-    width: 111.111111%;
-    min-height: 111.111111svh;
+    width: 100%;
+    min-height: 100svh;
     overflow-x: clip;
-    zoom: 0.9;
   }
 
   .dark .analytics-shell-scale {
@@ -343,31 +346,27 @@
   }
 
   .analytics-shell-scale .dashboard-overview {
-    --chart-height: 19rem;
+    --chart-height: 9rem;
+    font-family: var(--font-heading);
   }
 
   .analytics-shell-scale .dashboard-overview .panel,
   .analytics-shell-scale .dashboard-overview [data-slot="card"] {
     border-color: var(--border);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--card);
-    box-shadow: 0 1px 3px rgb(23 32 51 / 4%);
+    box-shadow: 0 1px 2px rgb(23 32 51 / 3%);
   }
 
-  .analytics-shell-scale .dashboard-overview [data-slot="card"] {
+  .analytics-shell-scale .dashboard-overview .dashboard-metric {
     min-width: 0;
-    border-top: 2px solid var(--primary);
+    min-height: 5.75rem;
   }
 
-  .analytics-shell-scale .dashboard-overview [data-slot="card"] [data-slot="card-content"] > div:first-child > div:first-child > span {
-    border-color: var(--border);
-    background: var(--accent);
-    color: var(--primary);
-  }
 
-  .analytics-shell-scale .dashboard-overview [data-slot="card"] .metric {
+  .analytics-shell-scale .dashboard-overview .dashboard-metric .metric {
     color: var(--foreground);
-    font-weight: 600;
+    font-weight: 550;
   }
 
   .analytics-shell-scale .dashboard-overview .panel > div:first-child,
@@ -383,16 +382,16 @@
   }
 
   .analytics-shell-scale [data-slot="sidebar-inset"] {
-    min-height: 111.111111svh;
+    min-height: 100svh;
   }
 
   .analytics-page-content {
-    min-height: calc(111.111111svh - var(--header-height));
+    min-height: calc(100svh - var(--header-height));
   }
 
   .analytics-shell-scale [data-global-loading] {
-    width: 111.111111vw;
-    height: 111.111111vh;
+    width: 100vw;
+    height: 100vh;
   }
 
   .page-content {
@@ -458,6 +457,35 @@
     display: block;
     margin-bottom: 0.375rem;
   }
+}
+
+/* Dashboard overrides live outside Tailwind layers so utilities do not win. */
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > div:first-child {
+  padding: 0.75rem 1rem 0.375rem;
+  background: transparent;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > [role="list"] {
+  justify-content: flex-end;
+  padding: 0 1rem 0.25rem;
+  border: 0;
+  background: transparent;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > [role="list"] [role="listitem"] > span {
+  width: 1rem;
+  height: 0.15rem;
+  border-radius: 1rem;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > div:last-child {
+  padding: 0.25rem 1rem 0.75rem;
+  border: 0;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-metric {
+  background: var(--card);
+  border-color: var(--border);
 }
 
 @media (max-width: 1279px) {
