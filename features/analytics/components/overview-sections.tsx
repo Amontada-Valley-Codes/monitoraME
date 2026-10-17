@@ -31,8 +31,7 @@ export function OverviewKpis({
   if (!data || !view) return null;
 
   return (
-    <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2 xl:grid-rows-2">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
         <KpiCard
           label="Participação de ME e MEI"
           value={valueOrDash(data.meMeiPercentage, percent)}
@@ -52,13 +51,6 @@ export function OverviewKpis({
           sizeScope="ME"
           tone="violet"
         />
-      </div>
-
-      <div className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1 *:h-full">
-        {expenseChart}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-1 xl:row-start-2">
         <KpiCard
           label="Compras com fornecedores locais"
           value={valueOrDash(data.localPercentage, percent)}
@@ -76,6 +68,8 @@ export function OverviewKpis({
           inverse
           tone="amber"
         />
+      <div className="col-span-full min-w-0 *:h-full">
+        {expenseChart}
       </div>
     </div>
   );

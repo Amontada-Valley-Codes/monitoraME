@@ -303,20 +303,20 @@
   }
 
   .analytics-shell-scale {
-    --background: #edf1f7;
-    --card: #f9fbfe;
-    --card-foreground: #172033;
-    --muted: #e4eaf3;
-    --muted-foreground: #556174;
-    --accent: #dce7f5;
-    --accent-foreground: #174b9c;
-    --border: #ccd6e5;
-    --input: #aebbd0;
-    --sidebar: #e2eaf6;
-    --sidebar-foreground: #33425a;
-    --sidebar-accent: #c9daf4;
-    --sidebar-accent-foreground: #174b9c;
-    --sidebar-border: #c3cee0;
+    --background: #f7f7fa;
+    --card: #ffffff;
+    --card-foreground: #272332;
+    --muted: #f3f1f7;
+    --muted-foreground: #777181;
+    --accent: #f0eafa;
+    --accent-foreground: #7042b8;
+    --border: #e7e3ec;
+    --input: #d8d1e3;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #625d6c;
+    --sidebar-accent: #f0eafa;
+    --sidebar-accent-foreground: #7042b8;
+    --sidebar-border: #ece8f0;
     width: 111.111111%;
     min-height: 111.111111svh;
     overflow-x: clip;
@@ -371,7 +371,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--card);
-    box-shadow: var(--shadow-panel);
+    box-shadow: 0 1px 2px rgb(39 35 50 / 3%);
   }
 
   .metric {

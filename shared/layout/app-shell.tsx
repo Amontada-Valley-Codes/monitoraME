@@ -116,8 +116,8 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
         </SidebarGroup>
 
         <SidebarGroup className="pt-2">
-          <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
-            Poder Público
+          <SidebarGroupLabel className="eyebrow mb-3 px-2 text-muted-foreground">
+            Análises públicas
           </SidebarGroupLabel>
           <SidebarMenu className="gap-1">
             {NAV.slice(0, 6).map((item) => (
@@ -139,7 +139,7 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="relative min-h-10 gap-3 rounded-md text-sm transition-colors before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs data-[active=true]:before:bg-primary"
+                  className="relative min-h-10 gap-3 rounded-lg px-3 text-sm transition-colors before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs data-[active=true]:before:bg-primary"
                 >
                   <item.icon className="size-4" />
                   <span>{item.label}</span>
@@ -200,7 +200,7 @@ function ShellContent({ children }: { children: ReactNode }) {
     <>
       <Navigation onSearch={() => setSearch(true)} />
       <SidebarInset className="min-w-0 overflow-clip border-l border-border/70 bg-background">
-        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/90 px-4 shadow-[0_1px_0_rgb(23_32_51/3%)] backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b border-border/70 bg-card/95 px-4 backdrop-blur sm:px-8">
           <SidebarTrigger
             aria-label={isMobile
               ? openMobile ? 'Fechar navegação' : 'Abrir navegação'
