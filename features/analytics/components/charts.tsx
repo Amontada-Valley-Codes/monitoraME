@@ -16,6 +16,7 @@ import { XAxis } from '@/components/charts/x-axis';
 import { YAxis } from '@/components/charts/y-axis';
 import { Button } from '@/components/ui/button';
 import { compactMoney, money, percent, ratio } from '@/shared/lib/format';
+import { ReferenceArea } from 'recharts';
 
 export type Series = { key: string; label: string; color: string };
 export const EXPENSE_COLORS = [
@@ -68,11 +69,14 @@ export function TrendChart({
       <AreaChart
         data={data}
         className="h-full w-full"
+        aspectRatio='0'
         style={{ height: '100%' }}
-        margin={{ top: 24, right: 28, bottom: 40, left: 72 }}
+        margin={{ top: 24, right: 28, bottom: 40, left: 60 }}
         animationDuration={500}
+        animationEasing='ease-in-out'
       >
         <Grid horizontal numTicksRows={4} />
+        <ReferenceArea y1={200} y2={220} strokeDasharray="4 4" />
         {series.map((seriesItem) => (
           <Area
             key={seriesItem.key}
@@ -88,29 +92,11 @@ export function TrendChart({
         <YAxis numTicks={4} formatValue={(value) => compactMoney(value)} />
         <ChartTooltip
           showDatePill={false}
-          content={({ point }) => (
-            <div className="min-w-52 px-3.5 py-3 text-sm">
-              <p className="mb-2.5 text-[0.6875rem] font-medium tracking-wide text-chart-tooltip-muted">
-                {String(point.label ?? '')}
-              </p>
-              <div className="space-y-2">
-              {series.map((seriesItem) => (
-                <div
-                  key={seriesItem.key}
-                  className="flex items-center justify-between gap-6"
-                >
-                  <span className="flex min-w-0 items-center gap-2 text-xs text-chart-tooltip-muted">
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: seriesItem.color }} />
-                    {seriesItem.label}
-                  </span>
-                  <span className="font-semibold tabular-nums text-chart-tooltip-foreground">
-                    {chartMoney(point[seriesItem.key])}
-                  </span>
-                </div>
-              ))}
-              </div>
-            </div>
-          )}
+          rows={(point) => series.map((seriesItem) => ({
+            color: seriesItem.color,
+            label: seriesItem.label,
+            value: chartMoney(point[seriesItem.key]),
+          }))}
         />
       </AreaChart>
     </div>
@@ -164,28 +150,15 @@ export function BarsChart({
         />
         <ChartTooltip
           showDatePill={false}
-          content={({ point }) => (
-            <div className="min-w-52 px-3.5 py-3 text-sm">
-              <p className="mb-2.5 text-[0.6875rem] font-medium tracking-wide text-chart-tooltip-muted">
-                {String(point.label ?? point.name)}
-              </p>
-              <div className="space-y-2">
-              {series.map((seriesItem) => (
-                <p key={seriesItem.key} className="flex items-center justify-between gap-6">
-                  <span className="flex min-w-0 items-center gap-2 text-xs text-chart-tooltip-muted">
-                    <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: colorKey && typeof point[colorKey] === 'string' ? String(point[colorKey]) : seriesItem.color }} />
-                    {seriesItem.label}
-                  </span>
-                  <span className="font-semibold tabular-nums text-chart-tooltip-foreground">
-                    {percentage
-                      ? percent(Number(point[seriesItem.key]))
-                      : money(Number(point[seriesItem.key]))}
-                  </span>
-                </p>
-              ))}
-              </div>
-            </div>
-          )}
+          rows={(point) => series.map((seriesItem) => ({
+            color: colorKey && typeof point[colorKey] === 'string'
+              ? String(point[colorKey])
+              : seriesItem.color,
+            label: seriesItem.label,
+            value: percentage
+              ? percent(Number(point[seriesItem.key]))
+              : money(Number(point[seriesItem.key])),
+          }))}
         />
       </BarChart>
     </div>

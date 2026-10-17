@@ -10,7 +10,7 @@ export function ExpenseElementsTable({ rows }: { rows: OverviewMetric[] }) {
         <p className="mt-1 text-xs text-muted-foreground">Elementos considerados para microempresas · valores líquidos</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-112 text-left text-xs">
+        <table className="w-full min-w-md text-left text-xs">
           <thead className="bg-muted/40 text-muted-foreground">
             <tr>
               <th scope="col" className="px-5 py-3 font-medium">Código</th>

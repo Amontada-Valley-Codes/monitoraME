@@ -10,7 +10,6 @@ import {
   ArrowLeftRight,
   Search,
   ChevronRight,
-  RefreshCw,
   Share2,
   MessageCircle,
 } from 'lucide-react';
@@ -31,7 +30,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import {
   CommandDialog,
@@ -53,10 +51,10 @@ const normalizeMunicipality = (value: string) => value.normalize('NFD').replace(
 export const NAV = [
   { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
-  { path: '/analitico/empenhos', label: 'Despesas empenhadas', icon: ReceiptText },
+  { path: '/analitico/empenhos', label: 'Empenhos', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
   // { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
-  { path: '/analitico/comparar', label: 'Comparar resultados', icon: ArrowLeftRight },
+  { path: '/analitico/comparar', label: 'Comparação', icon: ArrowLeftRight },
   // { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
   // { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
   // { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
@@ -140,7 +138,7 @@ function Navigation() {
 
 function ShellContent({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const { navigate, reload, state, filters } = useAnalytics();
+  const { navigate, state, filters } = useAnalytics();
   const protectedNavigate = useProtectedNavigate();
   const [search, setSearch] = useState(false);
   const { state: sidebarState, isMobile, openMobile } = useSidebar();
@@ -228,24 +226,6 @@ function ShellContent({ children }: { children: ReactNode }) {
             >
               <Search className="size-4" />
             </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Atualizar consulta"
-                  onClick={reload}
-                  disabled={state === 'loading'}
-                >
-                  <RefreshCw
-                    className={`size-4 text-muted-foreground ${
-                      state === 'loading' ? 'animate-spin' : ''
-                    }`}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Atualizar consulta</TooltipContent>
-            </Tooltip>
           </div>
         </header>
 

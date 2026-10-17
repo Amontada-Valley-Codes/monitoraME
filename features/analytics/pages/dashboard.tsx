@@ -4,7 +4,6 @@ import { Info, TriangleAlert } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
-import { ExpenseElementsTable } from '../components/expense-elements-table';
 import {
   OverviewBusinessSizes,
   OverviewDestinations,
@@ -70,10 +69,6 @@ export default function Dashboard() {
 
           <div className="mb-3">
             <OverviewEvolution params={params} />
-          </div>
-
-          <div className="mb-3">
-            <ExpenseElementsTable rows={view.expenseElements} />
           </div>
 
           <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">

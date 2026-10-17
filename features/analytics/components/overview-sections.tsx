@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, ChartPie, Info, MapPin, Wallet } from 'lucide-react';
+import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
@@ -29,11 +29,10 @@ function OverviewMetricCard({ label, value, detail, icon: Icon }: {
     <Card className="dashboard-metric gap-0 p-3">
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-xs font-medium text-muted-foreground" title={label}>{label}</span>
-        <Info className="size-3.5 shrink-0 text-muted-foreground/70" aria-hidden="true" />
       </div>
-      <div className="mt-2 flex items-center gap-2">
-        <Icon className="size-4 shrink-0 text-primary" aria-hidden="true" />
-        <strong className="metric min-w-0 truncate text-xl font-semibold leading-none" title={value}>{value}</strong>
+      <div className="mt-4 flex items-center gap-2">
+        <Icon className="size-6 shrink-0 text-primary" aria-hidden="true" />
+        <strong className="metric min-w-0 truncate text-4xl font-semibold leading-none" title={value}>{value}</strong>
       </div>
       <p className="mt-1.5 truncate text-[11px] leading-4 text-muted-foreground" title={detail}>{detail}</p>
     </Card>
@@ -138,7 +137,7 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
   return (
     <ChartPanel
       title="Destino dos recursos"
-      description="Origem das compras de ME em relação ao município comprador"
+      description="Origem das compras de ME"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
