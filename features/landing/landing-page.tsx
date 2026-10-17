@@ -11,7 +11,6 @@ import {
   ArrowDownRight,
   ArrowRight,
   BarChart3,
-  BellRing,
   BookmarkCheck,
   Building2,
   Check,
@@ -454,7 +453,7 @@ export function LandingPage() {
       <main>
         <section
           id="inicio"
-          className="relative min-h-180 overflow-hidden bg-landing-ink text-white lg:min-h-190"
+          className="relative min-h-dvh overflow-hidden bg-landing-ink text-white lg:min-h-dvh-90"
         >
           <Image
             src="/landing/hero-david.webp"
@@ -466,17 +465,15 @@ export function LandingPage() {
           />
           <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-ink)_0%,color-mix(in_srgb,var(--landing-ink)_96%,transparent)_38%,color-mix(in_srgb,var(--landing-ink)_40%,transparent)_72%,color-mix(in_srgb,var(--landing-ink)_12%,transparent)_100%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
-          <div className="relative mx-auto flex min-h-180 max-w-7xl items-center px-5 py-24 sm:px-8 lg:min-h-190">
-            <div className="max-w-2xl pt-6">
-              <h1 data-hero-reveal className="max-w-2xl text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
+          <div className="relative mx-auto flex min-h-180 max-w-7xl flex-col justify-center gap-10 px-5 pb-12 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:min-h-190">
+            <div className="flex max-w-2xl flex-col gap-6 sm:gap-7">
+              <h1 data-hero-reveal className="text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
                 Mais oportunidade para quem vende e clareza para quem decide.
-                {/* Dados públicos.<br />Decisões que{' '}
-                <span className="text-[#8fb4ff]">movem</span> territórios. */}
               </h1>
-              <p data-hero-reveal className="mt-7 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
+              <p data-hero-reveal className="max-w-xl text-base leading-7 text-white/72 sm:text-lg">
                 Transformamos dados dispersos de compras públicas em clareza para gestores e oportunidades para pequenos negócios.
               </p>
-              <div data-hero-reveal className="mt-9 flex flex-wrap gap-3">
+              <div data-hero-reveal className="flex flex-wrap gap-3 pt-1">
                 <Button
                   asChild
                   size="lg"
@@ -495,7 +492,7 @@ export function LandingPage() {
                   <Link href="/analitico">Explorar dados públicos</Link>
                 </Button>
               </div>
-              <div className="mt-12 flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-6 text-xs text-white/64">
+              <div className="flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-5 text-xs text-white/64 sm:pt-6">
                 <span data-hero-proof className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
                   TCE
@@ -510,36 +507,21 @@ export function LandingPage() {
                 </span>
               </div>
             </div>
-          </div>
-          {/* <div className="absolute bottom-0 left-0 hidden h-28 w-14 items-center justify-center bg-landing-blue text-white lg:flex">
-            <span className="-rotate-90 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.2em]">
-              Ceará · Brasil
-            </span>
-          </div> */}
-        </section>
 
-        <section
-          id="consulta"
-          data-reveal-section
-          className="relative z-10 -mt-14 scroll-mt-28 px-5 sm:px-8"
-        >
-          <div data-reveal-item className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
-            <div className="bg-landing-blue p-7 text-white sm:p-9">
+          <section id="consulta" className="z-10 w-full scroll-mt-28">
+            <div data-hero-reveal className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="flex flex-col justify-center gap-3 bg-landing-blue p-7 text-white sm:p-9">
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/65">
                 Consulta aberta
               </p>
-              <h2 className="mt-3 text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-white">
                 Comece pelo seu município.
               </h2>
-              <p className="mt-3 text-sm leading-6 text-white/72">
-                Veja despesas, fornecedores e a participação das microempresas no
-                território.
-              </p>
             </div>
             <form
               onSubmit={submitMunicipality}
               noValidate
-              className="flex flex-col justify-center gap-3 p-7 sm:p-9 md:flex-row md:items-start"
+              className="flex flex-col justify-center gap-4 p-7 sm:p-9 md:flex-row md:items-start"
             >
               <div className="min-w-0 flex-1">
                 <label
@@ -561,7 +543,7 @@ export function LandingPage() {
                       aria-expanded={municipalityOpen}
                       aria-invalid={Boolean(error)}
                       aria-describedby={error ? 'municipality-error' : undefined}
-                      className="h-12 w-full justify-between rounded-lg bg-background px-4 font-normal"
+                      className="h-12 w-full justify-between rounded-full bg-background px-4 font-normal"
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <MapPin className="size-4 shrink-0 text-primary" />
@@ -627,18 +609,20 @@ export function LandingPage() {
               </div>
               <Button
                 type="submit"
-                className="mt-6 h-12 rounded-lg px-6 md:shrink-0"
+                className="mt-6 h-12 rounded-full px-6 md:shrink-0"
               >
                 Ver dados do município <ArrowRight className="size-4" />
               </Button>
             </form>
+            </div>
+          </section>
           </div>
         </section>
 
         <section
           id="plataforma"
           data-reveal-section
-          className="scroll-mt-20 bg-landing-paper px-5 py-24 sm:px-8 lg:py-32"
+          className="scroll-mt-20 bg-landing-paper px-5 pb-24 pt-28 sm:px-8 lg:pb-32 lg:pt-36"
         >
           <div className="mx-auto max-w-7xl">
             <div data-reveal-item className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
@@ -731,12 +715,8 @@ export function LandingPage() {
         >
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.03fr_0.97fr] lg:gap-24">
             <div>
-              <div data-reveal-item className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-secondary px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-                <BellRing className="size-3.5" />
-                Radar de oportunidades
-              </div>
               <h2 data-reveal-item className="mt-5 max-w-3xl text-3xl font-bold leading-[1.04] sm:text-5xl">
-                Encontre compras públicas que fazem sentido para o seu negócio.
+                Encontre compras públicas compatíveis com seu negócio.
               </h2>
               <p data-reveal-item className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
                 Em vez de procurar edital por edital em diferentes portais, consulte
@@ -744,81 +724,33 @@ export function LandingPage() {
                 e concentre sua atenção no que tem mais potencial para a sua empresa.
               </p>
 
-              <div className="mt-9 grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
-                {opportunityBenefits.map(({ title, description, icon: Icon }) => (
-                  <article key={title} data-reveal-item className="flex gap-4">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                      <Icon className="size-4" />
-                    </span>
-                    <div>
-                      <h3 className="text-sm font-bold">{title}</h3>
-                      <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
-                        {description}
-                      </p>
-                    </div>
-                  </article>
-                ))}
-              </div>
-
               <div data-reveal-item className="mt-10 flex flex-wrap items-center gap-4">
                 <Button asChild size="lg" className="h-12 rounded-full px-6">
                   <Link href="/oportunidades">
                     Acessar oportunidades públicas <ArrowRight className="size-4" />
                   </Link>
                 </Button>
-                <span className="text-xs text-muted-foreground">
-                  Consulta pública disponível sem cadastro
-                </span>
               </div>
             </div>
 
-            <div data-reveal-item className="relative">
-              <div className="absolute -inset-10 -z-10 rounded-full bg-primary/8 blur-3xl" />
-              <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_30px_80px_-38px_rgb(0_20_41/42%)]">
-                <div className="flex items-center justify-between border-b border-border bg-muted/45 px-5 py-4">
+            <div className="grid gap-4 lg:pt-10">
+              {opportunityBenefits.map(({ title, description, icon: Icon }) => (
+                <article
+                  key={title}
+                  data-reveal-item
+                  className="flex gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-[0_12px_35px_-30px_rgb(0_20_41/30%)] sm:p-6"
+                >
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Icon className="size-4" />
+                  </span>
                   <div>
-                    <p className="text-sm font-bold">Oportunidades públicas</p>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                      Uma jornada mais simples até o edital oficial
+                    <h3 className="text-sm font-bold">{title}</h3>
+                    <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
+                      {description}
                     </p>
                   </div>
-                  <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-primary">
-                    <FileSearch className="size-4" />
-                  </span>
-                </div>
-                <div className="space-y-3 p-5 sm:p-6">
-                  {[
-                    ['01', 'Descubra', 'Pesquise compras por território e pelo que sua empresa oferece.'],
-                    ['02', 'Avalie', 'Compare objeto, órgão, modalidade e prazo antes de decidir.'],
-                    ['03', 'Acompanhe', 'Organize oportunidades relevantes e não perca os próximos passos.'],
-                  ].map(([number, title, description], index) => (
-                    <div
-                      key={number}
-                      className={`group flex gap-4 rounded-xl border p-5 transition-colors ${
-                        index === 0
-                          ? 'border-primary/25 bg-secondary/70'
-                          : 'border-border bg-background hover:border-primary/20'
-                      }`}
-                    >
-                      <span className="font-mono text-xs font-semibold text-primary">
-                        {number}
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-bold">{title}</h3>
-                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                          {description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-border bg-landing-ink px-6 py-5 text-white">
-                  <p className="text-xs leading-5 text-white/68">
-                    A participação e o envio de propostas continuam sendo realizados
-                    nos canais oficiais indicados por cada órgão.
-                  </p>
-                </div>
-              </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -903,7 +835,7 @@ export function LandingPage() {
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                   <DatabaseZap className="size-5" />
                 </span>
-                <h2 className="mt-4 text-5xl font-bold leading-[1.05] sm:text-4xl">
+                <h2 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl">
                   Simplicidade na sua tela.
                 </h2>
                 <p className="mt-6 text-sm leading-7 text-muted-foreground">
@@ -932,7 +864,7 @@ export function LandingPage() {
           id="faq"
           data-faq-section
           data-reveal-section
-          className="flex min-h-svh scroll-mt-20 items-center overflow-hidden bg-landing-paper px-5 py-16 sm:px-8 lg:py-20"
+          className="flex min-h-svh scroll-mt-20 items-center overflow-hidden bg-landing-tint px-5 py-16 sm:px-8 lg:py-20"
         >
           <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-24">
             <div data-reveal-item>
@@ -988,7 +920,7 @@ export function LandingPage() {
                   ))}
                 </div>
               </div>
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-landing-paper to-transparent" />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-landing-tint to-transparent" />
             </div>
           </div>
         </section>
@@ -996,7 +928,7 @@ export function LandingPage() {
         <section
           id="contato"
           data-reveal-section
-          className="scroll-mt-20 bg-landing-tint px-5 py-24 sm:px-8 lg:py-32"
+          className="scroll-mt-20 bg-landing-paper px-5 py-24 sm:px-8 lg:py-32"
         >
           <div data-reveal-item className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-8 sm:p-12 lg:p-16">
