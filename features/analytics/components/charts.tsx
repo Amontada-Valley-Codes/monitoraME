@@ -64,12 +64,12 @@ export function TrendChart({
   series: Series[];
 }) {
   return (
-    <div className="chart-box">
+    <div className="chart-box min-w-0">
       <AreaChart
         data={data}
         className="h-full w-full"
         style={{ height: '100%' }}
-        margin={{ top: 16, right: 20, bottom: 36, left: 72 }}
+        margin={{ top: 24, right: 28, bottom: 40, left: 72 }}
         animationDuration={500}
       >
         <Grid horizontal numTicksRows={4} />
@@ -79,8 +79,8 @@ export function TrendChart({
             dataKey={seriesItem.key}
             fill={seriesItem.color}
             stroke={seriesItem.color}
-            fillOpacity={0.15}
-            strokeWidth={2.5}
+            fillOpacity={seriesItem.key === series[0]?.key ? 0.13 : 0.035}
+            strokeWidth={seriesItem.key === series[0]?.key ? 3 : 2}
           />
         ))}
         <XAxis numTicks={6} />
@@ -130,7 +130,7 @@ export function BarsChart({
   colorKey?: string;
 }) {
   const margin = fullWidth
-    ? { top: 16, right: 20, bottom: 44, left: 58 }
+    ? { top: 24, right: 28, bottom: 48, left: 72 }
     : { top: 16, right: 16, bottom: 44, left: percentage ? 48 : 72 };
 
   return (
@@ -142,7 +142,7 @@ export function BarsChart({
         aspectRatio={fullWidth ? 'auto' : undefined}
         margin={margin}
         animationDuration={450}
-        barGap={fullWidth ? 0.24 : 0.4}
+        barGap={fullWidth ? 0.42 : 0.4}
       >
         <Grid horizontal numTicksRows={4} />
         {series.map((seriesItem) => (

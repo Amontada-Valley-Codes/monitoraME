@@ -25,7 +25,7 @@ export default function Dashboard() {
   const currentExercise = Number(year) === new Date().getFullYear();
 
   return (
-    <>
+    <div className="dashboard-overview">
       <PageHeader
         eyebrow="Inteligência territorial"
         title="Panorama das compras públicas"
@@ -92,23 +92,23 @@ export default function Dashboard() {
             </div>
           )}
 
-          <OverviewKpis
-            params={params}
-            expenseChart={<OverviewExpenses params={params} />}
-          />
+          <OverviewKpis params={params} />
+
+          <div className="mb-5">
+            <OverviewEvolution params={params} />
+          </div>
 
           <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
             <OverviewBusinessSizes params={params} />
             <OverviewDestinations params={params} />
           </div>
 
-          <div className="mb-5 grid grid-cols-1 gap-4 ">
-            <OverviewEvolution params={params} />
-            {/* <OverviewReading params={params} /> */}
+          <div className="mb-5">
+            <OverviewExpenses params={params} />
           </div>
 
         </>
       )}
-    </>
+    </div>
   );
 }

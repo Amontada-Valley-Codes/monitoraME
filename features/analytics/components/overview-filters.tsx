@@ -13,8 +13,8 @@ export function OverviewFilters() {
   const years = Array.from({ length: 5 }, (_, index) => String(currentYear - index));
 
   return (
-    <div className="no-print mb-6 flex flex-wrap items-end gap-3 rounded-lg border bg-card/65 p-4 shadow-xs">
-      <div className="flex w-full flex-col gap-1.5 sm:w-72">
+    <div className="no-print mb-5 flex flex-wrap items-center gap-3 rounded-lg border bg-card px-4 py-3 shadow-xs">
+      <div className="flex w-full flex-col gap-1.5 sm:w-56">
         <Label htmlFor="overview-year" className="h-5 leading-5">
           Exercício
         </Label>

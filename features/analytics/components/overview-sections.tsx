@@ -1,7 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { ArrowUpRight, CalendarRange, ChartPie, MapPin, Sparkles, Store, Wallet } from 'lucide-react';
+import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
@@ -20,19 +19,13 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-export function OverviewKpis({
-  params,
-  expenseChart,
-}: {
-  params: PipelineOverviewParams;
-  expenseChart: ReactNode;
-}) {
+export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
   const { data, view } = useOverviewKpis(params);
   if (!data || !view) return null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
-        <KpiCard
+    <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <KpiCard
           label="Participação de ME e MEI"
           value={valueOrDash(data.meMeiPercentage, percent)}
           detail="Percentual de compras de Microempresas e Empresas de Pequeno Porte"
@@ -42,35 +35,32 @@ export function OverviewKpis({
           highlight
           tone="blue"
         />
-        <KpiCard
+      <KpiCard
           label="Total de compras de ME"
           value={valueOrDash(data.mePurchasesCents, compactMoney)}
           detail="Valor líquido em reais"
           change={null}
           icon={Wallet}
           sizeScope="ME"
-          tone="violet"
+          tone="blue"
         />
-        <KpiCard
+      <KpiCard
           label="Compras com fornecedores locais"
           value={valueOrDash(data.localPercentage, percent)}
           detail="No município comprador"
           change={null}
           icon={MapPin}
-          tone="teal"
+          tone="blue"
         />
-        <KpiCard
+      <KpiCard
           label="Recursos fora do município"
           value={valueOrDash(data.outsidePercentage, percent)}
           detail="Percentual consolidado para o período"
           change={null}
           icon={ArrowUpRight}
           inverse
-          tone="amber"
+          tone="blue"
         />
-      <div className="col-span-full min-w-0 *:h-full">
-        {expenseChart}
-      </div>
     </div>
   );
 }
@@ -118,7 +108,6 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   ];
   return (
     <ChartPanel
-      className="xl:col-span-2"
       title="Evolução das compras consideradas"
       description="Valores mensais, sem acumulação"
       legend={series.map((item) => ({ label: item.label, color: item.color }))}
@@ -141,7 +130,7 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
   return (
     <ChartPanel
       title="Participação por porte empresarial"
-      description="Percentual do valor valor liquido anual"
+      description="Percentual do valor líquido anual"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}

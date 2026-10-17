@@ -303,20 +303,22 @@
   }
 
   .analytics-shell-scale {
-    --background: #f7f7fa;
+    --background: #f7f9fc;
     --card: #ffffff;
-    --card-foreground: #272332;
-    --muted: #f3f1f7;
-    --muted-foreground: #777181;
-    --accent: #f0eafa;
-    --accent-foreground: #7042b8;
-    --border: #e7e3ec;
-    --input: #d8d1e3;
+    --card-foreground: #172033;
+    --muted: #f1f5fb;
+    --muted-foreground: #5e6b7f;
+    --accent: #eaf1fe;
+    --accent-foreground: #2058b7;
+    --border: #e2e9f2;
+    --input: #c9d5e5;
     --sidebar: #ffffff;
-    --sidebar-foreground: #625d6c;
-    --sidebar-accent: #f0eafa;
-    --sidebar-accent-foreground: #7042b8;
-    --sidebar-border: #ece8f0;
+    --sidebar-foreground: #536175;
+    --sidebar-accent: #eaf1fe;
+    --sidebar-accent-foreground: #2058b7;
+    --sidebar-border: #e2e9f2;
+    --chart-1: #2058b7;
+    --chart-2: #75b7cf;
     width: 111.111111%;
     min-height: 111.111111svh;
     overflow-x: clip;
@@ -338,6 +340,39 @@
     --sidebar-accent: #1c3152;
     --sidebar-accent-foreground: #d7e3ff;
     --sidebar-border: #2b3950;
+  }
+
+  .analytics-shell-scale .dashboard-overview {
+    --chart-height: 19rem;
+  }
+
+  .analytics-shell-scale .dashboard-overview .panel,
+  .analytics-shell-scale .dashboard-overview [data-slot="card"] {
+    border-color: var(--border);
+    border-radius: 0.625rem;
+    background: var(--card);
+    box-shadow: 0 1px 3px rgb(23 32 51 / 4%);
+  }
+
+  .analytics-shell-scale .dashboard-overview [data-slot="card"] {
+    min-width: 0;
+    border-top: 2px solid var(--primary);
+  }
+
+  .analytics-shell-scale .dashboard-overview [data-slot="card"] [data-slot="card-content"] > div:first-child > div:first-child > span {
+    border-color: var(--border);
+    background: var(--accent);
+    color: var(--primary);
+  }
+
+  .analytics-shell-scale .dashboard-overview [data-slot="card"] .metric {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .analytics-shell-scale .dashboard-overview .panel > div:first-child,
+  .analytics-shell-scale .dashboard-overview .panel [role="list"] {
+    background: transparent;
   }
 
   .analytics-shell-scale .metric {
