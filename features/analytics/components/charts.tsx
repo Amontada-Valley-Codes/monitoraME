@@ -69,9 +69,8 @@ export function TrendChart({
       <AreaChart
         data={data}
         className="h-full w-full"
-        aspectRatio='0'
         style={{ height: '100%' }}
-        margin={{ top: 24, right: 28, bottom: 40, left: 60 }}
+        margin={{ top: 24, right: 28, bottom: 40, left: 70 }}
         animationDuration={500}
         animationEasing='ease-in-out'
       >

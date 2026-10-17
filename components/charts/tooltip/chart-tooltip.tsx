@@ -14,7 +14,7 @@ import {
   useChart,
   useChartStable,
 } from "../chart-context";
-import { weekdayDateFmt } from "../chart-formatters";
+import { formatMonthYear } from "../chart-formatters";
 import type { IndicatorFadeEdges } from "../indicator-fade";
 import { DateTicker } from "./date-ticker";
 import { TooltipBox } from "./tooltip-box";
@@ -261,10 +261,14 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     }
     // For bar charts (horizontal or vertical), use the category name
     if (barXAccessor) {
-      return barXAccessor(tooltipData.point);
+      const category = barXAccessor(tooltipData.point);
+      const legend = tooltipData.point.label;
+      return typeof legend === "string" && legend.length > 0 && legend !== category
+        ? `${category} - ${legend}`
+        : category;
     }
     // For line/area charts, use the date
-    return weekdayDateFmt.format(xAccessor(tooltipData.point));
+    return formatMonthYear(xAccessor(tooltipData.point));
   }, [tooltipData, barXAccessor, xAccessor]);
 
   const tooltipContent = (
