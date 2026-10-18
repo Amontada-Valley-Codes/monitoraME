@@ -1,20 +1,15 @@
 'use client';
 
-import { Info, Share2, TriangleAlert } from 'lucide-react';
-import { toast } from 'sonner';
+import { Info, TriangleAlert } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
-import { PageHeader } from '../components/page-header';
-import { OverviewFilters } from '../components/overview-filters';
 import {
   OverviewBusinessSizes,
   OverviewDestinations,
   OverviewEvolution,
   OverviewExpenses,
   OverviewKpis,
-  // OverviewReading,
 } from '../components/overview-sections';
 import { usePipelineOverview } from '../pipeline/use-overview';
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
@@ -25,30 +20,8 @@ export default function Dashboard() {
   const currentExercise = Number(year) === new Date().getFullYear();
 
   return (
-    <>
-      <PageHeader
-        eyebrow="Inteligência territorial"
-        title="Panorama das compras públicas"
-        description="Acompanhe como as compras municipais movimentam a economia do Ceará."
-        actions={(
-          <Button
-            variant="outline"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(window.location.href);
-                toast.success('Link com o recorte copiado.');
-              } catch {
-                toast.error('Não foi possível copiar o link.');
-              }
-            }}
-          >
-            <Share2 className="size-4" />
-            <span className="hidden sm:inline">Compartilhar</span>
-          </Button>
-        )}
-      />
-
-      <OverviewFilters />
+    <div className="dashboard-overview">
+      <h1 className="sr-only">Panorama das compras públicas</h1>
 
       {status === 'loading' ? (
         <LoadingState />
@@ -92,23 +65,23 @@ export default function Dashboard() {
             </div>
           )}
 
-          <OverviewKpis
-            params={params}
-            expenseChart={<OverviewExpenses params={params} />}
-          />
+          <OverviewKpis params={params} />
 
-          <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="mb-3">
+            <OverviewEvolution params={params} />
+          </div>
+
+          <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
             <OverviewBusinessSizes params={params} />
             <OverviewDestinations params={params} />
           </div>
 
-          <div className="mb-5 grid grid-cols-1 gap-4 ">
-            <OverviewEvolution params={params} />
-            {/* <OverviewReading params={params} /> */}
+          <div className="mb-3">
+            <OverviewExpenses params={params} />
           </div>
 
         </>
       )}
-    </>
+    </div>
   );
 }

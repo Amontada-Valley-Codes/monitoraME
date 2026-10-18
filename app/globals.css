@@ -303,24 +303,29 @@
   }
 
   .analytics-shell-scale {
-    --background: #edf1f7;
-    --card: #f9fbfe;
+    --sidebar-size: 12rem;
+    --header-height: 4rem;
+    --page-padding: 1rem;
+    --content-max: 100rem;
+    --background: #f7f9fc;
+    --card: #ffffff;
     --card-foreground: #172033;
-    --muted: #e4eaf3;
-    --muted-foreground: #556174;
-    --accent: #dce7f5;
-    --accent-foreground: #174b9c;
-    --border: #ccd6e5;
-    --input: #aebbd0;
-    --sidebar: #e2eaf6;
-    --sidebar-foreground: #33425a;
-    --sidebar-accent: #c9daf4;
-    --sidebar-accent-foreground: #174b9c;
-    --sidebar-border: #c3cee0;
-    width: 111.111111%;
-    min-height: 111.111111svh;
+    --muted: #f1f5fb;
+    --muted-foreground: #5e6b7f;
+    --accent: #eaf1fe;
+    --accent-foreground: #2058b7;
+    --border: #e2e9f2;
+    --input: #c9d5e5;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #536175;
+    --sidebar-accent: #eaf1fe;
+    --sidebar-accent-foreground: #2058b7;
+    --sidebar-border: #e2e9f2;
+    --chart-1: #2058b7;
+    --chart-2: #75b7cf;
+    width: 100%;
+    min-height: 100svh;
     overflow-x: clip;
-    zoom: 0.9;
   }
 
   .dark .analytics-shell-scale {
@@ -340,6 +345,35 @@
     --sidebar-border: #2b3950;
   }
 
+  .analytics-shell-scale .dashboard-overview {
+    --chart-height: 20rem;
+    font-family: var(--font-heading);
+  }
+
+  .analytics-shell-scale .dashboard-overview .panel,
+  .analytics-shell-scale .dashboard-overview [data-slot="card"] {
+    border-color: var(--border);
+    border-radius: 0.5rem;
+    background: var(--card);
+    box-shadow: 0 1px 2px rgb(23 32 51 / 3%);
+  }
+
+  .analytics-shell-scale .dashboard-overview .dashboard-metric {
+    min-width: 0;
+    min-height: 8rem;
+  }
+
+
+  .analytics-shell-scale .dashboard-overview .dashboard-metric .metric {
+    color: var(--foreground);
+    font-weight: 550;
+  }
+
+  .analytics-shell-scale .dashboard-overview .panel > div:first-child,
+  .analytics-shell-scale .dashboard-overview .panel [role="list"] {
+    background: transparent;
+  }
+
   .analytics-shell-scale .metric {
     font-family: var(--font-heading);
     font-weight: 650;
@@ -348,16 +382,16 @@
   }
 
   .analytics-shell-scale [data-slot="sidebar-inset"] {
-    min-height: 111.111111svh;
+    min-height: 100svh;
   }
 
   .analytics-page-content {
-    min-height: calc(111.111111svh - var(--header-height));
+    min-height: calc(100svh - var(--header-height));
   }
 
   .analytics-shell-scale [data-global-loading] {
-    width: 111.111111vw;
-    height: 111.111111vh;
+    width: 100vw;
+    height: 100vh;
   }
 
   .page-content {
@@ -371,7 +405,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--card);
-    box-shadow: var(--shadow-panel);
+    box-shadow: 0 1px 2px rgb(39 35 50 / 3%);
   }
 
   .metric {
@@ -423,6 +457,35 @@
     display: block;
     margin-bottom: 0.375rem;
   }
+}
+
+/* Dashboard overrides live outside Tailwind layers so utilities do not win. */
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > div:first-child {
+  padding: 0.75rem 1rem 0.375rem;
+  background: transparent;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > [role="list"] {
+  justify-content: flex-end;
+  padding: 0 1rem 0.25rem;
+  border: 0;
+  background: transparent;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > [role="list"] [role="listitem"] > span {
+  width: 1rem;
+  height: 0.15rem;
+  border-radius: 1rem;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-primary-chart > div:last-child {
+  padding: 0.25rem 1rem 0.75rem;
+  border: 0;
+}
+
+.analytics-shell-scale .dashboard-overview .dashboard-metric {
+  background: var(--card);
+  border-color: var(--border);
 }
 
 @media (max-width: 1279px) {

@@ -14,7 +14,7 @@ import {
   useChart,
   useChartStable,
 } from "../chart-context";
-import { weekdayDateFmt } from "../chart-formatters";
+import { formatMonthYear } from "../chart-formatters";
 import type { IndicatorFadeEdges } from "../indicator-fade";
 import { DateTicker } from "./date-ticker";
 import { TooltipBox } from "./tooltip-box";
@@ -29,15 +29,28 @@ export interface ChartTooltipProps {
   showCrosshair?: boolean;
   /** Whether to show dots on the lines. Default: true */
   showDots?: boolean;
-  /** Dot style: filled circle or transparent ring. Default: "dot" */
+  /**
+   * Dot style: filled circle with a soft same-color halo, or transparent ring.
+   * Default: "dot"
+   */
   dotVariant?: "dot" | "ring";
-  /** Dot / ring radius in pixels. Default: 5 */
+  /** Dot core / ring radius in pixels. Default: 5 */
   dotSize?: number;
+  /**
+   * `dot` variant: halo radius as a multiple of the core radius. `0` hides the halo.
+   * Default: `2.6`
+   */
+  dotHaloScale?: number;
+  /** `dot` variant: halo opacity (0–1). Default: `0.3` */
+  dotHaloOpacity?: number;
   /** Ring corner radius as a fraction of side length (0 = square, 0.5 = circle). */
   dotRadiusFraction?: number;
   /** Multiplier applied to the computed dot / ring pixel radius. Default: 1 */
   dotScale?: number;
-  /** Ring stroke width in pixels. Default: 1.5 for ring variant */
+  /**
+   * Ring stroke width in pixels (default `1.5`). For the `dot` variant, draws a
+   * background-colored outline around the core (default `0`, none).
+   */
   dotStrokeWidth?: number;
   /**
    * Color for the crosshair/indicator line. When a function, receives the hovered point
@@ -101,6 +114,8 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
   showDots = true,
   dotVariant = "dot",
   dotSize = 5,
+  dotHaloScale,
+  dotHaloOpacity,
   dotRadiusFraction,
   dotScale = 1,
   dotStrokeWidth,
@@ -191,15 +206,6 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     ? (tooltipData?.yPositions[firstLineDataKey] ?? 0)
     : 0;
   const yWithMargin = firstLineY + margin.top;
-  const pointY = useMemo(() => {
-    if (!tooltipData) {
-      return 0;
-    }
-    const positions = Object.values(tooltipData.yPositions).filter(
-      (position): position is number => Number.isFinite(position)
-    );
-    return positions.length > 0 ? Math.min(...positions) : 0;
-  }, [tooltipData]);
 
   const tooltipRows = useMemo(() => {
     if (!tooltipData) {
@@ -255,10 +261,14 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
     }
     // For bar charts (horizontal or vertical), use the category name
     if (barXAccessor) {
-      return barXAccessor(tooltipData.point);
+      const category = barXAccessor(tooltipData.point);
+      const legend = tooltipData.point.label;
+      return typeof legend === "string" && legend.length > 0 && legend !== category
+        ? `${category} - ${legend}`
+        : category;
     }
     // For line/area charts, use the date
-    return weekdayDateFmt.format(xAccessor(tooltipData.point));
+    return formatMonthYear(xAccessor(tooltipData.point));
   }, [tooltipData, barXAccessor, xAccessor]);
 
   const tooltipContent = (
@@ -267,7 +277,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
       {showCrosshair && (
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 overflow-visible"
           height="100%"
           width="100%"
         >
@@ -296,7 +306,7 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
       {showDots && visible && !isHorizontal && (
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 overflow-visible"
           height="100%"
           width="100%"
         >
@@ -307,11 +317,13 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
                 cornerRadiusFraction={
                   dotVariant === "ring" ? dotRadiusFraction : undefined
                 }
+                haloOpacity={dotHaloOpacity}
+                haloScale={dotHaloScale}
                 key={line.dataKey}
                 size={resolvedDotSize}
                 springConfig={springConfig}
                 strokeColor={chartCssVars.background}
-                strokeWidth={dotVariant === "ring" ? dotStrokeWidth : undefined}
+                strokeWidth={dotStrokeWidth}
                 variant={dotVariant}
                 visible={visible}
                 x={tooltipData?.xPositions?.[line.dataKey] ?? x}
@@ -324,18 +336,18 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
 
       {/* Tooltip Box */}
       <TooltipBox
-        animate={isHorizontal ? boxMotion.animate : false}
+        animate={boxMotion.animate}
         backgroundColor={backgroundColor}
         className={className}
         containerHeight={height}
         containerRef={containerRef}
         containerWidth={width}
         panelStyle={panelStyle}
-        placement={isHorizontal ? "side" : "above"}
         springConfig={boxMotion.springConfig}
+        top={isHorizontal ? undefined : margin.top}
         visible={visible}
         x={xWithMargin}
-        y={isHorizontal ? yWithMargin : pointY + margin.top}
+        y={isHorizontal ? yWithMargin : margin.top}
       >
         {content && tooltipData
           ? content({

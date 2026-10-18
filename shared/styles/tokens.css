@@ -12,7 +12,7 @@
   --brand-ink: #001429;
   --landing-ink: #0a1930;
   --landing-blue: #2855c5;
-  --landing-paper: #f5f7fc;
+  --landing-paper: #dbe2f4;
   --landing-tint: #eaf0fa;
   --navy: #c8dcf1;
   --secondary: #ebf3fe;
@@ -56,9 +56,9 @@
   --chart-line-secondary: var(--chart-2);
   --chart-crosshair: var(--primary);
   --chart-grid: var(--border);
-  --chart-tooltip-background: #132846;
-  --chart-tooltip-foreground: #ffffff;
-  --chart-tooltip-muted: #b5c8e4;
+  --chart-tooltip-background: #ffffff;
+  --chart-tooltip-foreground: #27272a;
+  --chart-tooltip-muted: #71717a;
   --chart-marker-background: var(--muted);
   --chart-marker-border: var(--border);
   --chart-marker-foreground: var(--foreground);
@@ -74,7 +74,7 @@
   --sidebar-size: 17rem;
   --rail-size: 4.25rem;
   --header-height: 4rem;
-  --chart-height: 17.5rem;
+  --chart-height: 40rem;
   --chart-compact-height: 12rem;
   --content-max: 100rem;
   --font-heading: 'Plus Jakarta Sans', sans-serif;
@@ -141,9 +141,9 @@
   --origin-state: #7698df;
   --origin-external: #bd9bff;
   --origin-unknown: #657289;
-  --chart-tooltip-foreground: #edf3ff;
-  --chart-tooltip-muted: #aab5c9;
-  --chart-tooltip-background: #152a4a;
+  --chart-tooltip-foreground: #f4f4f5;
+  --chart-tooltip-muted: #a1a1aa;
+  --chart-tooltip-background: #27272a;
   --shadow-panel: 0 1px 2px rgb(0 0 0 / 24%);
   --shadow-popover:
     0 10px 28px -8px rgb(0 0 0 / 48%), 0 3px 8px -3px rgb(0 0 0 / 32%);

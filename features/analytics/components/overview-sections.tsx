@@ -1,11 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { ArrowUpRight, CalendarRange, ChartPie, MapPin, Sparkles, Store, Wallet } from 'lucide-react';
+import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
-import { KpiCard } from '@/shared/components/kpi-card';
+import { Card } from '@/components/ui/card';
 import { compactMoney, money, percent } from '@/shared/lib/format';
 import type { PipelineOverviewParams } from '../pipeline/types';
 import {
@@ -20,63 +19,36 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-export function OverviewKpis({
-  params,
-  expenseChart,
-}: {
-  params: PipelineOverviewParams;
-  expenseChart: ReactNode;
+function OverviewMetricCard({ label, value, detail, icon: Icon }: {
+  label: string;
+  value: string;
+  detail: string;
+  icon: typeof ChartPie;
 }) {
+  return (
+    <Card className="dashboard-metric gap-0 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="truncate text-xs font-medium text-muted-foreground" title={label}>{label}</span>
+      </div>
+      <div className="mt-4 flex items-center gap-2">
+        <Icon className="size-6 shrink-0 text-primary" aria-hidden="true" />
+        <strong className="metric min-w-0 truncate text-4xl font-semibold leading-none" title={value}>{value}</strong>
+      </div>
+      <p className="mt-1.5 truncate text-[11px] leading-4 text-muted-foreground" title={detail}>{detail}</p>
+    </Card>
+  );
+}
+
+export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
   const { data, view } = useOverviewKpis(params);
   if (!data || !view) return null;
 
   return (
-    <div className="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-2 xl:grid-rows-2">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <KpiCard
-          label="Participação de ME e MEI"
-          value={valueOrDash(data.meMeiPercentage, percent)}
-          detail="Percentual de compras de Microempresas e Empresas de Pequeno Porte"
-          change={null}
-          icon={ChartPie}
-          sizeScope="ME + MEI"
-          highlight
-          tone="blue"
-        />
-        <KpiCard
-          label="Total de compras de ME"
-          value={valueOrDash(data.mePurchasesCents, compactMoney)}
-          detail="Valor líquido em reais"
-          change={null}
-          icon={Wallet}
-          sizeScope="ME"
-          tone="violet"
-        />
-      </div>
-
-      <div className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1 *:h-full">
-        {expenseChart}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-1 xl:row-start-2">
-        <KpiCard
-          label="Compras com fornecedores locais"
-          value={valueOrDash(data.localPercentage, percent)}
-          detail="No município comprador"
-          change={null}
-          icon={MapPin}
-          tone="teal"
-        />
-        <KpiCard
-          label="Recursos fora do município"
-          value={valueOrDash(data.outsidePercentage, percent)}
-          detail="Percentual consolidado para o período"
-          change={null}
-          icon={ArrowUpRight}
-          inverse
-          tone="amber"
-        />
-      </div>
+    <div className="dashboard-metrics mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} />
+      <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
+      <OverviewMetricCard label="Compras com fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} />
+      <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} />
     </div>
   );
 }
@@ -120,11 +92,11 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   const rows = data ?? [];
   const series = [
     { key: 'total', label: 'Compras consideradas', color: 'var(--chart-1)' },
-    { key: 'mpe', label: 'Microempresas', color: 'var(--size-me)' },
+    { key: 'mpe', label: 'Microempresas', color: 'var(--chart-2)' },
   ];
   return (
     <ChartPanel
-      className="xl:col-span-2"
+      className="dashboard-primary-chart"
       title="Evolução das compras consideradas"
       description="Valores mensais, sem acumulação"
       legend={series.map((item) => ({ label: item.label, color: item.color }))}
@@ -147,7 +119,7 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
   return (
     <ChartPanel
       title="Participação por porte empresarial"
-      description="Percentual do valor valor liquido anual"
+      description="Percentual do valor líquido anual"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
@@ -165,7 +137,7 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
   return (
     <ChartPanel
       title="Destino dos recursos"
-      description="Origem das compras de ME em relação ao município comprador"
+      description="Origem das compras de ME"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}
