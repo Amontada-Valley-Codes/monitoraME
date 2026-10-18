@@ -5,7 +5,11 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
-  title: "MonitoraME - Monitoramento das Compras Públicas",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: ["/favicon.svg"],
+  },
+  title: "MonitoraME",
   description:
     "Dados públicos transformados em inteligência para municípios e pequenos negócios do Ceará.",
 };
