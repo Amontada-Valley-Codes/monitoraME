@@ -9,6 +9,10 @@ import { BarChart } from '@/components/charts/bar-chart';
 import { BarXAxis } from '@/components/charts/bar-x-axis';
 import { Grid } from '@/components/charts/grid';
 import { PieCenter } from '@/components/charts/pie-center';
+import {
+  chartCenterLabelClassName,
+  chartCenterValueClassName,
+} from '@/components/charts/chart-center-typography';
 import { PieChart } from '@/components/charts/pie-chart';
 import { PieSlice } from '@/components/charts/pie-slice';
 import { ChartTooltip } from '@/components/charts/tooltip';
@@ -188,7 +192,7 @@ export function DonutChart({
         fillVerticalSpace ? 'min-h-(--chart-height)' : ''
       }`}
     >
-      <div className="size-48 shrink-0">
+      <div className="size-50 shrink-0">
         <PieChart
           data={values}
           innerRadius={64}
@@ -199,12 +203,12 @@ export function DonutChart({
           <PieCenter>
             {({ value, label, isHovered }) => (
               <div className="px-3 text-center">
-                <p className="metric whitespace-nowrap text-[clamp(1rem,16cqw,1.75rem)] font-semibold leading-none text-primary">
+                <p className={`${chartCenterValueClassName} whitespace-nowrap text-primary`}>
                   {isHovered
                     ? percent(data[hover ?? -1]?.percentage ?? ratio(value, total))
                     : compactMoney(total)}
                 </p>
-                <p className="text-muted-foreground mt-1 text-xs">
+                <p className={`${chartCenterLabelClassName} mt-1 text-muted-foreground`}>
                   {isHovered ? label : 'do valor considerado'}
                 </p>
               </div>
