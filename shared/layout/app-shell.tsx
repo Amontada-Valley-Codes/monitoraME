@@ -10,9 +10,11 @@ import {
   ArrowLeftRight,
   Search,
   ChevronRight,
-  RefreshCw,
+  Share2,
   MessageCircle,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { OverviewFilters } from '@/features/analytics/components/overview-filters';
 import {
   Sidebar,
   SidebarProvider,
@@ -28,7 +30,6 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 import {
   CommandDialog,
@@ -50,10 +51,10 @@ const normalizeMunicipality = (value: string) => value.normalize('NFD').replace(
 export const NAV = [
   { path: '/analitico', label: 'Visão geral', icon: LayoutDashboard },
   { path: '/analitico/municipios', label: 'Municípios', icon: MapPinned },
-  { path: '/analitico/empenhos', label: 'Despesas empenhadas', icon: ReceiptText },
+  { path: '/analitico/empenhos', label: 'Empenhos', icon: ReceiptText },
   { path: '/analitico/fornecedores', label: 'Fornecedores', icon: Building2 },
   // { path: '/analitico/territorio', label: 'Análise territorial', icon: Globe },
-  { path: '/analitico/comparar', label: 'Comparar resultados', icon: ArrowLeftRight },
+  { path: '/analitico/comparar', label: 'Comparação', icon: ArrowLeftRight },
   // { path: '/analitico/metas', label: 'Metas de gestão', icon: Target },
   // { path: '/analitico/relatorios', label: 'Relatórios', icon: Files },
   // { path: '/analitico/qualidade', label: 'Qualidade da base', icon: Database },
@@ -65,7 +66,7 @@ const PLANS_PAGE = {
   label: 'Planos',
 };
 
-function Navigation({ onSearch }: { onSearch: () => void }) {
+function Navigation() {
   const path = usePathname();
   const { navigate, state: loadState } = useAnalytics();
   const { state, isMobile, setOpenMobile } = useSidebar();
@@ -95,29 +96,10 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2.5">
-        <SidebarGroup className="pb-2 pt-4">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Buscar no MonitoraME"
-                onClick={onSearch}
-                disabled={loadState === 'loading'}
-                className="min-h-10 gap-3 border border-sidebar-border bg-card/70 text-sidebar-foreground shadow-xs hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <Search className="size-4" />
-                <span>Buscar</span>
-                <span className="ml-auto rounded border border-sidebar-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
-                  Ctrl K
-                </span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarGroup className="pt-2">
-          <SidebarGroupLabel className="eyebrow mb-3 text-muted-foreground">
-            Poder Público
+      <SidebarContent className="px-2">
+        <SidebarGroup className="pt-5">
+          <SidebarGroupLabel className="sr-only">
+            Análises públicas
           </SidebarGroupLabel>
           <SidebarMenu className="gap-1">
             {NAV.slice(0, 6).map((item) => (
@@ -139,7 +121,7 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="relative min-h-10 gap-3 rounded-md text-sm transition-colors before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-transparent data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold data-[active=true]:shadow-xs data-[active=true]:before:bg-primary"
+                  className="relative min-h-10 gap-2.5 rounded-md px-2.5 text-xs transition-colors data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold"
                 >
                   <item.icon className="size-4" />
                   <span>{item.label}</span>
@@ -156,7 +138,7 @@ function Navigation({ onSearch }: { onSearch: () => void }) {
 
 function ShellContent({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const { navigate, reload, state, filters } = useAnalytics();
+  const { navigate, state, filters } = useAnalytics();
   const protectedNavigate = useProtectedNavigate();
   const [search, setSearch] = useState(false);
   const { state: sidebarState, isMobile, openMobile } = useSidebar();
@@ -198,9 +180,9 @@ function ShellContent({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <Navigation onSearch={() => setSearch(true)} />
+      <Navigation />
       <SidebarInset className="min-w-0 overflow-clip border-l border-border/70 bg-background">
-        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-3 border-b bg-card/90 px-4 shadow-[0_1px_0_rgb(23_32_51/3%)] backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-2 border-b border-border/70 bg-card/95 px-4 backdrop-blur">
           <SidebarTrigger
             aria-label={isMobile
               ? openMobile ? 'Fechar navegação' : 'Abrir navegação'
@@ -208,44 +190,42 @@ function ShellContent({ children }: { children: ReactNode }) {
             title={isMobile
               ? openMobile ? 'Fechar navegação (Ctrl+B)' : 'Abrir navegação (Ctrl+B)'
               : sidebarState === 'expanded' ? 'Recolher navegação (Ctrl+B)' : 'Expandir navegação (Ctrl+B)'}
-            className="size-10 text-muted-foreground"
+            className="size-8 text-muted-foreground"
           />
           <Separator orientation="vertical" className="h-5!" />
-          <div className="flex items-center gap-2 text-sm min-w-0">
+          <div className="flex items-center gap-2 text-xs min-w-0">
             <span className="text-muted-foreground hidden sm:block">Análises públicas</span>
             <ChevronRight className="text-muted-foreground size-3 hidden sm:block" />
             <span className="font-medium truncate">{current.label}</span>
           </div>
 
           <div className="flex items-center ml-auto gap-3">
+            {path === '/analitico' && (
+              <>
+                <OverviewFilters />
+                <Button variant="outline" size="sm" className="size-8 px-0 sm:h-9 sm:w-auto sm:px-3" aria-label="Compartilhar recorte" onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    toast.success('Link com o recorte copiado.');
+                  } catch {
+                    toast.error('Não foi possível copiar o link.');
+                  }
+                }}>
+                  <Share2 className="size-4" />
+                  <span className="hidden sm:inline">Compartilhar</span>
+                </Button>
+              </>
+            )}
             <Button
               variant="ghost"
               size="icon"
               aria-label="Buscar no MonitoraME"
-              className="md:hidden"
+              className="size-8"
               disabled={state === 'loading'}
               onClick={() => setSearch(true)}
             >
               <Search className="size-4" />
             </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Atualizar consulta"
-                  onClick={reload}
-                  disabled={state === 'loading'}
-                >
-                  <RefreshCw
-                    className={`size-4 text-muted-foreground ${
-                      state === 'loading' ? 'animate-spin' : ''
-                    }`}
-                  />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Atualizar consulta</TooltipContent>
-            </Tooltip>
           </div>
         </header>
 
@@ -336,7 +316,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {
             '--sidebar-width': 'var(--sidebar-size)',
             '--sidebar-width-icon': 'var(--rail-size)',
-            '--sidebar-height': '111.111111svh',
+            '--sidebar-height': '100svh',
           } as CSSProperties
         }
       >

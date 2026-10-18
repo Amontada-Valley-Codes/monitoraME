@@ -327,7 +327,7 @@ function SideSummary({
   const color = tone === 'left' ? LEFT_COLOR : RIGHT_COLOR;
 
   return (
-    <article className="relative min-w-0 p-5 sm:p-6 md:[&:last-child]:border-l">
+    <article className="relative min-w-0 p-5 sm:p-6 md:last:border-l">
       <span
         className="absolute inset-x-0 top-0 h-0.5"
         style={{ backgroundColor: color }}
@@ -383,7 +383,7 @@ function ComparisonCard({ title, value }: { title: string; value: ValueCompariso
   return (
     <article className="panel relative overflow-hidden p-5 sm:p-6">
       <div
-        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-chart-1 to-chart-2"
+        className="absolute inset-x-0 top-0 h-0.5 bg-linear-to-r from-chart-1 to-chart-2"
         aria-hidden="true"
       />
       <div className="flex items-start justify-between gap-3">

@@ -23,8 +23,6 @@ export interface TooltipBoxProps {
   containerHeight: number;
   /** Offset from the target position */
   offset?: number;
-  /** Position relative to the selected chart point. Default: "side" */
-  placement?: "side" | "above" | "top";
   /** Custom class name */
   className?: string;
   /** Tooltip content */
@@ -49,6 +47,18 @@ export interface TooltipBoxProps {
    */
   backgroundColor?: string;
 }
+
+/**
+ * Popover-style panel: rounded, 1px border, soft layered shadow and a 1px
+ * edge highlight (`before:`) — matches shadcn / coss popovers using only theme
+ * tokens (`border`, `--radius`) and Tailwind utilities.
+ */
+const TOOLTIP_PANEL_CLASS_NAME =
+  "relative min-w-[160px] rounded-xl border not-dark:bg-clip-padding text-chart-tooltip-foreground shadow-lg/5 before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-xl)-1px)] before:shadow-[0_1px_rgb(0_0_0/0.04)] dark:before:shadow-[0_-1px_rgb(255_255_255/0.06)]";
+
+/** Clips content to the panel's inner radius without clipping the edge highlight. */
+const TOOLTIP_PANEL_INNER_CLASS_NAME =
+  "overflow-hidden rounded-[calc(var(--radius-xl)-1px)]";
 
 // Inner-only-on-visible so `useSpring` initializes at the cursor's actual x/y
 // instead of (0, 0) on first hover.
@@ -75,7 +85,6 @@ function TooltipBoxInner({
   containerWidth,
   containerHeight,
   offset = 16,
-  placement = "side",
   className = "",
   children,
   left: leftOverride,
@@ -96,23 +105,16 @@ function TooltipBoxInner({
   const tooltipRef = useRef<HTMLDivElement>(null);
   const tooltipWidthRef = useRef(180);
   const tooltipHeightRef = useRef(80);
-  const [panelSize, setPanelSize] = useState({ width: 180, height: 80 });
   const [staticPosition, setStaticPosition] = useState({ left: x, top: y });
 
-  const tw = panelSize.width;
-  const th = panelSize.height;
-  const isCentered = placement === "above" || placement === "top";
+  const tw = tooltipWidthRef.current;
+  const th = tooltipHeightRef.current;
   const shouldFlipX = x + tw + offset > containerWidth;
-  const targetX = isCentered
-    ? Math.max(offset, Math.min(x - tw / 2, containerWidth - tw - offset))
-    : shouldFlipX
-      ? x - offset - tw
-      : x + offset;
-  const targetY = placement === "top"
-    ? offset
-    : placement === "above"
-      ? y - th - offset
-    : Math.max(offset, Math.min(y - th / 2, containerHeight - th - offset));
+  const targetX = shouldFlipX ? x - offset - tw : x + offset;
+  const targetY = Math.max(
+    offset,
+    Math.min(y - th / 2, containerHeight - th - offset)
+  );
 
   const animatedLeft = useSpring(targetX, effectiveSpring);
   const animatedTop = useSpring(targetY, effectiveSpring);
@@ -139,23 +141,12 @@ function TooltipBoxInner({
     }
     const w2 = tooltipWidthRef.current;
     const h2 = tooltipHeightRef.current;
-    setPanelSize((current) =>
-      current.width === w2 && current.height === h2
-        ? current
-        : { width: w2, height: h2 }
-    );
     const flip = x + w2 + offset > containerWidth;
-    const centered = placement === "above" || placement === "top";
-    const tx = centered
-      ? Math.max(offset, Math.min(x - w2 / 2, containerWidth - w2 - offset))
-      : flip
-        ? x - offset - w2
-        : x + offset;
-    const ty = placement === "top"
-      ? offset
-      : placement === "above"
-        ? y - h2 - offset
-      : Math.max(offset, Math.min(y - h2 / 2, containerHeight - h2 - offset));
+    const tx = flip ? x - offset - w2 : x + offset;
+    const ty = Math.max(
+      offset,
+      Math.min(y - h2 / 2, containerHeight - h2 - offset)
+    );
     if (!animate) {
       setStaticPosition({ left: tx, top: ty });
       return;
@@ -172,7 +163,6 @@ function TooltipBoxInner({
     containerWidth,
     containerHeight,
     offset,
-    placement,
     leftOverride,
     topOverride,
     animate,
@@ -195,16 +185,10 @@ function TooltipBoxInner({
     : staticPosition.left;
   const finalTop = animate ? (topOverride ?? animatedTop) : staticPosition.top;
   const isFlipped = flippedOverride ?? shouldFlipX;
-  const transformOrigin = isCentered
-    ? "center bottom"
-    : isFlipped
-      ? "right top"
-      : "left top";
-
-  const arrowLeft = Math.max(14, Math.min(x - targetX, tw - 14));
+  const transformOrigin = isFlipped ? "right top" : "left top";
 
   const panelClassName = cn(
-    "relative min-w-[140px] rounded-xl border border-white/10 text-chart-tooltip-foreground shadow-[0_16px_40px_-16px_rgb(0_10_30/85%)]",
+    TOOLTIP_PANEL_CLASS_NAME,
     panelStyle?.backgroundColor === undefined &&
       backgroundColor === chartCssVars.tooltipBackground &&
       "bg-chart-tooltip-background",
@@ -226,18 +210,7 @@ function TooltipBoxInner({
         style={{ left: staticPosition.left, top: staticPosition.top }}
       >
         <div className={panelClassName} style={panelStyleResolved}>
-          {children}
-          {isCentered && (
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-2.5 h-2.5 w-5 bg-inherit drop-shadow-sm"
-              style={{
-                left: arrowLeft,
-                clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                transform: "translateX(-50%)",
-              }}
-            />
-          )}
+          <div className={TOOLTIP_PANEL_INNER_CLASS_NAME}>{children}</div>
         </div>
       </div>,
       container
@@ -262,18 +235,7 @@ function TooltipBoxInner({
         style={panelStyleResolved}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
-        {children}
-        {isCentered && (
-          <span
-            aria-hidden="true"
-            className="absolute -bottom-2.5 h-2.5 w-5 bg-inherit drop-shadow-sm"
-            style={{
-              left: arrowLeft,
-              clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-              transform: "translateX(-50%)",
-            }}
-          />
-        )}
+        <div className={TOOLTIP_PANEL_INNER_CLASS_NAME}>{children}</div>
       </motion.div>
     </motion.div>,
     container

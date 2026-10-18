@@ -76,8 +76,15 @@ export function PieCenter({
     return null;
   }
 
-  // If custom render function is provided, use it
+  // If custom render function is provided, use it for both the default
+  // filtered total and the hovered slice. This keeps the caller's formatting
+  // (for example, compact BRL values) in every center state.
   if (children) {
+    const callbackData = hoveredData ?? {
+      label: displayLabel,
+      value: displayValue,
+    };
+
     return (
       <div
         className={cn(
@@ -91,10 +98,7 @@ export function PieCenter({
           value: displayValue,
           label: displayLabel,
           isHovered: effectiveHoveredIndex !== null,
-          data: hoveredData ?? {
-            label: defaultLabel,
-            value: totalValue,
-          },
+          data: callbackData,
         })}
       </div>
     );
