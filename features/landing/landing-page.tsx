@@ -395,7 +395,7 @@ export function LandingPage() {
             className={`transition-colors duration-300 ${headerScrolled ? 'text-brand-ink' : 'text-white'}`}
           >
             <Image
-              src={headerScrolled ? '/brand/horizontal-dark.svg' : '/brand/horizontal-light.svg'}
+              src={headerScrolled ? '/brand/dark-horizontal-logo.svg' : '/brand/light-horizontal-logo.svg'}
               alt="MonitoraME"
               width={613}
               height={100}
