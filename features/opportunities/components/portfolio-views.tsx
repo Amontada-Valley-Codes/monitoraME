@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarClock, Loader2 } from 'lucide-react';
+import { CalendarClock, Loader2, StickyNote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   PORTFOLIO_STAGES,
@@ -63,7 +63,10 @@ export function PortfolioList({ entries, members, canEdit, pendingIds, today, on
                     onOpen(entry);
                   }}
                 >
-                  <span className="block truncate font-semibold">{entry.opportunity.title}</span>
+                  <span className="flex items-center gap-1.5 font-semibold">
+                    <span className="truncate">{entry.opportunity.title}</span>
+                    {entry.note && <StickyNote className="size-3.5 shrink-0 text-muted-foreground" aria-label="Possui observação interna" />}
+                  </span>
                   <span className="block truncate text-xs text-muted-foreground">
                     {entry.opportunity.organization} · {entry.opportunity.city}/{entry.opportunity.state}
                   </span>
@@ -125,7 +128,10 @@ export function PortfolioBoard({ entries, members, pendingIds, today, onOpen }: 
                   )}
                   <span className="mt-3 flex items-center justify-between gap-2">
                     <Deadline value={entry.internalDeadline} today={today} />
-                    <MemberAvatar member={member(members, entry.assigneeId)} />
+                    <span className="flex items-center gap-1.5">
+                      {entry.note && <StickyNote className="size-3.5 text-muted-foreground" aria-label="Possui observação interna" />}
+                      <MemberAvatar member={member(members, entry.assigneeId)} />
+                    </span>
                   </span>
                 </button>
               ))}

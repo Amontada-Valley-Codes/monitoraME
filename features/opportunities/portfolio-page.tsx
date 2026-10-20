@@ -76,6 +76,11 @@ export default function PortfolioPage() {
     await mutate(entry, value);
     syncOutcome();
   };
+  const saveNote = async (entry: PortfolioEntry, text: string) => {
+    const saved = await mutate(entry, { kind: 'note', text });
+    syncOutcome();
+    return saved;
+  };
   const requestStage = (entry: PortfolioEntry, stage: PortfolioStage) => {
     if (stage === 'discarded' || stage === 'submitted') setStageRequest({ entry, stage });
     else change(entry, { kind: 'stage', stage });
@@ -265,6 +270,7 @@ export default function PortfolioPage() {
             pending={selected ? pendingIds.has(selected.id) : false}
             onClose={() => setSelectedId(null)}
             onChange={change}
+            onNoteSave={saveNote}
             onStageRequest={requestStage}
           />
           <StageChangeDialog
