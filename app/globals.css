@@ -293,13 +293,25 @@
   }
 
   .saved-calendar .fc .deadline-event {
-    background: var(--warning-soft);
-    color: var(--warning);
+    border-left: 3px solid #ef4444;
+    background: #fee2e2;
+    color: #7f1d1d;
   }
 
   .saved-calendar .fc .opening-event {
-    background: var(--secondary);
-    color: var(--secondary-foreground);
+    border-left: 3px solid #3b82f6;
+    background: #dbeafe;
+    color: #1e3a8a;
+  }
+
+  .dark .saved-calendar .fc .deadline-event {
+    background: #450a0a;
+    color: #fecaca;
+  }
+
+  .dark .saved-calendar .fc .opening-event {
+    background: #172554;
+    color: #bfdbfe;
   }
 
   .analytics-shell-scale {
@@ -534,4 +546,5 @@
     break-inside: avoid;
   }
 }
+
 

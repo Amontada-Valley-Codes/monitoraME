@@ -23,10 +23,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { OpportunitySidebar } from './opportunity-sidebar';
 import type { Opportunity } from '../types';
 import { SaveOpportunityButton } from './save-opportunity-button';
-import { NotificationBell } from './notification-bell';
 
 type OpportunityDetailsProps = {
   opportunity: Opportunity;
@@ -112,12 +110,9 @@ export function OpportunityDetails({
   }).format(new Date(opportunity.openingDate));
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex min-h-screen w-full">
-        <OpportunitySidebar />
-
+    <div className="flex min-h-[calc(100svh-var(--header-height))] w-full bg-background">
         <main className="min-w-0 flex-1 border-r bg-card">
-          <header className="sticky top-0 z-10 flex h-(--header-height) items-center gap-3 border-b bg-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-card/80 sm:px-6">
+          <header className="flex min-h-16 items-center gap-3 border-b bg-card px-4 py-3 sm:px-6">
             <Button asChild variant="ghost" size="icon" aria-label="Voltar para oportunidades">
               <Link href="/oportunidades">
                 <ArrowLeft className="size-4" />
@@ -131,7 +126,7 @@ export function OpportunityDetails({
               </h1>
             </div>
 
-            <div className="ml-auto flex items-center gap-1"><NotificationBell /><Button variant="ghost" size="icon" aria-label="Compartilhar edital">
+            <div className="ml-auto flex items-center gap-1"><Button variant="ghost" size="icon" aria-label="Compartilhar edital">
               <Share2 className="size-4 text-muted-foreground" />
             </Button></div>
           </header>
@@ -336,7 +331,6 @@ export function OpportunityDetails({
             </div>
           </div>
         </aside>
-      </div>
     </div>
   );
 }

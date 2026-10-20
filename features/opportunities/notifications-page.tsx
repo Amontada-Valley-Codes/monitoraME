@@ -13,8 +13,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
 import { cn } from '@/lib/utils';
-import { OpportunitySidebar } from './components/opportunity-sidebar';
-import { NotificationBell } from './components/notification-bell';
 import { companyDemoFixture, type NotificationItem } from './demo-fixture';
 import { useNotifications } from './notification-context';
 import type { DemoScenario } from './notification-repository';
@@ -56,11 +54,9 @@ export default function NotificationsPage() {
     deleteMany(ids);
     setCheckedIds(new Set());
   };
-  return <div className="min-h-screen bg-muted/20"><div className="flex min-h-screen"><OpportunitySidebar active="notifications" />
-    <main className="min-w-0 flex-1 px-4 py-5 sm:px-7 lg:px-8">
+  return <main className="min-h-[calc(100svh-var(--header-height))] min-w-0 flex-1 bg-muted/20 px-4 py-5 sm:px-7 lg:px-8">
       <header className="mx-auto mb-6 flex max-w-[1480px] items-center gap-4">
         <div className="min-w-0 flex-1"><h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Central de notificações</h1><p className="mt-1 text-sm text-muted-foreground sm:text-base">Acompanhe os alertas do Radar e da operação da sua empresa.</p></div>
-        <NotificationBell />
       </header>
 
       <div className="mx-auto grid max-w-[1480px] gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
@@ -79,15 +75,15 @@ export default function NotificationsPage() {
           <div className="hidden px-4 py-3 sm:flex sm:justify-end"><label className="sr-only" htmlFor="demo-scenario">Cenário da demonstração</label><NativeSelect id="demo-scenario" size="sm" value={scenario} onChange={(event) => setScenario(event.target.value as DemoScenario)}><NativeSelectOption value="success">Cenário: com dados</NativeSelectOption><NativeSelectOption value="loading">Cenário: carregando</NativeSelectOption><NativeSelectOption value="empty">Cenário: vazio</NativeSelectOption><NativeSelectOption value="error">Cenário: erro</NativeSelectOption><NativeSelectOption value="blocked">Cenário: plano bloqueado</NativeSelectOption></NativeSelect></div>
           {scenario === 'loading' && <LoadingState label="Carregando notificações" />}
           {scenario === 'error' && <div className="p-6"><ErrorState onRetry={() => setScenario('success')} /></div>}
-          {scenario === 'empty' && <div className="p-6"><EmptyState title="Nenhuma notificação por aqui" description="Novos alertas relevantes aparecerão nesta central." /></div>}
-          {scenario === 'blocked' && <div className="p-10 text-center"><h2 className="font-semibold">Central disponível no plano Equipe</h2><p className="mt-2 text-sm text-muted-foreground">O acesso está bloqueado neste cenário demonstrativo.</p><Button asChild className="mt-4" variant="outline"><Link href="/analitico/planos">Conhecer planos</Link></Button></div>}
+          {/* {scenario === 'empty' && <div className="p-6"><EmptyState title="Nenhuma notificação por aqui" description="Novos alertas relevantes aparecerão nesta central." /></div>}                                                                                                                                   implantar campo certo */}
+          {scenario === 'blocked' && <div className="p-10 text-center"><h2 className="font-semibold">Central disponível no plano Equipe</h2><p className="mt-2 text-sm text-muted-foreground">O acesso está bloqueado neste cenário demonstrativo.</p><Button asChild className="mt-4" variant="outline"><Link href="#">Conhecer planos</Link></Button></div>}
           {scenario === 'success' && <div className="px-1 sm:px-2">{items.map((item) => <NotificationListRow key={item.id} item={item} selected={selected?.id === item.id} checked={checkedIds.has(item.id)} onSelect={() => setSelectedId(item.id)} onToggleChecked={() => toggleChecked(item.id)} />)}</div>}
           {scenario === 'success' && <footer className="flex items-center justify-center gap-2 border-t px-4 py-3"><Button size="icon-sm" variant="ghost" disabled={page === 1} onClick={() => setPage((value) => value - 1)}><ChevronLeft /><span className="sr-only">Página anterior</span></Button>{Array.from({ length: total }, (_, index) => <Button key={index} size="icon-sm" variant={page === index + 1 ? 'default' : 'ghost'} onClick={() => setPage(index + 1)}>{index + 1}</Button>)}<Button size="icon-sm" variant="ghost" disabled={page === total} onClick={() => setPage((value) => value + 1)}><ChevronRight /><span className="sr-only">Próxima página</span></Button><span className="ml-auto hidden text-xs text-muted-foreground sm:block">{items.length} de {filtered.length} notificações</span></footer>}
         </Card>
         {selected && scenario === 'success' && <NotificationDetail item={selected} onRead={() => markRead(selected.id)} />}
       </div>
       <p className="mx-auto mt-4 max-w-[1480px] text-center text-xs text-muted-foreground">Ambiente demonstrativo · fixture company-demo-nordeste · leitura mantida nesta sessão</p>
-    </main></div></div>;
+    </main>;
 }
 
 function FilterButton({ active, label, count, onClick }: { active: boolean; label: string; count: number; onClick: () => void }) {
