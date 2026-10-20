@@ -23,6 +23,7 @@ const successMessage = (change: PortfolioChange) => {
     case 'deadline': return change.deadline ? 'Prazo interno atualizado.' : 'Prazo interno removido.';
     case 'archive': return 'Oportunidade arquivada. O histórico foi preservado.';
     case 'restore': return 'Oportunidade restaurada para a carteira ativa.';
+    case 'note': return 'Observação salva.';
   }
 };
 

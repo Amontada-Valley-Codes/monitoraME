@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { companyDemoFixture } from './demo-fixture';
 import {
+  NOTE_MAX_LENGTH,
   PORTFOLIO_STAGES,
   PortfolioRuleError,
   applyPortfolioChange,
@@ -66,6 +67,24 @@ describe('portfolio rules', () => {
     expect(archived.history.slice(1)).toEqual(entry.history);
     expect(() => applyPortfolioChange(archived, { kind: 'assignee', assigneeId: 'ana' }, 'bruno')).toThrow(/Restaure/);
     expect(applyPortfolioChange(archived, { kind: 'restore' }, 'bruno').archived).toBe(false);
+  });
+
+  it('creates and edits the private note with author and history', () => {
+    const entry = entryFor('pf-caucaia');
+    expect(entry.note).toBeUndefined();
+    const created = applyPortfolioChange(entry, { kind: 'note', text: '  Validar prazo de entrega dos notebooks.  ' }, 'ana', '2026-10-20T10:00:00-03:00');
+    expect(created.note).toEqual({ text: 'Validar prazo de entrega dos notebooks.', authorId: 'ana', updatedAt: '2026-10-20T10:00:00-03:00' });
+    expect(created.history[0]).toMatchObject({ action: 'note', from: null, authorId: 'ana' });
+    const edited = applyPortfolioChange(created, { kind: 'note', text: 'Prazo validado com o fornecedor.' }, 'bruno');
+    expect(edited.note).toMatchObject({ text: 'Prazo validado com o fornecedor.', authorId: 'bruno' });
+    expect(edited.history[0]).toMatchObject({ action: 'note', from: 'edited' });
+  });
+
+  it('validates the note size', () => {
+    const entry = entryFor('pf-caucaia');
+    expect(() => applyPortfolioChange(entry, { kind: 'note', text: '   ' }, 'ana')).toThrow(/Escreva/);
+    expect(() => applyPortfolioChange(entry, { kind: 'note', text: 'a'.repeat(NOTE_MAX_LENGTH + 1) }, 'ana')).toThrow(/máximo/);
+    expect(applyPortfolioChange(entry, { kind: 'note', text: 'a'.repeat(NOTE_MAX_LENGTH) }, 'ana').note?.text).toHaveLength(NOTE_MAX_LENGTH);
   });
 
   it('only lets admins and managers edit', () => {
