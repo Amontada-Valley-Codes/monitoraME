@@ -14,13 +14,13 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { SelectField } from '@/shared/components/select-field';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
-import { KpiCard } from '@/shared/components/kpi-card';
 import { compactMoney, money, percent } from '@/shared/lib/format';
 import { COMPLETE_REGISTRATION_PATH, PUBLIC_ENTRY_PATH } from '@/shared/auth/config';
 import { saveReturnTo } from '@/shared/auth/return-to';
 import { useSession } from '@/shared/auth/session-context';
 import { MUNICIPALITIES } from '../data/fixtures';
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from '../components/charts';
+import { OverviewMetricCard } from '../components/overview-sections';
 import { PageHeader } from '../components/page-header';
 import { TceMunicipalitySelect } from '../components/tce-municipality-select';
 import { TCE_MUNICIPALITIES } from '../pipeline/municipalities';
@@ -122,20 +122,31 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
   const totalDestinations = destinations.reduce((sum, item) => sum + item.value, 0);
   const series = [{ key: 'total', label: 'Compras consideradas', color: 'var(--chart-1)' }, { key: 'mpe', label: 'Microempresas', color: 'var(--size-me)' }];
 
-  return <>
+  return <div className="dashboard-overview">
     {accountStatus === 'ONBOARDING' && showRegistrationNotice && <Alert className="relative mb-6 pr-12"><Building2 /><AlertTitle>Seu acesso inicial está ativo</AlertTitle><AlertDescription><p>Conclua seu cadastro para acessar empenhos, fornecedores e comparações.</p><Button asChild size="sm" className="mt-2"><Link href={COMPLETE_REGISTRATION_PATH}>Concluir cadastro</Link></Button></AlertDescription><Button type="button" variant="ghost" size="icon" className="absolute right-2 top-2 size-8 text-muted-foreground hover:text-foreground" aria-label="Fechar aviso de conclusão de cadastro" onClick={dismissRegistrationNotice}><X className="size-4" /></Button></Alert>}
     {(data.competencias_ausentes?.length ?? 0) > 0 && <Alert className="mb-3"><Info /><AlertTitle>Dados incompletos neste recorte</AlertTitle><AlertDescription>Competências {data.competencias_ausentes!.join(', ')} não publicadas.</AlertDescription></Alert>}
     {(data.falhas_competencias?.length ?? 0) > 0 && <Alert variant="destructive" className="mb-6"><TriangleAlert /><AlertTitle>Falhas no processamento</AlertTitle><AlertDescription>Algumas competências não puderam ser processadas; os demais dados continuam disponíveis.</AlertDescription></Alert>}
 
-    <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:grid-rows-2 xl:gap-x-6 xl:gap-y-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><KpiCard label="Participação de ME e MEI" value={percent(kpis.percentual_participacao_me ?? null)} detail="Percentual consolidado para o período" change={null} icon={ChartPie} sizeScope="ME + MEI" highlight /><KpiCard label="Total de compras de ME" value={kpis.total_compras_ME_centavos == null ? '—' : compactMoney(kpis.total_compras_ME_centavos)} detail="Valor líquido em reais" change={null} icon={Wallet} sizeScope="ME" /></div>
-      <ChartPanel className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1" title="Elementos de despesas" description="Valores líquidos consolidados" legend={expenses.map((item) => ({ label: item.shortLabel, color: item.color }))} rows={expenses.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!expenses.length}><div className="h-(--chart-height)"><BarsChart data={expenses.map((item) => ({ name: item.key.slice(-2), label: item.shortLabel, color: item.color, value: item.value }))} series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]} colorKey="color" /></div></ChartPanel>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:col-start-1 xl:row-start-2"><KpiCard label="Compras com fornecedores locais" value={percent(kpis.percentual_compras_fornecedores_locais ?? null)} detail="No município comprador" change={null} icon={MapPin} /><KpiCard label="Recursos fora do município" value={percent(kpis.percentual_recursos_fora_municipio ?? null)} detail="Percentual consolidado para o período" change={null} icon={ArrowUpRight} inverse /></div>
+    <div className="dashboard-metrics mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <OverviewMetricCard label="Participação de ME e MEI" value={percent(kpis.percentual_participacao_me ?? null)} detail="Percentual consolidado para o período" icon={ChartPie} />
+      <OverviewMetricCard label="Total de compras de ME" value={kpis.total_compras_ME_centavos == null ? '—' : compactMoney(kpis.total_compras_ME_centavos)} detail="Valor líquido em reais" icon={Wallet} />
+      <OverviewMetricCard label="Compras com fornecedores locais" value={percent(kpis.percentual_compras_fornecedores_locais ?? null)} detail="No município comprador" icon={MapPin} />
+      <OverviewMetricCard label="Recursos fora do município" value={percent(kpis.percentual_recursos_fora_municipio ?? null)} detail="Percentual consolidado para o período" icon={ArrowUpRight} />
     </div>
 
-    <div className="mb-6 grid gap-6 xl:grid-cols-2"><ChartPanel title="Participação por porte empresarial" rows={sizes.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!sizes.length}><DonutChart data={sizes} total={totalSizes} /></ChartPanel><ChartPanel title="Destino dos recursos" description="Origem em relação ao município comprador" rows={destinations.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!destinations.length}><DonutChart data={destinations} total={totalDestinations} /></ChartPanel></div>
-    <ChartPanel className="mb-6" title="Evolução das compras consideradas" description="Lacunas representam competências não publicadas; períodos publicados sem movimento aparecem como zero." legend={series.map((item) => ({ label: item.label, color: item.color }))} rows={evolution.map((item) => ({ label: item.label, values: item.unavailable ? ['Dados não publicados', 'Dados não publicados'] : [item.total == null ? '—' : money(item.total), item.mpe == null ? '—' : money(item.mpe)] }))} empty={!evolution.length}><TrendChart data={evolution} series={series} /></ChartPanel>
-  </>;
+    <div className="mb-3">
+      <ChartPanel className="analytics-fixed-chart dashboard-primary-chart" title="Evolução das compras consideradas" description="Lacunas representam competências não publicadas; períodos publicados sem movimento aparecem como zero." legend={series.map((item) => ({ label: item.label, color: item.color }))} rows={evolution.map((item) => ({ label: item.label, values: item.unavailable ? ['Dados não publicados', 'Dados não publicados'] : [item.total == null ? '—' : money(item.total), item.mpe == null ? '—' : money(item.mpe)] }))} empty={!evolution.length}><TrendChart data={evolution} series={series} /></ChartPanel>
+    </div>
+
+    <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+      <ChartPanel title="Participação por porte empresarial" rows={sizes.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!sizes.length}><DonutChart data={sizes} total={totalSizes} /></ChartPanel>
+      <ChartPanel title="Destino dos recursos" description="Origem em relação ao município comprador" rows={destinations.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!destinations.length}><DonutChart data={destinations} total={totalDestinations} /></ChartPanel>
+    </div>
+
+    <div className="mb-3">
+      <ChartPanel className="analytics-fixed-chart" title="Elementos de despesas" description="Valores líquidos consolidados" legend={expenses.map((item) => ({ label: item.shortLabel, color: item.color }))} rows={expenses.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!expenses.length}><div className="h-(--chart-height) min-h-(--chart-height) w-full"><BarsChart data={expenses.map((item) => ({ name: item.key.slice(-2), label: item.shortLabel, color: item.color, value: item.value }))} series={[{ key: 'value', label: 'Valor líquido', color: 'var(--chart-1)' }]} colorKey="color" /></div></ChartPanel>
+    </div>
+  </div>;
 }
 
 export default function MunicipalityDetail({ id }: { id?: string }) {

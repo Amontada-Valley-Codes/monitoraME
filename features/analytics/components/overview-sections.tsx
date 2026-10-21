@@ -19,7 +19,7 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-function OverviewMetricCard({ label, value, detail, icon: Icon }: {
+export function OverviewMetricCard({ label, value, detail, icon: Icon }: {
   label: string;
   value: string;
   detail: string;
@@ -62,6 +62,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
   }));
   return (
     <ChartPanel
+      className="analytics-fixed-chart"
       title="Elementos de despesas"
       description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
       legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
@@ -96,7 +97,7 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   ];
   return (
     <ChartPanel
-      className="dashboard-primary-chart"
+      className="analytics-fixed-chart dashboard-primary-chart"
       title="Evolução das compras consideradas"
       description="Valores mensais, sem acumulação"
       legend={series.map((item) => ({ label: item.label, color: item.color }))}

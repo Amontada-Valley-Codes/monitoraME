@@ -436,6 +436,10 @@
     min-width: 0;
   }
 
+  .analytics-fixed-chart {
+    --chart-height: 20rem;
+  }
+
   .chart-compact {
     height: var(--chart-compact-height);
   }
