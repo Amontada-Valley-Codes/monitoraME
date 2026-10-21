@@ -115,13 +115,12 @@ export function PortfolioItemSheet({
                 <section className="space-y-3" aria-label="Organização interna">
                   <label className="block text-xs text-muted-foreground">
                     Etapa interna
-                    <StageSelect entry={entry} disabled={pending} className="mt-1 w-full" onRequest={(stage) => onStageRequest(entry, stage)} />
+                    <StageSelect entry={entry} disabled={pending} className="mt-1 w-full data-[size=sm]:h-9" onRequest={(stage) => onStageRequest(entry, stage)} />
                   </label>
                   <label className="block text-xs text-muted-foreground">
                     Responsável
                     <NativeSelect
-                      size="sm"
-                      className="mt-1 w-full"
+                      className="mt-1 h-9 w-full"
                       value={entry.assigneeId ?? ''}
                       disabled={pending}
                       onChange={(event) => onChange(entry, { kind: 'assignee', assigneeId: event.target.value || null })}
@@ -138,13 +137,14 @@ export function PortfolioItemSheet({
                       <Input
                         id="internal-deadline"
                         type="date"
-                        className="h-8"
+                        className="h-9 min-h-9!"
                         value={deadline}
                         disabled={pending}
                         onChange={(event) => setDeadlineDraft({ id: entry.id, value: event.target.value })}
                       />
                       <Button
                         variant="outline"
+                        className="h-9 min-h-9!"
                         disabled={pending || deadline === (entry.internalDeadline ?? '')}
                         onClick={() => {
                           onChange(entry, { kind: 'deadline', deadline: deadline || null });
