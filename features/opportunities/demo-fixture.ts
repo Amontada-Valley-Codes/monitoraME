@@ -35,7 +35,9 @@ export const companyDemoFixture = {
     opportunity({ id: 'servidores-legado-2026', organization: 'Prefeitura de Maranguape', title: 'Aquisição de servidores — lote legado', city: 'Maranguape', estimatedValue: 260000, matchScore: 77, confidence: 70, relatedCnaes: ['4651-6/01'], matchReasons: ['Equipamentos de informática', 'Oportunidade no Ceará'], status: 'cancelled' }),
   ] satisfies Opportunity[],
   portfolio: [
-    { id: 'pf-fortaleza', opportunityId: 'ti-fortaleza-2026', stage: 'preparing', assigneeId: 'bruno', internalDeadline: '2026-10-21', archived: false, version: 3, history: [
+    { id: 'pf-fortaleza', opportunityId: 'ti-fortaleza-2026', stage: 'preparing', assigneeId: 'bruno', internalDeadline: '2026-10-21', archived: false, version: 4,
+      note: { text: 'Confirmar com o contador a validade da Certidão Federal antes do envio. Pedir à Carla os atestados de sustentação de sistemas web.', authorId: 'bruno', updatedAt: '2026-10-14T11:30:00-03:00' }, history: [
+      { id: 'pf-fortaleza-v4', at: '2026-10-14T11:30:00-03:00', authorId: 'bruno', action: 'note', from: null },
       { id: 'pf-fortaleza-v3', at: '2026-10-14T10:05:00-03:00', authorId: 'bruno', action: 'deadline', from: null, to: '2026-10-21' },
       { id: 'pf-fortaleza-v2', at: '2026-10-14T09:50:00-03:00', authorId: 'ana', action: 'stage', from: 'interested', to: 'preparing' },
       { id: 'pf-fortaleza-v1', at: '2026-10-13T16:30:00-03:00', authorId: 'ana', action: 'created', to: 'interested' },
