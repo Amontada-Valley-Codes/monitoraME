@@ -1,19 +1,13 @@
-import { Stepper } from '../../../components/ui/stepper'
-import { CompanyReviewForm } from '../../../features/company-access/company-review-form'
+import { CompanyAccessShell } from '@/features/company-access/components/company-access-shell';
 
-export default function ReviewPage() {
+export default function CompanyAccessPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="max-w-3xl mx-auto px-4 py-8 lg:py-12">
-        <h1 className="text-2xl font-bold text-foreground mb-8">Revisão Cadastral</h1>
-        <Stepper currentStep={2} />
-        
-        <div className="p-4 bg-muted border border-border rounded-md text-foreground-subtle text-sm mb-6">
-          Verifique os dados importados da Receita Federal e preencha as informações de contato do representante legal.
-        </div>
-
-        <CompanyReviewForm />
+    <main className="min-h-screen bg-background py-10">
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-center">Habilitação Empresarial</h1>
+        <p className="text-muted-foreground text-center mb-8">Complete as etapas para submeter a solicitação de acesso da sua empresa.</p>
+        <CompanyAccessShell />
       </div>
     </main>
-  )
+  );
 }
