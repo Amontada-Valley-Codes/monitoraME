@@ -1,0 +1,23 @@
+# Serviço de produção para o servidor standalone do Next.js.
+# O deploy substitui __APP_DIR__ e __APP_USER__ antes de instalar esta unit.
+[Unit]
+Description=MonitoraME web (Next.js)
+After=network.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+WorkingDirectory=__APP_DIR__/web
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/local/bin/node server.js
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=monitorame-web
+
+[Install]
+WantedBy=multi-user.target
