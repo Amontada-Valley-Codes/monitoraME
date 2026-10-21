@@ -89,8 +89,9 @@ function CommandList({
   return (
     <CommandPrimitive.List
       data-slot="command-list"
+      data-lenis-prevent
       className={cn(
-        "max-h-75 scroll-py-1 overflow-x-hidden overflow-y-auto",
+        "max-h-75 touch-pan-y scroll-py-1 overflow-x-hidden overflow-y-auto overscroll-y-contain",
         className
       )}
       {...props}

@@ -238,7 +238,6 @@ export function TesteLanding() {
               <a href="#inicio" aria-label="MonitoraME, voltar ao início">
                 <Image src="/brand/light-horizontal-logo.svg" alt="MonitoraME" width={185} height={23} />
               </a>
-              <p>{c.footer.tagline}</p>
             </div>
 
             {c.footer.groups.map((group) => (

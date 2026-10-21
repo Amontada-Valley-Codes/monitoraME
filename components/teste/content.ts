@@ -62,7 +62,7 @@ export const testeContent = {
     ],
   },
   footer: {
-    tagline: "Dados públicos para novas possibilidades.",
+    // tagline: "Dados públicos para novas possibilidades.",
     groups: [
       { title: "Plataforma", links: [{ label: "Início", href: "#inicio" }, { label: "Soluções", href: "#solucoes" }] },
       { title: "Conheça", links: [{ label: "Sobre", href: "#sobre" }, { label: "Resultados", href: "#resultados" }] },
