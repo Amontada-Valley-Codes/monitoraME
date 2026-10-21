@@ -19,8 +19,8 @@ export const testeContent = {
     chartLabel: "Visão de mercado*",
   },
   social: {
-    title: "Conectando quem faz o Ceará acontecer",
-    logos: ["NEGÓCIOS", "MUNICÍPIOS", "DADOS", "OPORTUNIDADES", "TERRITÓRIOS", "CONEXÕES"],
+    // title: "Conectando quem faz o Ceará acontecer",
+    logos: ["NEGÓCIOS", "PREFEITURAS", "DADOS", "OPORTUNIDADES", "TERRITÓRIOS", "CONEXÕES"],
     municipality: {
       label: "Município do Ceará",
       placeholder: "Selecione um município",

@@ -320,19 +320,35 @@
 }
 
 .teste-logo-placeholder {
-  display: flex;
+  display: inline-grid;
+  grid-template-columns: 1.55rem auto;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
   color: #6e7d91;
   font-size: 0.68rem;
+  line-height: 1;
   letter-spacing: 0.02em;
   font-weight: 800;
 }
 
 .teste-logo-mark {
-  font-size: 1.55rem;
-  line-height: 1;
+  display: inline-grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  place-items: center;
+}
+
+.teste-logo-mark svg {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2;
+}
+
+.teste-logo-label {
+  display: block;
+  line-height: 1rem;
 }
 
 .teste-section {
@@ -352,7 +368,7 @@
 
 .teste-about-art {
   position: relative;
-  min-height: 420px;
+  min-height: 480px;
 }
 
 .teste-about-blob {
@@ -934,7 +950,8 @@
     row-gap: 0.45rem;
   }
   .teste-logo-mark {
-    font-size: 1.1rem;
+    width: 1.55rem;
+    height: 1.55rem;
   }
 }
 

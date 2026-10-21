@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, BarChart3, ChevronDown, Layers3, Play, Search, UsersRound } from "lucide-react";
+import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Play, Search, SearchCheck, UsersRound } from "lucide-react";
 import { testeContent as c } from "./content";
 import { MunicipalitySearch } from "./municipality-search";
 
@@ -10,6 +10,8 @@ const icons = {
   layers: Layers3,
   users: UsersRound,
 };
+
+const socialIcons = [BriefcaseBusiness, Landmark, Database, SearchCheck, MapPinned, Network];
 
 export function TesteLanding() {
   return (
@@ -52,7 +54,7 @@ export function TesteLanding() {
               <h1 id="teste-hero-title">{c.hero.title}</h1>
               <p>{c.hero.description}</p>
               
-              <div className="teste-actions">
+              <div className="teste-actions p-6">
                 <Link className="teste-button" href="/oportunidades">
                   {c.hero.cta}
                   <ArrowUpRight size={17} aria-hidden="true" />
@@ -108,18 +110,19 @@ export function TesteLanding() {
             </div>
           </div>
 
-          <div className="teste-container teste-social-wrap">
+          <div className="teste-container pt-8 teste-social-wrap">
             <div className="teste-social">
-              <h2>{c.social.title}</h2>
+              {/* <h2>{c.social.title}</h2> */}
               <div className="teste-logo-row">
-                {c.social.logos.map((logo, i) => (
-                  <span className="teste-logo-placeholder" key={logo}>
-                    <span className="teste-logo-mark" aria-hidden="true">
-                      {["◈", "▣", "◇", "✣", "⬡", "≋"][i]}
+                {c.social.logos.map((logo, i) => {
+                  const SocialIcon = socialIcons[i];
+                  return (
+                    <span className="teste-logo-placeholder" key={logo}>
+                      <span className="teste-logo-mark" aria-hidden="true"><SocialIcon /></span>
+                      <span className="teste-logo-label">{logo}</span>
                     </span>
-                    {logo}
-                  </span>
-                ))}
+                  );
+                })}
               </div>
               <MunicipalitySearch />
             </div>
