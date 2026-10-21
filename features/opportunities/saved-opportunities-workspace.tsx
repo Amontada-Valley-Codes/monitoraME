@@ -10,19 +10,32 @@ import type { EventClickArg, EventContentArg } from '@fullcalendar/core';
 import {
   BookmarkX,
   CalendarDays,
+  Clock3,
   ChevronLeft,
   ChevronRight,
   Columns3,
   ExternalLink,
   List,
   MapPin,
+  Plus,
   RotateCcw,
+  Trash2,
 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   NativeSelect,
   NativeSelectOption,
@@ -36,15 +49,22 @@ import {
 import SavedOpportunitiesKanban from '@/components/shadcn-studio/kanban/kanban-04';
 
 import {
-  emptyOpportunityPipeline,
   readAllSavedOpportunities,
   removeSavedOpportunity,
-  SAVED_PIPELINE_KEY,
 } from './saved-opportunities';
 
 import type { Opportunity } from './types';
 
 type View = 'calendar' | 'agenda' | 'kanban';
+
+type AgendaTask = {
+  id: string;
+  date: string;
+  time: string;
+  description: string;
+};
+
+const AGENDA_STORAGE_KEY = 'monitorame:demo-agenda-tasks';
 
 type CalendarEvent = {
   id: string;
@@ -76,7 +96,6 @@ const isSameDay = (left: Date, right: Date | undefined) =>
   left.getMonth() === right.getMonth() &&
   left.getDate() === right.getDate();
 
-
 const dateTime = (value: string | null | undefined) => {
   if (!value || Number.isNaN(new Date(value).getTime())) {
     return 'Não informado';
@@ -89,21 +108,18 @@ const dateTime = (value: string | null | undefined) => {
 };
 
 
-export default function SavedOpportunitiesWorkspace() {
+export default function SavedOpportunitiesWorkspace({ initialView = 'calendar' }: { initialView?: View }) {
   const calendarRef = useRef<InstanceType<typeof FullCalendar> | null>(null);
-
-  const [view, setView] = useState<View>('calendar');
+  const [view, setView] = useState<View>(initialView);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [selected, setSelected] = useState<Opportunity | null>(null);
   const [title, setTitle] = useState('');
-
   const [status, setStatus] = useState('all');
   const [modality, setModality] = useState('all');
   const [organization, setOrganization] = useState('all');
 
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState<number | null>(null);
-
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pickedDate, setPickedDate] = useState<Date>();
   const [pickerMonth, setPickerMonth] = useState<Date>();
@@ -119,6 +135,10 @@ export default function SavedOpportunitiesWorkspace() {
     setPickerMonth(today);
     setLoaded(true);
   }, []);
+
+  useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
 
   const filtered = useMemo(
     () =>
@@ -170,43 +190,6 @@ export default function SavedOpportunitiesWorkspace() {
     [filtered],
   );
 
-  const week = 7 * 86400000;
-
-  const preparing = (() => {
-    if (typeof window === 'undefined') return 0;
-
-    try {
-      const raw = localStorage.getItem(SAVED_PIPELINE_KEY);
-
-      return raw
-        ? {
-            ...emptyOpportunityPipeline(),
-            ...JSON.parse(raw),
-          }.preparing.length
-        : 0;
-    } catch {
-      return 0;
-    }
-  })();
-
-  const stats = {
-    total: opportunities.length,
-    near:
-      now === null
-        ? 0
-        : opportunities.filter((item) => {
-            const time = new Date(item.closingDate).getTime();
-            return time >= now && time <= now + week;
-          }).length,
-    preparing,
-    expired:
-      now === null
-        ? 0
-        : opportunities.filter(
-            (item) => new Date(item.closingDate).getTime() < now,
-          ).length,
-  };
-
   const clearFilters = () => {
     setStatus('all');
     setModality('all');
@@ -230,7 +213,6 @@ export default function SavedOpportunitiesWorkspace() {
 
   const goToDate = (date: Date | undefined) => {
     if (!date) return;
-
     setPickedDate(date);
     setPickerMonth(date);
     api()?.gotoDate(date);
@@ -239,7 +221,6 @@ export default function SavedOpportunitiesWorkspace() {
 
   const goToToday = () => {
     const today = new Date();
-
     setPickedDate(today);
     setPickerMonth(today);
     api()?.today();
@@ -254,13 +235,6 @@ export default function SavedOpportunitiesWorkspace() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Editais salvos" value={stats.total} />
-        <Stat label="Prazos nos próximos 7 dias" value={stats.near} />
-        <Stat label="Propostas em preparação" value={stats.preparing} />
-        <Stat label="Prazos vencidos" value={stats.expired} />
-      </div>
-
       <Card className="gap-0 overflow-hidden py-0 shadow-none">
         <div className="flex flex-col gap-2 border-b p-2 xl:flex-row xl:items-end">
           <div className="flex flex-wrap gap-1">
@@ -340,78 +314,26 @@ export default function SavedOpportunitiesWorkspace() {
           <div className="p-4">
             <SavedOpportunitiesKanban />
           </div>
+        ) : view === 'agenda' ? (
+          <PersonalAgenda />
         ) : (
           <div className="grid xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0 border-r">
-              {view === 'calendar' ? (
-                <>
-                  <div className="flex items-center gap-2 border-b p-2 px-4">
-                    <Button
-                      className="h-8 min-h-8! rounded-sm"
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => api()?.prev()}
-                    >
-                      <ChevronLeft />
-                      <span className="sr-only">Mês anterior</span>
-                    </Button>
-
-                    <Button
-                      className="h-8 min-h-8! rounded-sm"
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => api()?.next()}
-                    >
-                      <ChevronRight />
-                      <span className="sr-only">Próximo mês</span>
-                    </Button>
-
-                    <h2 className="ml-2 text-lg font-semibold capitalize">
-                      {title}
-                    </h2>
-
-                    <Popover
-                      open={datePickerOpen}
-                      onOpenChange={setDatePickerOpen}
-                    >
+              <>
+                  <div className="flex flex-wrap items-center gap-2 border-b px-4 py-3">
+                    <Button variant="outline" size="sm" onClick={goToToday}>Hoje</Button>
+                    <Button variant="ghost" size="icon-sm" onClick={() => api()?.prev()} aria-label="Mês anterior"><ChevronLeft /></Button>
+                    <Button variant="ghost" size="icon-sm" onClick={() => api()?.next()} aria-label="Próximo mês"><ChevronRight /></Button>
+                    <h2 className="text-lg font-semibold capitalize">{title}</h2>
+                    <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="default"
-                          className="ml-auto h-8 min-h-8! rounded-sm"
-                        >
-                          <CalendarDays className="size-4" />
-                          {pickedDate ? shortDate(pickedDate) : 'Selecionar data'}
-                        </Button>
+                        <Button variant="outline" size="sm" className="ml-auto"><CalendarDays />{pickedDate ? shortDate(pickedDate) : 'Selecionar data'}</Button>
                       </PopoverTrigger>
-
                       <PopoverContent align="end" className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={pickedDate}
-                          month={pickerMonth}
-                          onMonthChange={setPickerMonth}
-                          onSelect={goToDate}
-                          captionLayout="dropdown"
-                          startMonth={new Date(2020, 0)}
-                          endMonth={new Date(2035, 11)}
-                          className="rounded-lg"
-                        />
-
-                        <div className="border-t p-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full"
-                            onClick={goToToday}
-                          >
-                            Ir para hoje
-                          </Button>
-                        </div>
+                        <Calendar mode="single" selected={pickedDate} month={pickerMonth} onMonthChange={setPickerMonth} onSelect={goToDate} captionLayout="dropdown" startMonth={new Date(2020, 0)} endMonth={new Date(2035, 11)} />
                       </PopoverContent>
                     </Popover>
                   </div>
-
                   <div className="saved-calendar p-2 sm:p-4">
                     <FullCalendar
                       ref={calendarRef}
@@ -421,25 +343,15 @@ export default function SavedOpportunitiesWorkspace() {
                       firstDay={1}
                       headerToolbar={false}
                       height="auto"
-                      dayMaxEvents={2}
+                      dayMaxEvents={3}
                       events={events}
-                      dayCellClassNames={(info) =>
-                        isSameDay(info.date, pickedDate) ? ['picked-date'] : []
-                      }
-                      datesSet={(info) => {
-                        setTitle(info.view.title);
-                        setPickerMonth(info.view.currentStart);
-                      }}
-                      eventClick={(info: EventClickArg) => {
-                        setSelected(info.event.extendedProps.opportunity);
-                      }}
+                      dayCellClassNames={(info) => isSameDay(info.date, pickedDate) ? ['picked-date'] : []}
+                      datesSet={(info) => { setTitle(info.view.title); setPickerMonth(info.view.currentStart); }}
+                      eventClick={(info: EventClickArg) => setSelected(info.event.extendedProps.opportunity)}
                       eventContent={CalendarEventContent}
                     />
                   </div>
-                </>
-              ) : (
-                <Agenda events={events} onSelect={setSelected} />
-              )}
+              </>
             </div>
 
             <Details
@@ -453,25 +365,13 @@ export default function SavedOpportunitiesWorkspace() {
   );
 }
 
-function CalendarEventContent({
-  event,
-  timeText,
-}: EventContentArg) {
+function CalendarEventContent({ event, timeText }: EventContentArg) {
   const opportunity = event.extendedProps.opportunity as Opportunity;
-
   return (
     <div className="min-w-0 p-1">
       <b className="block truncate text-[10px]">{event.title}</b>
-
-      <span className="block truncate text-[10px] opacity-75">
-        {money(opportunity.estimatedValue)}
-      </span>
-
-      {timeText && (
-        <span className="block text-[10px] opacity-70">
-          {timeText}
-        </span>
-      )}
+      <span className="block truncate text-[10px] opacity-75">{money(opportunity.estimatedValue)}</span>
+      {timeText && <span className="block text-[10px] opacity-70">{timeText}</span>}
     </div>
   );
 }
@@ -496,21 +396,6 @@ function ViewButton({
       <Icon className="size-4" />
       {children}
     </Button>
-  );
-}
-
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <Card className="gap-1 p-4 shadow-none">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <strong className="text-2xl text-foreground">{value}</strong>
-    </Card>
   );
 }
 
@@ -544,37 +429,226 @@ function Filter({
   );
 }
 
-function Agenda({
-  events,
-  onSelect,
-}: {
-  events: CalendarEvent[];
-  onSelect: (item: Opportunity) => void;
-}) {
-  return (
-    <div className="divide-y">
-      {[...events]
-        .sort((a, b) => +new Date(a.start) - +new Date(b.start))
-        .map((event) => (
-          <button
-            key={event.id}
-            className="flex w-full items-center gap-4 p-4 text-left hover:bg-muted/40"
-            onClick={() => onSelect(event.extendedProps.opportunity)}
-          >
-            <span className="w-28 shrink-0 text-xs text-muted-foreground">
-              {dateTime(event.start)}
-            </span>
+function PersonalAgenda() {
+  const [tasks, setTasks] = useState<AgendaTask[]>([]);
+  const [date, setDate] = useState<Date>(() => new Date());
+  const [time, setTime] = useState('09:00');
+  const [description, setDescription] = useState('');
+  const [dateOpen, setDateOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [draftHour, setDraftHour] = useState('09');
+  const [draftMinute, setDraftMinute] = useState('00');
+  const [clockMode, setClockMode] = useState<'hour' | 'minute'>('hour');
+  const [message, setMessage] = useState('');
 
-            <span className="min-w-0">
-              <b className="block truncate text-sm">{event.title}</b>
-              <span className="text-xs text-muted-foreground">
-                {event.extendedProps.opportunity.organization}
-              </span>
-            </span>
-          </button>
-        ))}
+  useEffect(() => {
+    queueMicrotask(() => {
+      try {
+        const saved = localStorage.getItem(AGENDA_STORAGE_KEY);
+        setTasks(saved ? JSON.parse(saved) : []);
+      } catch {
+        setTasks([]);
+      }
+    });
+  }, []);
+
+  const persist = (next: AgendaTask[]) => {
+    setTasks(next);
+    localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(next));
+  };
+
+  const addTask = () => {
+    if (!description.trim()) {
+      setMessage('Escreva uma descrição para a tarefa.');
+      return;
+    }
+
+    persist([
+      ...tasks,
+      {
+        id: crypto.randomUUID(),
+        date: localDateValue(date),
+        time,
+        description: description.trim(),
+      },
+    ]);
+    setDescription('');
+    setMessage('Tarefa adicionada à agenda.');
+  };
+
+  const sortedTasks = [...tasks].sort((left, right) =>
+    `${left.date}T${left.time}`.localeCompare(`${right.date}T${right.time}`),
+  );
+
+  const openTimePicker = () => {
+    const [hour, minute] = time.split(':');
+    setDraftHour(hour);
+    setDraftMinute(minute);
+    setClockMode('hour');
+    setTimeOpen(true);
+  };
+
+  const confirmTime = () => {
+    const hour = Math.min(23, Math.max(0, Number(draftHour) || 0));
+    const minute = Math.min(59, Math.max(0, Number(draftMinute) || 0));
+    setTime(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+    setTimeOpen(false);
+  };
+
+  return (
+    <div className="grid min-h-[32rem] xl:grid-cols-[minmax(0,1fr)_360px]">
+      <section className="min-w-0 border-r" aria-labelledby="agenda-title">
+        <div className="border-b px-4 py-4">
+          <h2 id="agenda-title" className="font-semibold">Minha agenda</h2>
+          <p className="mt-1 text-xs text-muted-foreground">Anotações pessoais para organizar suas tarefas. Dados demonstrativos.</p>
+        </div>
+
+        {sortedTasks.length ? (
+          <div className="divide-y">
+            {sortedTasks.map((task) => (
+              <div key={task.id} className="flex items-start gap-4 p-4">
+                <div className="w-28 shrink-0">
+                  <span className="block text-xs font-medium text-primary">{formatAgendaDate(task.date)}</span>
+                  <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="size-3" />{task.time}</span>
+                </div>
+                <p className="min-w-0 flex-1 text-sm leading-relaxed">{task.description}</p>
+                <Button variant="ghost" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={() => persist(tasks.filter((item) => item.id !== task.id))} aria-label={`Excluir tarefa: ${task.description}`}><Trash2 /></Button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid min-h-72 place-items-center p-8 text-center">
+            <div><CalendarDays className="mx-auto size-8 text-muted-foreground/60" /><p className="mt-3 text-sm font-medium">Nenhuma tarefa anotada</p><p className="mt-1 text-xs text-muted-foreground">Use o formulário ao lado para criar sua primeira anotação.</p></div>
+          </div>
+        )}
+      </section>
+
+      <aside className="min-w-0 p-4 sm:p-5">
+        <h2 className="text-lg font-semibold">Adicionar tarefa</h2>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Escolha o dia e o horário para lembrar desta atividade.</p>
+
+        <div className="mt-6 grid gap-5">
+          <div className="grid gap-2">
+            <Label>Dia</Label>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger asChild><Button variant="outline" className="justify-start font-normal"><CalendarDays />{formatSelectedDate(date)}</Button></PopoverTrigger>
+              <PopoverContent align="end" className="w-auto p-0"><Calendar mode="single" selected={date} onSelect={(value) => { if (value) { setDate(value); setDateOpen(false); } }} /></PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="grid gap-2">
+            <Label>Horário</Label>
+            <Button type="button" variant="outline" className="justify-start font-normal" onClick={openTimePicker}><Clock3 />{time}</Button>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="agenda-description">Descrição</Label>
+            <Textarea id="agenda-description" value={description} onChange={(event) => { setDescription(event.target.value); setMessage(''); }} rows={5} placeholder="Ex.: Revisar os documentos do edital antes do prazo." />
+          </div>
+
+          {message && <p className="text-xs text-muted-foreground" role="status">{message}</p>}
+
+          <Button onClick={addTask}><Plus />Adicionar à agenda</Button>
+        </div>
+      </aside>
+
+      <Dialog open={timeOpen} onOpenChange={setTimeOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Escolher horário</DialogTitle>
+            <DialogDescription>Informe a hora e os minutos exatos da tarefa.</DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2">
+            <div className="mb-4 flex items-center justify-center text-3xl font-semibold tabular-nums" aria-live="polite">
+              <button type="button" className={clockMode === 'hour' ? 'text-primary' : 'text-muted-foreground'} onClick={() => setClockMode('hour')}>{draftHour.padStart(2, '0')}</button>
+              <span className="px-1 text-muted-foreground">:</span>
+              <button type="button" className={clockMode === 'minute' ? 'text-primary' : 'text-muted-foreground'} onClick={() => setClockMode('minute')}>{draftMinute.padStart(2, '0')}</button>
+            </div>
+
+            <AnalogClock
+              mode={clockMode}
+              hour={Number(draftHour)}
+              minute={Number(draftMinute)}
+              onHourChange={(value) => {
+                setDraftHour(String(value).padStart(2, '0'));
+                setClockMode('minute');
+              }}
+              onMinuteChange={(value) => setDraftMinute(String(value).padStart(2, '0'))}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setTimeOpen(false)}>Cancelar</Button>
+            <Button type="button" onClick={confirmTime}>Confirmar horário</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function AnalogClock({ mode, hour, minute, onHourChange, onMinuteChange }: { mode: 'hour' | 'minute'; hour: number; minute: number; onHourChange: (value: number) => void; onMinuteChange: (value: number) => void }) {
+  const [afternoon, setAfternoon] = useState(hour >= 12);
+  const values = mode === 'hour'
+    ? Array.from({ length: 12 }, (_, index) => index + (afternoon ? 12 : 0))
+    : Array.from({ length: 12 }, (_, index) => index * 5);
+  const activeIndex = mode === 'hour' ? hour % 12 : Math.round(minute / 5) % 12;
+
+  return (
+    <div>
+      {mode === 'hour' && (
+        <div className="mb-3 flex justify-center gap-1" aria-label="Período do dia">
+          <Button type="button" size="sm" variant={!afternoon ? 'default' : 'outline'} onClick={() => setAfternoon(false)}>00–11</Button>
+          <Button type="button" size="sm" variant={afternoon ? 'default' : 'outline'} onClick={() => setAfternoon(true)}>12–23</Button>
+        </div>
+      )}
+
+      <div className="relative mx-auto size-64 rounded-full bg-muted/70 shadow-inner" role="group" aria-label={mode === 'hour' ? 'Escolher hora no relógio' : 'Escolher minutos no relógio'}>
+        <span className="absolute left-1/2 top-1/2 z-10 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
+        <span
+          className="pointer-events-none absolute left-1/2 top-1/2 h-0.5 w-[5.25rem] origin-left bg-primary transition-transform"
+          style={{ transform: `rotate(${activeIndex * 30 - 90}deg)` }}
+        />
+
+        {values.map((value, index) => {
+          const angle = index * 30 - 90;
+          const radians = angle * Math.PI / 180;
+          const x = 128 + Math.cos(radians) * 102;
+          const y = 128 + Math.sin(radians) * 102;
+          const active = index === activeIndex;
+          return (
+            <button
+              key={value}
+              type="button"
+              className={`absolute z-20 grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-primary text-primary-foreground' : 'hover:bg-background'}`}
+              style={{ left: x, top: y }}
+              onClick={() => mode === 'hour' ? onHourChange(value) : onMinuteChange(value)}
+              aria-label={mode === 'hour' ? `${value} horas` : `${value} minutos`}
+            >
+              {String(value).padStart(2, '0')}
+            </button>
+          );
+        })}
+      </div>
+
+      {mode === 'minute' && <p className="mt-3 text-center text-xs text-muted-foreground">Selecione os minutos em intervalos de 5.</p>}
+    </div>
+  );
+}
+
+function localDateValue(date: Date) {
+  const offset = date.getTimezoneOffset();
+  return new Date(+date - offset * 60000).toISOString().slice(0, 10);
+}
+
+function formatAgendaDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(year, month - 1, day));
+}
+
+function formatSelectedDate(date: Date) {
+  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: 'long' }).format(date);
 }
 
 function Details({
