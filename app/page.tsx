@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
-import { TesteLanding } from '@/components/teste/teste-landing';
+import { Landing } from '@/components/teste/teste-landing';
 
-import './teste/teste.css';
+import './teste/landing.css';
 
 export const metadata: Metadata = {
   title: 'MonitoraME',
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <TesteLanding />;
+  return <Landing />;
 }

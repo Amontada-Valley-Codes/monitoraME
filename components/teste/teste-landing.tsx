@@ -13,13 +13,13 @@ const icons = {
 
 const socialIcons = [BriefcaseBusiness, Landmark, Database, SearchCheck, MapPinned, Network];
 
-export function TesteLanding() {
+export function Landing() {
   return (
-    <div className="teste-page" id="inicio">
+    <div className="landing-page" id="inicio">
       {/* Cabeçalho */}
-      <header className="teste-header">
-        <div className="teste-container teste-header-inner">
-          <a className="teste-brand" href="#inicio" aria-label="MonitoraME, início">
+      <header className="landing-header">
+        <div className="landing-container landing-header-inner">
+          <a className="landing-brand" href="#inicio" aria-label="MonitoraME, início">
             <Image
               src="/brand/default-text-dark.svg"
               alt="MonitoraME"
@@ -29,7 +29,7 @@ export function TesteLanding() {
             />
           </a>
 
-          <nav className="teste-nav" aria-label="Navegação da página de demonstração">
+          <nav className="landing-nav" aria-label="Navegação da página de demonstração">
             {c.nav.map((item) => (
               <a href={item.href} key={item.label}>
                 {item.label}
@@ -38,7 +38,7 @@ export function TesteLanding() {
             ))}
           </nav>
 
-          <a className="teste-button teste-header-cta" href="#solucoes">
+          <a className="landing-button landing-header-cta" href="#solucoes">
             {c.headerCta}
             <ArrowUpRight size={15} aria-hidden="true" />
           </a>
@@ -48,18 +48,18 @@ export function TesteLanding() {
       {/* Conteúdo Principal */}
       <main>
         {/* Seção Hero */}
-        <section className="teste-hero" aria-labelledby="teste-hero-title">
-          <div className="teste-container teste-hero-grid">
-            <div className="teste-hero-copy">
-              <h1 id="teste-hero-title">{c.hero.title}</h1>
+        <section className="landing-hero" aria-labelledby="landing-hero-title">
+          <div className="landing-container landing-hero-grid">
+            <div className="landing-hero-copy">
+              <h1 id="landing-hero-title">{c.hero.title}</h1>
               <p>{c.hero.description}</p>
               
-              <div className="teste-actions p-6">
-                <Link className="teste-button" href="/oportunidades">
+              <div className="landing-actions p-6">
+                <Link className="landing-button" href="/oportunidades">
                   {c.hero.cta}
                   <ArrowUpRight size={17} aria-hidden="true" />
                 </Link>
-                <a className="teste-play-link" href="#sobre">
+                <a className="landing-play-link" href="#sobre">
                   <span>
                     <Play size={15} fill="currentColor" aria-hidden="true" />
                   </span>
@@ -68,10 +68,10 @@ export function TesteLanding() {
               </div>
             </div>
 
-            <div className="teste-hero-art">
-              <div className="teste-orange-disc" aria-hidden="true" />
+            <div className="landing-hero-art">
+              <div className="landing-orange-disc" aria-hidden="true" />
               <Image
-                className="teste-hero-person"
+                className="landing-hero-person"
                 src="/persons/xdavid.png"
                 alt="Profissional com computador"
                 fill
@@ -79,8 +79,8 @@ export function TesteLanding() {
                 priority
               />
               
-              <div className="teste-float teste-float-left">
-                <span className="teste-float-icon">
+              <div className="landing-float landing-float-left">
+                <span className="landing-float-icon">
                   <BarChart3 size={19} />
                 </span>
                 <span>
@@ -89,8 +89,8 @@ export function TesteLanding() {
                 </span>
               </div>
 
-              <div className="teste-float teste-float-top">
-                <span className="teste-float-icon">
+              <div className="landing-float landing-float-top">
+                <span className="landing-float-icon">
                   <UsersRound size={18} />
                 </span>
                 <span>
@@ -99,9 +99,9 @@ export function TesteLanding() {
                 </span>
               </div>
 
-              <div className="teste-float teste-float-chart">
+              <div className="landing-float landing-float-chart">
                 <small>{c.hero.chartLabel}</small>
-                <div className="teste-bars" aria-hidden="true">
+                <div className="landing-bars" aria-hidden="true">
                   {[37, 61, 43, 76, 55, 91].map((height, i) => (
                     <i key={i} style={{ height: `${height}%` }} />
                   ))}
@@ -110,16 +110,16 @@ export function TesteLanding() {
             </div>
           </div>
 
-          <div className="teste-container pt-8 teste-social-wrap">
-            <div className="teste-social">
+          <div className="landing-container pt-8 landing-social-wrap">
+            <div className="landing-social">
               {/* <h2>{c.social.title}</h2> */}
-              <div className="teste-logo-row">
+              <div className="landing-logo-row">
                 {c.social.logos.map((logo, i) => {
                   const SocialIcon = socialIcons[i];
                   return (
-                    <span className="teste-logo-placeholder" key={logo}>
-                      <span className="teste-logo-mark" aria-hidden="true"><SocialIcon /></span>
-                      <span className="teste-logo-label">{logo}</span>
+                    <span className="landing-logo-placeholder" key={logo}>
+                      <span className="landing-logo-mark" aria-hidden="true"><SocialIcon /></span>
+                      <span className="landing-logo-label">{logo}</span>
                     </span>
                   );
                 })}
@@ -130,10 +130,10 @@ export function TesteLanding() {
         </section>
 
         {/* Seção Sobre */}
-        <section className="teste-section teste-about" id="sobre" aria-labelledby="teste-about-title">
-          <div className="teste-container teste-about-grid">
-            <div className="teste-about-art">
-              <div className="teste-about-blob">
+        <section className="landing-section landing-about" id="sobre" aria-labelledby="landing-about-title">
+          <div className="landing-container landing-about-grid">
+            <div className="landing-about-art">
+              <div className="landing-about-blob">
                 <Image
                   src="/persons/valley-team.png"
                   alt="Pessoas colaborando em equipe"
@@ -141,21 +141,21 @@ export function TesteLanding() {
                   sizes="(max-width: 700px) 90vw, 40vw"
                 />
               </div>
-              <div className="teste-seal">
+              <div className="landing-seal">
                 <strong>{c.about.sealValue}</strong>
                 <span>{c.about.sealLabel}</span>
               </div>
             </div>
 
-            <div className="teste-about-copy">
-              <span className="teste-eyebrow">{c.about.eyebrow}</span>
-              <h2 id="teste-about-title">{c.about.title}</h2>
+            <div className="landing-about-copy">
+              <span className="landing-eyebrow">{c.about.eyebrow}</span>
+              <h2 id="landing-about-title">{c.about.title}</h2>
               <p>{c.about.description}</p>
               
-              <div className="teste-about-items">
+              <div className="landing-about-items">
                 {c.about.items.map((item, i) => (
-                  <div className="teste-about-item" key={item.title}>
-                    <span className="teste-item-icon">
+                  <div className="landing-about-item" key={item.title}>
+                    <span className="landing-item-icon">
                       {i === 0 ? <BarChart3 size={22} /> : <Layers3 size={22} />}
                     </span>
                     <div>
@@ -170,22 +170,22 @@ export function TesteLanding() {
         </section>
 
         {/* Seção Soluções / Serviços */}
-        <section className="teste-section teste-services" id="solucoes" aria-labelledby="teste-services-title">
-          <div className="teste-container">
-            <div className="teste-section-heading">
-              <span className="teste-eyebrow">{c.services.eyebrow}</span>
-              <h2 id="teste-services-title">{c.services.title}</h2>
+        <section className="landing-section landing-services" id="solucoes" aria-labelledby="landing-services-title">
+          <div className="landing-container">
+            <div className="landing-section-heading">
+              <span className="landing-eyebrow">{c.services.eyebrow}</span>
+              <h2 id="landing-services-title">{c.services.title}</h2>
             </div>
 
-            <div className="teste-service-grid">
+            <div className="landing-service-grid">
               {c.services.items.map((item, i) => {
                 const Icon = icons[item.icon];
                 return (
                   <article
-                    className={`teste-service-card ${i === 0 ? "teste-service-featured" : ""}`}
+                    className={`landing-service-card ${i === 0 ? "landing-service-featured" : ""}`}
                     key={item.title}
                   >
-                    <span className="teste-service-icon">
+                    <span className="landing-service-icon">
                       <Icon size={23} strokeWidth={1.8} />
                     </span>
                     <h3>{item.title}</h3>
@@ -198,14 +198,14 @@ export function TesteLanding() {
         </section>
 
         {/* Seção Módulo Analítico */}
-        <section className="teste-analytics" id="analitico" aria-labelledby="teste-analytics-title">
-          <div className="teste-container teste-analytics-grid">
-            <div className="teste-analytics-copy">
-              <span className="teste-eyebrow">{c.analytics.eyebrow}</span>
-              <h2 id="teste-analytics-title">{c.analytics.title}</h2>
+        <section className="landing-analytics" id="analitico" aria-labelledby="landing-analytics-title">
+          <div className="landing-container landing-analytics-grid">
+            <div className="landing-analytics-copy">
+              <span className="landing-eyebrow">{c.analytics.eyebrow}</span>
+              <h2 id="landing-analytics-title">{c.analytics.title}</h2>
               <p>{c.analytics.description}</p>
 
-              <div className="teste-analytics-highlights">
+              <div className="landing-analytics-highlights">
                 {c.analytics.highlights.map((highlight) => (
                   <article key={highlight.title}>
                     <span aria-hidden="true"><TrendingUp size={18} /></span>
@@ -217,16 +217,16 @@ export function TesteLanding() {
                 ))}
               </div>
 
-              <Link className="teste-button teste-analytics-cta" href="/analitico">
+              <Link className="landing-button landing-analytics-cta" href="/analitico">
                 {c.analytics.cta}
                 <ArrowUpRight size={17} aria-hidden="true" />
               </Link>
             </div>
 
-            <div className="teste-analytics-visual">
-              <div className="teste-analytics-halo" aria-hidden="true" />
+            <div className="landing-analytics-visual">
+              <div className="landing-analytics-halo" aria-hidden="true" />
               <Image
-                className="teste-analytics-people"
+                className="landing-analytics-people"
                 src="/persons/mario-adriano.png"
                 alt="Profissionais que representam a análise de dados para decisões públicas"
                 fill
@@ -237,8 +237,8 @@ export function TesteLanding() {
         </section>
 
         {/* Seção Resultados */}
-        <section className="teste-results" id="resultados" aria-labelledby="teste-results-title">
-          <div className="teste-mosaic" aria-hidden="true">
+        <section className="landing-results" id="resultados" aria-labelledby="landing-results-title">
+          <div className="landing-mosaic" aria-hidden="true">
             {Array.from({ length: 16 }, (_, i) => (
               <div key={i}>
                 <Image
@@ -251,13 +251,13 @@ export function TesteLanding() {
             ))}
           </div>
 
-          <div className="teste-results-overlay" />
+          <div className="landing-results-overlay" />
 
-          <div className="teste-container teste-results-content">
-            <h2 id="teste-results-title">{c.results.title}</h2>
+          <div className="landing-container landing-results-content">
+            <h2 id="landing-results-title">{c.results.title}</h2>
             <p>{c.results.description}</p>
             
-            <div className="teste-metrics">
+            <div className="landing-metrics">
               {c.results.metrics.map((metric) => (
                 <div key={metric.label}>
                   <strong>{metric.value}</strong>
@@ -270,17 +270,17 @@ export function TesteLanding() {
       </main>
 
       {/* Rodapé */}
-      <footer className="teste-footer" id="contato">
-        <div className="teste-container">
-          <div className="teste-footer-grid">
-            <div className="teste-footer-brand">
+      <footer className="landing-footer" id="contato">
+        <div className="landing-container">
+          <div className="landing-footer-grid">
+            <div className="landing-footer-brand">
               <a href="#inicio" aria-label="MonitoraME, voltar ao início">
                 <Image src="/brand/light-horizontal-logo.svg" alt="MonitoraME" width={185} height={23} />
               </a>
             </div>
 
             {c.footer.groups.map((group) => (
-              <div className="teste-footer-group" key={group.title}>
+              <div className="landing-footer-group" key={group.title}>
                 <h2>{group.title}</h2>
                 {group.links.map((link) => (
                   <a key={link.label} href={link.href}>
@@ -291,9 +291,9 @@ export function TesteLanding() {
             ))}
           </div>
 
-          <div className="teste-footer-bottom">
+          <div className="landing-footer-bottom">
             <small>{c.footer.copyright}</small>
-            <div className="teste-footer-social" aria-label="Redes sociais (ilustração)">
+            <div className="landing-footer-social" aria-label="Redes sociais (ilustração)">
               {c.footer.social.map((item) => (
                 <span title={`${item.label} — ilustrativo`} key={item.label}>
                   {item.glyph}
