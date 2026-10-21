@@ -28,7 +28,7 @@ export function AdminDemoProfileSwitcher({ value }: { value: string }) {
     <label className="flex items-center gap-2 text-xs text-muted-foreground">
       Perfil da demonstração
       <NativeSelect
-        size="sm"
+        className="h-9"
         value={value}
         disabled={pending}
         onChange={(event) => {
