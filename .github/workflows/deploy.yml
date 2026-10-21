@@ -50,6 +50,7 @@ jobs:
           cp -R .next/static release/web/.next/static
           cp -R public release/web/public
           mkdir -p release/deploy/systemd
+          cp deploy/remote-deploy.sh release/deploy/remote-deploy.sh
           cp deploy/systemd/monitorame-web.service.template release/deploy/systemd/
           tar -czf release.tgz -C release .
       - name: Configurar acesso SSH pelo Cloudflare
@@ -80,35 +81,15 @@ jobs:
           RELEASE_FILE: /tmp/monitorame-${{ github.sha }}.tgz
         run: |
           scp release.tgz "monitorame:$RELEASE_FILE"
-          ssh monitorame bash -s -- "$DEPLOY_PATH" "$RELEASE_FILE" "$SSH_USER" <<'REMOTE'
+          ssh monitorame bash -s -- "$DEPLOY_PATH" "$RELEASE_FILE" <<'REMOTE'
           set -euo pipefail
           deploy_path="$1"
           release_file="$2"
-          app_user="$3"
           mkdir -p "$deploy_path"
-          staging_dir="$(mktemp -d "$deploy_path/.web.XXXXXX")"
+          staging_dir="$(mktemp -d "$deploy_path/.release.XXXXXX")"
           trap 'rm -rf "$staging_dir" "$release_file"' EXIT
           tar -xzf "$release_file" -C "$staging_dir"
-          rm -rf "$deploy_path/web.previous"
-          if [ -d "$deploy_path/web" ]; then
-            mv "$deploy_path/web" "$deploy_path/web.previous"
-          fi
-          mv "$staging_dir/web" "$deploy_path/web"
-          sed -e "s#__APP_DIR__#$deploy_path#g" -e "s#__APP_USER__#$app_user#g" \
-            "$staging_dir/deploy/systemd/monitorame-web.service.template" \
-            | sudo tee /etc/systemd/system/monitorame-web.service >/dev/null
-          sudo systemctl daemon-reload
-          sudo systemctl enable monitorame-web
-          if ! sudo systemctl restart monitorame-web || ! sudo systemctl is-active --quiet monitorame-web; then
-            echo "O novo servidor não iniciou; restaurando a versão anterior" >&2
-            sudo systemctl stop monitorame-web || true
-            rm -rf "$deploy_path/web"
-            if [ -d "$deploy_path/web.previous" ]; then
-              mv "$deploy_path/web.previous" "$deploy_path/web"
-              sudo systemctl restart monitorame-web || true
-            fi
-            exit 1
-          fi
+          bash "$staging_dir/deploy/remote-deploy.sh" "$deploy_path"
           REMOTE
       - name: Teste de fumaça
         if: ${{ env.SITE_URL != '' }}

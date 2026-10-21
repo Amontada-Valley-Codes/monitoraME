@@ -1,69 +1,65 @@
 #!/usr/bin/env bash
-# Roda DENTRO do container da squad, como o usuário da squad, chamado pelo GitHub Actions
-# logo depois de os arquivos serem extraídos. Faz o que não dá para fazer no CI:
-# instalar dependências de produção, (re)instalar as units do systemd e o site do nginx,
-# reiniciar os serviços e conferir se subiram. Pode rodar quantas vezes quiser.
+# Instala e inicia a versão standalone do frontend Next.js já extraída no release dir.
 set -euo pipefail
 
-DIR="$(cd "$(dirname "$0")/.." && pwd)"
+DEPLOY_PATH="${1:?Uso: remote-deploy.sh <deploy-path>}"
+RELEASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_USER="$(id -un)"
-DOMINIO="monitorame.amontadavalley.com.br"
-SITE_NOME="monitorame-app"
-cd "$DIR"
+WEB_SOURCE="$RELEASE_DIR/web"
+UNIT_TEMPLATE="$RELEASE_DIR/deploy/systemd/monitorame-web.service.template"
+WEB_TARGET="$DEPLOY_PATH/web"
+WEB_PREVIOUS="$DEPLOY_PATH/web.previous"
+UNIT_PATH="/etc/systemd/system/monitorame-web.service"
 
-echo "==> api: dependências de produção"
-(cd api && npm ci --omit=dev --no-audit --no-fund)
-
-echo "==> data: virtualenv e dependências (sem sudo, sem --break-system-packages)"
-[ -d data/.venv ] || python3 -m venv data/.venv
-data/.venv/bin/python -m pip install --quiet -r data/requirements.txt
-
-[ -f .env ] || echo "AVISO: não existe $DIR/.env; o serviço de dados vai usar o CSV de exemplo"
-
-echo "==> systemd: instalando as units"
-for s in web api data; do
-  sed -e "s#__APP_DIR__#$DIR#g" -e "s#__APP_USER__#$APP_USER#g" "deploy/systemd/monitorame-$s.service.template" \
-    | sudo tee "/etc/systemd/system/monitorame-$s.service" >/dev/null
-done
-sudo systemctl daemon-reload
-sudo systemctl enable monitorame-data monitorame-api monitorame-web >/dev/null 2>&1
-sudo systemctl restart monitorame-data monitorame-api monitorame-web
-
-echo "==> nginx: site $SITE_NOME"
-SITE="/etc/nginx/sites-available/$SITE_NOME"
-LINK="/etc/nginx/sites-enabled/$SITE_NOME"
-if ! sudo cmp -s deploy/nginx/monitorame-app.conf "$SITE" || [ ! -L "$LINK" ]; then
-  BAK="/etc/nginx/valley-backups/$(date +%Y%m%d%H%M%S)"
-  sudo mkdir -p "$BAK"
-  MOVIDOS=()
-  # tira de sites-enabled os sites antigos DESTE domínio (guarda a cópia de segurança fora de sites-enabled)
-  for f in $(sudo grep -l "server_name[[:space:]].*$DOMINIO" /etc/nginx/sites-enabled/* 2>/dev/null || true); do
-    [ "$(basename "$f")" = "$SITE_NOME" ] && continue
-    sudo cp -L "$f" "$BAK/$(basename "$f").conteudo"
-    sudo mv "$f" "$BAK/$(basename "$f")"
-    MOVIDOS+=("$(basename "$f")")
-  done
-  sudo install -o root -g root -m 0644 deploy/nginx/monitorame-app.conf "$SITE"
-  sudo ln -sfn "$SITE" "$LINK"
-  if sudo nginx -t; then
-    sudo systemctl reload nginx
-    echo "nginx recarregado (backup do site anterior em $BAK)"
-  else
-    echo "ERRO: nginx -t falhou; voltando ao site anterior" >&2
-    sudo rm -f "$LINK"
-    for n in "${MOVIDOS[@]}"; do sudo mv "$BAK/$n" "/etc/nginx/sites-enabled/$n"; done
-    sudo nginx -t && sudo systemctl reload nginx
-    exit 1
-  fi
-else
-  echo "site do nginx já está atualizado"
+if [[ ! -f "$WEB_SOURCE/server.js" ]]; then
+  echo "Release inválido: não encontrei $WEB_SOURCE/server.js" >&2
+  exit 1
 fi
 
-echo "==> conferindo se subiu"
-for i in 1 2 3 4 5 6; do
-  if curl -fsS http://127.0.0.1:3001/api/health >/dev/null; then break; fi
-  echo "aguardando a api... ($i)"; sleep 3
+if [[ ! -f "$UNIT_TEMPLATE" ]]; then
+  echo "Release inválido: não encontrei o template $UNIT_TEMPLATE" >&2
+  exit 1
+fi
+
+mkdir -p "$DEPLOY_PATH"
+rm -rf "$WEB_PREVIOUS"
+if [[ -d "$WEB_TARGET" ]]; then
+  mv "$WEB_TARGET" "$WEB_PREVIOUS"
+fi
+mv "$WEB_SOURCE" "$WEB_TARGET"
+
+rollback() {
+  echo "O frontend não iniciou; restaurando a versão anterior." >&2
+  sudo systemctl stop monitorame-web >/dev/null 2>&1 || true
+  rm -rf "$WEB_TARGET"
+  if [[ -d "$WEB_PREVIOUS" ]]; then
+    mv "$WEB_PREVIOUS" "$WEB_TARGET"
+    sudo systemctl restart monitorame-web || true
+  fi
+}
+
+if ! sed -e "s#__APP_DIR__#$DEPLOY_PATH#g" -e "s#__APP_USER__#$APP_USER#g" \
+  "$UNIT_TEMPLATE" | sudo tee "$UNIT_PATH" >/dev/null; then
+  rollback
+  exit 1
+fi
+
+if ! sudo systemctl daemon-reload \
+  || ! sudo systemctl enable monitorame-web \
+  || ! sudo systemctl restart monitorame-web; then
+  rollback
+  exit 1
+fi
+
+for attempt in 1 2 3 4 5 6; do
+  if sudo systemctl is-active --quiet monitorame-web \
+    && curl --fail --silent --show-error http://127.0.0.1:3000/ --output /dev/null; then
+    echo "Frontend Next.js ativo em http://127.0.0.1:3000"
+    exit 0
+  fi
+  echo "Aguardando o frontend iniciar ($attempt/6)..."
+  sleep 5
 done
-echo -n "api direta:      "; curl -fsS http://127.0.0.1:3001/api/health; echo
-echo -n "via nginx local: "; curl -fsS -H "Host: $DOMINIO" http://127.0.0.1/api/health; echo
-sudo systemctl is-active monitorame-data monitorame-api monitorame-web
+
+rollback
+exit 1
