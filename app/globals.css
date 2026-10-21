@@ -219,14 +219,6 @@
 }
 
 @layer components {
-  [data-hero-reveal],
-  [data-hero-proof],
-  [data-reveal-item] {
-    opacity: 0;
-    transform: translate3d(0, 2rem, 0);
-    will-change: transform, opacity;
-  }
-
   .login-page-scale {
     zoom: 0.9;
   }
@@ -502,13 +494,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-hero-reveal],
-  [data-hero-proof],
-  [data-reveal-item] {
-    opacity: 1;
-    transform: none;
-  }
-
   *,
   *::before,
   *::after {

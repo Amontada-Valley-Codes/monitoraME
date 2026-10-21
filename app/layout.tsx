@@ -3,6 +3,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
 
 export const metadata: Metadata = {
   icons: {
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body>
+        <SmoothScrollProvider />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
