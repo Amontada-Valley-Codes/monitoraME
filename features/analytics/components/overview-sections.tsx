@@ -48,7 +48,7 @@ export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
     <div className="dashboard-metrics analytics-overview-metrics grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} progress={data.meMeiPercentage} />
       <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
-      <OverviewMetricCard label="Compras com fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} progress={data.localPercentage} />
+      <OverviewMetricCard label="Fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} progress={data.localPercentage} />
       <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
     </div>
   );

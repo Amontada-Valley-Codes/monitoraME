@@ -539,14 +539,14 @@
 /* Analytical dashboard: the frame and overview treatment are intentionally scoped. */
 .analytics-stage {
   min-height: 100svh;
-  padding: clamp(0rem, 2.5vw, 2rem);
-  background: #e4eaf3;
+  background: #e9eef6;
 }
 
 .analytics-window.analytics-shell-scale {
   --sidebar-size: 15rem;
   --header-height: 5.25rem;
   --page-padding: clamp(1rem, 2vw, 2rem);
+  --content-max: 100%;
   --background: #fff;
   --card: #f2f6fc;
   --sidebar: #e9eef6;
@@ -554,19 +554,10 @@
   --sidebar-accent: #fff;
   --sidebar-border: #d5deec;
   position: relative;
-  width: min(100%, 1600px);
-  min-height: calc(100svh - clamp(0rem, 5vw, 4rem));
-  margin-inline: auto;
-  border: 1px solid #d7e0eb;
-  border-radius: 1.5rem;
+  width: 100%;
+  min-height: 100svh;
   background: #e9eef6;
-  box-shadow: 0 22px 65px rgb(29 54 92 / 12%);
   overflow: clip;
-}
-
-.analytics-window [data-slot="sidebar-container"] {
-  position: absolute;
-  height: 100%;
 }
 
 .analytics-window .analytics-navigation-header {
@@ -588,7 +579,7 @@
 .analytics-window .analytics-main-panel {
   min-height: 100%;
   border: 0;
-  border-radius: 1.5rem 0 0 1.5rem;
+  border-radius: 0;
   background: #fff;
   box-shadow: -9px 0 30px rgb(35 62 103 / 5%);
 }
