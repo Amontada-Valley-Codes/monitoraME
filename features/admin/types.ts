@@ -40,6 +40,10 @@ export type AdminActivity = {
   company_id: string | null;
 };
 
+export type CompanyAccessChange =
+  | { kind: 'suspend'; reason: string }
+  | { kind: 'reactivate' };
+
 export type AdminOverview = {
   generated_at: string;
   companies_by_status: Record<CompanyAccessStatus, number>;
