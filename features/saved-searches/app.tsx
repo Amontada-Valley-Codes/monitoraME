@@ -8,6 +8,7 @@ import { CreateSearchModal } from "./components/create-search-modal";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { SavedSearchFilters } from "./domain/types";
 
 export default function SavedSearchesApp() {
   const { searches, maxLimit, usedCount, planName, loading, error, createSearch, updateSearch, removeSearch } = useSavedSearches();
@@ -18,7 +19,7 @@ export default function SavedSearchesApp() {
   const [openCreate, setOpenCreate] = useState(false);
   const [newSearchName, setNewSearchName] = useState("");
 
-  const handleExecute = (filters: any) => {
+  const handleExecute = (filters: SavedSearchFilters) => {
     const params = new URLSearchParams();
     if (filters.query) params.set("q", filters.query);
     if (filters.municipalities) params.set("mun", filters.municipalities.join(","));

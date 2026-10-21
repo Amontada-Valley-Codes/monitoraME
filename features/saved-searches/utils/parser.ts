@@ -3,15 +3,15 @@ import { SavedSearchFilters } from "../domain/types";
 export function parseFiltersFromName(name: string): SavedSearchFilters {
   const lower = name.toLowerCase();
   let query: string | undefined = undefined;
-  let municipalities: string[] = [];
-  let cnaes: string[] = [];
-  let modalities: string[] = [];
+  const municipalities: string[] = [];
+  const cnaes: string[] = [];
+  const modalities: string[] = [];
   let minValue: number | undefined = undefined;
   let maxValue: number | undefined = undefined;
 
   const cnaeMatch = name.match(/(\d{4}[-]?\d[\/]?\d{2})/);
   if (cnaeMatch && cnaeMatch[1]) {
-    let raw = cnaeMatch[1].replace(/\D/g, "");
+    const raw = cnaeMatch[1].replace(/\D/g, "");
     if (raw.length === 7) {
       cnaes.push(`${raw.slice(0, 4)}-${raw.slice(4, 5)}/${raw.slice(5)}`);
     } else {

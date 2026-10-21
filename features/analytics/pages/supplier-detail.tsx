@@ -101,6 +101,7 @@ export default function SupplierDetail({ id }: { id: string }) {
       {rows.length ? (
         <>
           <ChartPanel
+            className="analytics-fixed-chart"
             title="Evolução dos valores empenhados"
             description="Porte: declarado do fornecedor"
             legend={series.map((s) => ({ label: s.label, color: s.color }))}

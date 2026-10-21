@@ -12,6 +12,7 @@ export async function lookupCompanyByCnpj(cnpj: string): Promise<CompanyLookupRe
 }
 
 export async function saveCompanyAccessDraft(data: Partial<CompanyReviewFormData>): Promise<void> {
+  void data;
   return new Promise((resolve) => setTimeout(resolve, 800))
 }
 
@@ -20,9 +21,11 @@ export async function submitCompanyAccessRequest(data: CompanyReviewFormData, do
 }
 
 export async function getAccessRequest(protocol: string): Promise<AccessRequest> {
+  void protocol;
   return new Promise((resolve) => setTimeout(() => resolve(mockAccessRequest), 800))
 }
 
 export async function cancelAccessRequest(protocol: string): Promise<void> {
+  void protocol;
   return new Promise((resolve) => setTimeout(resolve, 800))
 }

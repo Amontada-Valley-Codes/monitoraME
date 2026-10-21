@@ -48,7 +48,8 @@ export function PieCenterShell({
 
   useEffect(() => {
     if (!animateEntrance) {
-      setFlowTotal(centerValue);
+      const frame = requestAnimationFrame(() => setFlowTotal(centerValue));
+      return () => cancelAnimationFrame(frame);
       return;
     }
 
@@ -66,7 +67,8 @@ export function PieCenterShell({
       };
     }
 
-    setFlowTotal(centerValue);
+    const frame = requestAnimationFrame(() => setFlowTotal(centerValue));
+    return () => cancelAnimationFrame(frame);
   }, [animateEntrance, centerValue]);
 
   const data: PieData[] = useMemo(

@@ -19,22 +19,23 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-function OverviewMetricCard({ label, value, detail, icon: Icon }: {
+export function OverviewMetricCard({ label, value, detail, icon: Icon, progress, accent = 'blue' }: {
   label: string;
   value: string;
   detail: string;
   icon: typeof ChartPie;
+  progress?: number | null;
+  accent?: 'blue' | 'orange';
 }) {
   return (
-    <Card className="dashboard-metric gap-0 p-3">
+    <Card className="dashboard-metric analytics-overview-metric gap-0 p-5">
       <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-xs font-medium text-muted-foreground" title={label}>{label}</span>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
       </div>
-      <div className="mt-4 flex items-center gap-2">
-        <Icon className="size-6 shrink-0 text-primary" aria-hidden="true" />
-        <strong className="metric min-w-0 truncate text-4xl font-semibold leading-none" title={value}>{value}</strong>
-      </div>
-      <p className="mt-1.5 truncate text-[11px] leading-4 text-muted-foreground" title={detail}>{detail}</p>
+      <strong className="metric mt-4 block min-w-0 break-words text-3xl font-semibold leading-tight" title={value}>{value}</strong>
+      <p className="mt-2 text-sm leading-5 text-muted-foreground">{detail}</p>
+      {progress !== undefined && progress !== null && <div className="analytics-metric-track mt-auto" aria-hidden="true"><span className={accent === 'orange' ? 'analytics-metric-fill is-orange' : 'analytics-metric-fill'} style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} /></div>}
     </Card>
   );
 }
@@ -44,11 +45,11 @@ export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
   if (!data || !view) return null;
 
   return (
-    <div className="dashboard-metrics mb-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} />
+    <div className="dashboard-metrics analytics-overview-metrics grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} progress={data.meMeiPercentage} />
       <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
-      <OverviewMetricCard label="Compras com fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} />
-      <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} />
+      <OverviewMetricCard label="Fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} progress={data.localPercentage} />
+      <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
     </div>
   );
 }
@@ -62,6 +63,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
   }));
   return (
     <ChartPanel
+      className="analytics-fixed-chart analytics-overview-panel analytics-overview-expenses"
       title="Elementos de despesas"
       description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
       legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
@@ -96,7 +98,7 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   ];
   return (
     <ChartPanel
-      className="dashboard-primary-chart"
+      className="analytics-fixed-chart dashboard-primary-chart analytics-overview-panel analytics-overview-evolution"
       title="Evolução das compras consideradas"
       description="Valores mensais, sem acumulação"
       legend={series.map((item) => ({ label: item.label, color: item.color }))}
@@ -118,6 +120,7 @@ export function OverviewBusinessSizes({ params }: { params: PipelineOverviewPara
   const rows = data ?? [];
   return (
     <ChartPanel
+      className="analytics-overview-panel analytics-overview-donut"
       title="Participação por porte empresarial"
       description="Percentual do valor líquido anual"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
@@ -136,6 +139,7 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
   const meTotalCents = rows.reduce((total, item) => total + item.value, 0);
   return (
     <ChartPanel
+      className="analytics-overview-panel analytics-overview-donut"
       title="Destino dos recursos"
       description="Origem das compras de ME"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}

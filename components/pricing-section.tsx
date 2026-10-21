@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Building2,
   Check,
-  CheckCircle2,
   Sparkles,
   Users,
 } from "lucide-react";
