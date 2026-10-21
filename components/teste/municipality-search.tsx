@@ -41,17 +41,17 @@ export function MunicipalitySearch() {
     router.push(`/analitico/municipios?${params.toString()}`);
   }
 
-  return <form className="teste-municipality-form" onSubmit={submit} noValidate>
-    <div className="teste-municipality-field">
-      <label htmlFor="teste-municipality">{labels.label}</label>
+  return <form className="landing-municipality-form" onSubmit={submit} noValidate>
+    <div className="landing-municipality-field">
+      <label htmlFor="landing-municipality">{labels.label}</label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button id="teste-municipality" type="button" variant="outline" role="combobox" aria-expanded={open} aria-invalid={Boolean(error)} aria-describedby={error ? "teste-municipality-error" : undefined} className="teste-municipality-trigger h-12 w-full justify-between rounded-full px-4 font-normal">
+          <Button id="landing-municipality" type="button" variant="outline" role="combobox" aria-expanded={open} aria-invalid={Boolean(error)} aria-describedby={error ? "landing-municipality-error" : undefined} className="landing-municipality-trigger h-12 w-full justify-between rounded-full px-4 font-normal">
             <span className="flex min-w-0 items-center gap-3"><MapPin className="size-4 shrink-0" /><span className="truncate">{selected?.label ?? labels.placeholder}</span></span>
             <ChevronsUpDown className="size-4 shrink-0" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="teste-municipality-popover w-(--radix-popover-trigger-width) overflow-hidden p-0" align="start">
+        <PopoverContent className="landing-municipality-popover w-(--radix-popover-trigger-width) overflow-hidden p-0" align="start">
           <Command><CommandInput placeholder={labels.searchPlaceholder} /><CommandList className="max-h-72"><CommandEmpty>{labels.empty}</CommandEmpty><CommandGroup heading={labels.group}>
             {municipalities.map((item) => <CommandItem key={item.code} value={`${item.label} ${item.code}`} onSelect={() => { setMunicipality(item.code); setOpen(false); setError(""); }} className="py-2.5">
               <Check className={`size-4 ${municipality === item.code ? "opacity-100" : "opacity-0"}`} /><span className="min-w-0 flex-1 truncate">{item.label}</span><span className="font-mono text-[10px] text-muted-foreground">{item.code}</span>
@@ -59,8 +59,8 @@ export function MunicipalitySearch() {
           </CommandGroup></CommandList></Command>
         </PopoverContent>
       </Popover>
-      {error && <p id="teste-municipality-error" role="alert" className="teste-municipality-error">{error}</p>}
+      {error && <p id="landing-municipality-error" role="alert" className="landing-municipality-error">{error}</p>}
     </div>
-    <Button type="submit" className="teste-municipality-submit h-12 rounded-full px-6">{labels.submit}<ArrowUpRight className="size-4" /></Button>
+    <Button type="submit" className="landing-municipality-submit h-12 rounded-full px-6">{labels.submit}<ArrowUpRight className="size-4" /></Button>
   </form>;
 }

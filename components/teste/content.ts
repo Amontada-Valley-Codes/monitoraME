@@ -7,7 +7,7 @@ export const testeContent = {
     { label: "Contato", href: "#contato" },
     { label: "Explorar", href: "#resultados", dropdown: true },
   ],
-  headerCta: "Começar agora",
+  headerCta: "Ver compras públicas",
   hero: {
     // eyebrow: "INTELIGÊNCIA  NEGÓCIOS",
     title: "Seu negócio pode ir mais longe com dados públicos.",
@@ -52,6 +52,17 @@ export const testeContent = {
       { title: "Acompanhamento", description: "Organize descobertas e mantenha oportunidades à vista.", icon: "users" },
     ],
   },
+  analytics: {
+    eyebrow: "MÓDULO ANALÍTICO",
+    title: "Entenda como o dinheiro público movimenta o seu território.",
+    description: "Explore indicadores de compras governamentais por município, período e perfil de fornecedor. Compare cenários e acompanhe despesas empenhadas com origem e atualização dos dados sempre visíveis.",
+    cta: "Explorar módulo analítico",
+    source: "Dados públicos consolidados · Consulte a fonte oficial",
+    highlights: [
+      { title: "Leitura territorial", description: "Indicadores por município, período e perfil de fornecedor." },
+      { title: "Comparações objetivas", description: "Cenários lado a lado e despesas empenhadas em detalhe." },
+    ],
+  },
   results: {
     title: "Vamos construir pontes entre dados e oportunidades.",
     description: "Informação acessível para quem quer entender o mercado público e fazer escolhas mais bem informadas.",
@@ -62,7 +73,7 @@ export const testeContent = {
     ],
   },
   footer: {
-    tagline: "Dados públicos para novas possibilidades.",
+    // tagline: "Dados públicos para novas possibilidades.",
     groups: [
       { title: "Plataforma", links: [{ label: "Início", href: "#inicio" }, { label: "Soluções", href: "#solucoes" }] },
       { title: "Conheça", links: [{ label: "Sobre", href: "#sobre" }, { label: "Resultados", href: "#resultados" }] },
