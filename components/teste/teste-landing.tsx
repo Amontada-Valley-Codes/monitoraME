@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BarChart3, ChevronDown, Layers3, Play, Search, UsersRound } from "lucide-react";
 import { testeContent as c } from "./content";
+import { MunicipalitySearch } from "./municipality-search";
 
 const icons = {
   search: Search,
@@ -120,6 +121,7 @@ export function TesteLanding() {
                   </span>
                 ))}
               </div>
+              <MunicipalitySearch />
             </div>
           </div>
         </section>

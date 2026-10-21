@@ -21,6 +21,15 @@ export const testeContent = {
   social: {
     title: "Conectando quem faz o Ceará acontecer",
     logos: ["NEGÓCIOS", "MUNICÍPIOS", "DADOS", "OPORTUNIDADES", "TERRITÓRIOS", "CONEXÕES"],
+    municipality: {
+      label: "Município do Ceará",
+      placeholder: "Selecione um município",
+      searchPlaceholder: "Pesquisar por nome ou código...",
+      empty: "Município não encontrado.",
+      group: "Municípios do Ceará",
+      submit: "Ver dados do município",
+      error: "Selecione um município válido do Ceará.",
+    },
   },
   about: {
     eyebrow: "QUEM SOMOS",

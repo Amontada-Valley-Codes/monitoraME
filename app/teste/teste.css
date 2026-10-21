@@ -940,7 +940,7 @@
 
 @media (min-width: 1001px) and (min-height: 850px) {
   .teste-hero {
-    padding-top: clamp(72px, 11svh, 112px);
+    padding-top: clamp(24px, 4svh, 44px);
   }
   .teste-hero-grid {
     min-height: clamp(530px, calc(100svh - 330px), 650px);
@@ -951,4 +951,47 @@
   .teste-hero-art {
     margin-top: clamp(2.25rem, 4vh, 3rem);
   }
+}
+
+.teste-municipality-form {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 710px;
+  margin: 1.5rem auto 0;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--teste-line);
+  text-align: left;
+}
+.teste-municipality-field { flex: 1; min-width: 0; }
+.teste-municipality-field label {
+  display: block;
+  margin-bottom: .45rem;
+  color: var(--teste-ink);
+  font-size: .72rem;
+  font-weight: 700;
+}
+.teste-page .teste-municipality-trigger {
+  border-color: var(--teste-line);
+  background: var(--teste-bg);
+  color: var(--teste-ink);
+  box-shadow: none;
+}
+.teste-page .teste-municipality-trigger svg:first-child { color: var(--teste-blue); }
+.teste-page .teste-municipality-trigger:hover { background: #eaf1fb; }
+.teste-page .teste-municipality-submit {
+  background: var(--teste-blue);
+  color: #f5f8ff;
+  font-size: .76rem;
+  font-weight: 800;
+}
+.teste-page .teste-municipality-submit:hover { background: var(--teste-blue-2); }
+.teste-municipality-error { margin-top: .4rem; color: #b42318; font-size: .72rem; }
+.teste-municipality-popover { border-color: #dce5f2; background: #f2f6fc; color: #13294f; }
+.teste-municipality-popover [cmdk-root] { background: #f2f6fc; color: #13294f; }
+@media (max-width: 600px) {
+  .teste-municipality-form { flex-direction: column; align-items: stretch; margin-top: 1rem; padding-top: 1rem; }
+  .teste-municipality-field { width: 100%; }
+  .teste-page .teste-municipality-submit { width: 100%; }
 }
