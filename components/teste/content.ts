@@ -7,7 +7,7 @@ export const testeContent = {
     { label: "Contato", href: "#contato" },
     { label: "Explorar", href: "#resultados", dropdown: true },
   ],
-  headerCta: "Começar agora",
+  headerCta: "Ver compras públicas",
   hero: {
     // eyebrow: "INTELIGÊNCIA  NEGÓCIOS",
     title: "Seu negócio pode ir mais longe com dados públicos.",
@@ -50,6 +50,17 @@ export const testeContent = {
       { title: "Análise regional", description: "Explore dados de compras públicas por município e território.", icon: "chart" },
       { title: "Comparativos", description: "Visualize recortes e acompanhe mudanças ao longo do tempo.", icon: "layers" },
       { title: "Acompanhamento", description: "Organize descobertas e mantenha oportunidades à vista.", icon: "users" },
+    ],
+  },
+  analytics: {
+    eyebrow: "MÓDULO ANALÍTICO",
+    title: "Entenda como o dinheiro público movimenta o seu território.",
+    description: "Explore indicadores de compras governamentais por município, período e perfil de fornecedor. Compare cenários e acompanhe despesas empenhadas com origem e atualização dos dados sempre visíveis.",
+    cta: "Explorar módulo analítico",
+    source: "Dados públicos consolidados · Consulte a fonte oficial",
+    highlights: [
+      { title: "Leitura territorial", description: "Indicadores por município, período e perfil de fornecedor." },
+      { title: "Comparações objetivas", description: "Cenários lado a lado e despesas empenhadas em detalhe." },
     ],
   },
   results: {

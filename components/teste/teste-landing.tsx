@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Play, Search, SearchCheck, UsersRound } from "lucide-react";
+import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Play, Search, SearchCheck, TrendingUp, UsersRound } from "lucide-react";
 import { testeContent as c } from "./content";
 import { MunicipalitySearch } from "./municipality-search";
 
@@ -193,6 +193,45 @@ export function TesteLanding() {
                   </article>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* Seção Módulo Analítico */}
+        <section className="teste-analytics" id="analitico" aria-labelledby="teste-analytics-title">
+          <div className="teste-container teste-analytics-grid">
+            <div className="teste-analytics-copy">
+              <span className="teste-eyebrow">{c.analytics.eyebrow}</span>
+              <h2 id="teste-analytics-title">{c.analytics.title}</h2>
+              <p>{c.analytics.description}</p>
+
+              <div className="teste-analytics-highlights">
+                {c.analytics.highlights.map((highlight) => (
+                  <article key={highlight.title}>
+                    <span aria-hidden="true"><TrendingUp size={18} /></span>
+                    <div>
+                      <h3>{highlight.title}</h3>
+                      <p>{highlight.description}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <Link className="teste-button teste-analytics-cta" href="/analitico">
+                {c.analytics.cta}
+                <ArrowUpRight size={17} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="teste-analytics-visual">
+              <div className="teste-analytics-halo" aria-hidden="true" />
+              <Image
+                className="teste-analytics-people"
+                src="/persons/mario-adriano.png"
+                alt="Profissionais que representam a análise de dados para decisões públicas"
+                fill
+                sizes="(max-width: 700px) 92vw, 48vw"
+              />
             </div>
           </div>
         </section>
