@@ -3,12 +3,13 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
   BarChart3,
   Bell,
   Bookmark,
   CalendarDays,
+  ChevronRight,
   ChevronsUpDown,
   Columns3,
   LayoutDashboard,
@@ -21,6 +22,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -31,6 +37,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
   SidebarSeparator,
@@ -66,12 +75,28 @@ const navigation = [
     icon: LayoutDashboard,
     exact: true,
   },
-  {
-    href: '/oportunidades/salvos',
-    label: 'Editais salvos',
-    icon: Bookmark,
-  },
 ];
+
+const savedOpportunityViews = [
+  {
+    href: '/oportunidades/salvos?visualizacao=agenda',
+    view: 'agenda',
+    label: 'Agenda',
+    icon: List,
+  },
+  {
+    href: '/oportunidades/salvos?visualizacao=calendar',
+    view: 'calendar',
+    label: 'Calendário',
+    icon: CalendarDays,
+  },
+  {
+    href: '/oportunidades/salvos?visualizacao=kanban',
+    view: 'kanban',
+    label: 'Kanban',
+    icon: Columns3,
+  },
+] as const;
 
 const intelligence = [
   {
@@ -79,14 +104,9 @@ const intelligence = [
     label: 'Inteligência de mercado',
     icon: BarChart3,
   },
-  {
-    href: '/perfil',
-    label: 'Perfil da empresa',
-    icon: UserRound,
-  },
 ];
 
-const opportunitySections = new Set(['salvos', 'notificacoes']);
+const opportunitySections = new Set(['salvos', 'notificacoes', 'perfil']);
 
 const isOpportunityDetail = (pathname: string) => {
   const match = pathname.match(/^\/oportunidades\/([^/]+)$/);
@@ -104,11 +124,15 @@ function OpportunityNavigation({
   onOpenSearch: () => void;
 }) {
   const pathname = usePathname();
-  const { isMobile, setOpenMobile, state } = useSidebar();
+  const searchParams = useSearchParams();
+  const { isMobile, setOpen, setOpenMobile, state } = useSidebar();
   const { unreadCount } = useNotifications();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const company = companyDemoFixture.company;
+  const isSavedOpportunities = pathname === '/oportunidades/salvos';
+  const [savedMenuOpen, setSavedMenuOpen] = useState(isSavedOpportunities);
+  const savedView = searchParams.get('visualizacao') ?? 'calendar';
 
   const closeMobile = () => {
     if (isMobile) setOpenMobile(false);
@@ -175,7 +199,7 @@ function OpportunityNavigation({
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="overflow-hidden px-2 py-3">
+      <SidebarContent className="gap-1 overflow-x-hidden overflow-y-auto px-2 py-2">
         <SidebarGroup className="pb-1 pt-0 group-data-[collapsible=icon]:px-0">
           <Button
             type="button"
@@ -199,10 +223,10 @@ function OpportunityNavigation({
           </Button>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="my-0" />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Visão geral</SidebarGroupLabel>
+        <SidebarGroup className="py-1.5">
+          <SidebarGroupLabel className="h-7">Visão geral</SidebarGroupLabel>
 
           <SidebarMenu>
             {navigation.map(({ href, label, icon: Icon, exact }) => (
@@ -230,13 +254,55 @@ function OpportunityNavigation({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+
+            <Collapsible
+              asChild
+              open={savedMenuOpen}
+              onOpenChange={setSavedMenuOpen}
+            >
+              <SidebarMenuItem>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    tooltip="Expandir editais salvos"
+                    isActive={isSavedOpportunities}
+                    onClick={() => {
+                      if (!isMobile && state === 'collapsed') setOpen(true);
+                    }}
+                    className="h-10 gap-3 px-2.5 data-[active=true]:font-semibold"
+                  >
+                    <Bookmark />
+                    <span>Editais salvos</span>
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/menu-item:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent>
+                  <SidebarMenuSub className="mt-1 gap-0.5 pb-1">
+                    {savedOpportunityViews.map(({ href, view, label, icon: Icon }) => (
+                      <SidebarMenuSubItem key={view}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isSavedOpportunities && savedView === view}
+                          className="h-8 gap-2.5 rounded-md"
+                        >
+                          <Link href={href} onClick={closeMobile}>
+                            <Icon />
+                            <span>{label}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="my-0" />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Gestão e inteligência</SidebarGroupLabel>
+        <SidebarGroup className="py-1.5">
+          <SidebarGroupLabel className="h-7">Gestão e inteligência</SidebarGroupLabel>
 
           <SidebarMenu>
             {intelligence.map(({ href, label, icon: Icon }) => (
@@ -256,36 +322,32 @@ function OpportunityNavigation({
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto group-data-[collapsible=icon]:hidden [@media(max-height:760px)]:hidden">
-          <div className="overflow-hidden rounded-xl border border-primary/15 bg-gradient-to-br from-primary/[0.09] via-background to-secondary p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-full bg-background text-primary shadow-sm">
-                <Sparkles className="size-4" />
-              </span>
-
-              <div>
-                <p className="text-[11px] text-muted-foreground">
-                  Plano atual
-                </p>
-                <p className="text-sm font-semibold text-foreground">
-                  Demonstração Pro
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              Organize editais, acompanhe prazos e monitore oportunidades
-              compatíveis.
-            </p>
-
-            <Button asChild size="sm" className="mt-4 w-full">
-              <Link href="/analitico/planos">Conhecer planos</Link>
-            </Button>
-          </div>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="gap-2 border-t border-sidebar-border p-2">
+        <div className="overflow-hidden rounded-xl border border-primary/15 bg-gradient-to-br from-primary/[0.09] via-background to-secondary p-3 shadow-sm group-data-[collapsible=icon]:hidden">
+          <div className="flex items-center gap-2.5">
+            <span className="grid size-8 place-items-center rounded-full bg-background text-primary shadow-sm">
+              <Sparkles className="size-4" />
+            </span>
+
+            <div>
+              <p className="text-[10px] text-muted-foreground">Plano atual</p>
+              <p className="text-xs font-semibold text-foreground">
+                Demonstração Pro
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
+            Organize editais e acompanhe oportunidades compatíveis.
+          </p>
+
+          <Button asChild size="sm" className="mt-2 h-8 w-full text-xs">
+            <Link href="/analitico/planos">Aderir a um plano</Link>
+          </Button>
+        </div>
+
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -338,7 +400,7 @@ function OpportunityNavigation({
                 <DropdownMenuSeparator />
 
                 <DropdownMenuItem asChild>
-                  <Link href="/perfil" onClick={closeMobile}>
+                  <Link href="/oportunidades/perfil" onClick={closeMobile}>
                     <UserRound />
                     Perfil da empresa
                   </Link>
@@ -375,6 +437,11 @@ function OpportunityShellContent({ children }: { children: ReactNode }) {
       ? pathname === item.href
       : pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
+  const currentLabel = pathname === '/oportunidades/salvos'
+    ? 'Editais salvos'
+    : pathname === '/oportunidades/perfil'
+      ? 'Perfil da empresa'
+      : current?.label ?? 'Detalhes do edital';
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -412,7 +479,7 @@ function OpportunityShellContent({ children }: { children: ReactNode }) {
               Área da empresa
             </p>
             <p className="truncate text-sm font-semibold">
-              {current?.label ?? 'Detalhes do edital'}
+              {currentLabel}
             </p>
           </div>
 
@@ -503,7 +570,7 @@ function OpportunityShellContent({ children }: { children: ReactNode }) {
               <span>Inteligência de mercado</span>
             </CommandItem>
 
-            <CommandItem onSelect={() => goTo('/perfil')}>
+            <CommandItem onSelect={() => goTo('/oportunidades/perfil')}>
               <UserRound />
               <span>Perfil da empresa</span>
             </CommandItem>
