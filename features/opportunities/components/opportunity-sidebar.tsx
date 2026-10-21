@@ -3,6 +3,7 @@ import {
   Bookmark,
   BriefcaseBusiness,
   Ellipsis,
+  FolderKanban,
   LayoutDashboard,
   ListFilter,
   Search,
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/shared/components/logo';
 import { Input } from '@/components/ui/input';
 
-export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'notifications' }) {
+export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'portfolio' | 'notifications' }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-(--sidebar-size) shrink-0 flex-col border-r bg-sidebar px-3 py-4 text-sidebar-foreground xl:flex">
       <div className="flex min-h-0 flex-1 flex-col">
@@ -51,6 +52,13 @@ export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'sav
             <Link href="/oportunidades/salvos" aria-current={active === 'saved' ? 'page' : undefined}>
               <Bookmark className="size-4" />
               <span>Editais salvos</span>
+            </Link>
+          </Button>
+
+          <Button asChild variant={active === 'portfolio' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
+            <Link href="/oportunidades/carteira" aria-current={active === 'portfolio' ? 'page' : undefined}>
+              <FolderKanban className="size-4" />
+              <span>Minhas oportunidades</span>
             </Link>
           </Button>
         </nav>

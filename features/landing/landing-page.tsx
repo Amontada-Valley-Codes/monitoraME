@@ -42,7 +42,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
 import { useProtectedNavigate } from '@/shared/auth/protected-navigation';
-import { Logo, LogoIcon } from '@/shared/components/logo';
 
 const connectorWords = new Set(['DA', 'DAS', 'DE', 'DO', 'DOS', 'E']);
 
@@ -395,7 +394,13 @@ export function LandingPage() {
             aria-label="MonitoraME — página inicial"
             className={`transition-colors duration-300 ${headerScrolled ? 'text-brand-ink' : 'text-white'}`}
           >
-            <Logo className="h-6 w-auto sm:h-7" />
+            <Image
+              src={headerScrolled ? '/brand/dark-horizontal-logo.svg' : '/brand/light-horizontal-logo.svg'}
+              alt="MonitoraME"
+              width={613}
+              height={100}
+              className="h-6 w-auto sm:h-7"
+            />
           </Link>
           <nav
             aria-label="Navegação principal"
@@ -990,7 +995,13 @@ export function LandingPage() {
                 aria-label="MonitoraME — página inicial"
                 className="inline-block text-white"
               >
-                <Logo className="h-6 w-auto" />
+                <Image
+                  src="/brand/horizontal-light.svg"
+                  alt="MonitoraME"
+                  width={613}
+                  height={100}
+                  className="h-6 w-auto"
+                />
               </Link>
               <p className="mt-5 text-sm leading-6 text-white/58">
                 Inteligência de dados para compras públicas mais transparentes,
@@ -1076,7 +1087,14 @@ export function LandingPage() {
           <div className="flex flex-col gap-4 pt-7 text-[10px] text-white/40 sm:flex-row sm:items-center sm:justify-between">
             <span>© 2026 MonitoraME. Todos os direitos reservados.</span>
             <div className="flex items-center gap-5">
-              <LogoIcon className="h-4 w-auto text-white/30" />
+              <Image
+                src="/brand/standalone-m.svg"
+                alt=""
+                aria-hidden="true"
+                width={200}
+                height={120}
+                className="h-4 w-auto opacity-30"
+              />
               <span>Ceará, Brasil</span>
             </div>
           </div>
