@@ -11,6 +11,9 @@ import {
   CalendarDays,
   ChevronsUpDown,
   Columns3,
+  BriefcaseBusiness,
+  Ellipsis,
+  FolderKanban,
   LayoutDashboard,
   List,
   LogOut,
@@ -125,6 +128,7 @@ function OpportunityNavigation({
     }
   };
 
+export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'portfolio' | 'notifications' }) {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="flex h-(--header-height) items-center justify-center border-b border-sidebar-border px-3 group-data-[collapsible=icon]:px-0">
@@ -198,6 +202,14 @@ function OpportunityNavigation({
             </span>
           </Button>
         </SidebarGroup>
+
+          <Button asChild variant={active === 'portfolio' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
+            <Link href="/oportunidades/carteira" aria-current={active === 'portfolio' ? 'page' : undefined}>
+              <FolderKanban className="size-4" />
+              <span>Minhas oportunidades</span>
+            </Link>
+          </Button>
+        </nav>
 
         <SidebarSeparator />
 

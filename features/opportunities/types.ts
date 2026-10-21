@@ -15,5 +15,5 @@ export type Opportunity = {
   confidence: number;
   matchReasons: string[];
   relatedCnaes: string[];
-  status: 'open' | 'suspended' | 'closed' | 'cancelled';
+  status: 'open' | 'suspended' | 'closed' | 'revoked' | 'cancelled';
 };
