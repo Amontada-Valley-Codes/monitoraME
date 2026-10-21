@@ -23,7 +23,8 @@ export function useCompanyProfile() {
   }, []);
 
   useEffect(() => {
-    fetchProfile();
+    const timer = window.setTimeout(() => void fetchProfile(), 0);
+    return () => window.clearTimeout(timer);
   }, [fetchProfile]);
 
   const savePreferences = async (dto: UpdatePreferencesDTO) => {

@@ -2,6 +2,9 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
+type ApiResponse = Record<string, unknown> | string;
+type RequestBody = Record<string, unknown> | FormData;
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -38,7 +41,7 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
     return {} as T;
   }
 
-  let data: any;
+  let data: ApiResponse;
   const contentType = response.headers.get("content-type");
   if (contentType && contentType.includes("application/json")) {
     data = await response.json();
@@ -47,8 +50,8 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
   }
 
   if (!response.ok) {
-    const message = typeof data === "object" && data !== null && "message" in data 
-      ? (data as any).message 
+    const message = typeof data === "object" && data !== null && "message" in data && typeof data.message === "string"
+      ? data.message
       : response.statusText;
     throw new ApiError(response.status, message);
   }
@@ -56,9 +59,9 @@ async function fetcher<T>(endpoint: string, options: RequestOptions = {}): Promi
   return data as T;
 }
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions extends Omit<RequestInit, "body"> {
   token?: string;
-  body?: any;
+  body?: RequestBody;
 }
 
 export const apiService = {
@@ -169,7 +172,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/mei */
   createMeiAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/mei", {
+    fetcher<ApiResponse>("/companies/me/access-requests/mei", {
       method: "POST",
       body: formData,
       token,
@@ -177,7 +180,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/me */
   createMeAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/me", {
+    fetcher<ApiResponse>("/companies/me/access-requests/me", {
       method: "POST",
       body: formData,
       token,
@@ -185,7 +188,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/eep */
   createEepAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/eep", {
+    fetcher<ApiResponse>("/companies/me/access-requests/eep", {
       method: "POST",
       body: formData,
       token,
@@ -193,7 +196,7 @@ export const apiService = {
 
   /** POST /companies/me/access-requests/gov */
   createGovAccessRequest: (formData: FormData, token: string) =>
-    fetcher<any>("/companies/me/access-requests/gov", {
+    fetcher<ApiResponse>("/companies/me/access-requests/gov", {
       method: "POST",
       body: formData,
       token,
@@ -203,7 +206,7 @@ export const apiService = {
 
   /** POST /admin/accounts - Cadastra conta admin */
   createAdminAccount: (data: { name: string; cpf: string; email: string; password: string }, token: string) =>
-    fetcher<any>("/admin/accounts", {
+    fetcher<ApiResponse>("/admin/accounts", {
       method: "POST",
       body: data,
       token,
@@ -211,14 +214,14 @@ export const apiService = {
 
   /** GET /admin/access-requests - Lista solicitações de acesso */
   fetchAccessRequests: (status: "pending" | "completed", page = 1, perPage = 20, token: string) =>
-    fetcher<any>(`/admin/access-requests?status=${status}&page=${page}&perPage=${perPage}`, {
+    fetcher<ApiResponse>(`/admin/access-requests?status=${status}&page=${page}&perPage=${perPage}`, {
       method: "GET",
       token,
     }),
 
   /** PATCH /admin/access-requests/{accessRequestId}/approve - Aprova solicitação */
   approveAccessRequest: (accessRequestId: string, reviewComment?: string, token?: string) =>
-    fetcher<any>(`/admin/access-requests/${accessRequestId}/approve`, {
+    fetcher<ApiResponse>(`/admin/access-requests/${accessRequestId}/approve`, {
       method: "PATCH",
       body: reviewComment ? { reviewComment } : undefined,
       token,

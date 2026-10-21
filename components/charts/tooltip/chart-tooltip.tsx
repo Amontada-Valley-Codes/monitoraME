@@ -379,17 +379,13 @@ const ChartTooltipInner = memo(function ChartTooltipInner({
 
 export function ChartTooltip(props: ChartTooltipProps) {
   const { containerRef } = useChartStable();
-  const [mounted, setMounted] = useState(false);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
-  // Only render portals on client side after mount
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const container = containerRef.current;
-  if (!(mounted && container)) {
-    return null;
-  }
+    const frame = requestAnimationFrame(() => setContainer(containerRef.current));
+    return () => cancelAnimationFrame(frame);
+  }, [containerRef]);
+  if (!container) return null;
 
   return <ChartTooltipInner {...props} container={container} />;
 }
@@ -427,14 +423,11 @@ function DatePillTrackerInner({
   const effectiveSpring = springConfig ?? tooltipSpring;
   const animatedX = useSpring(xWithMargin, effectiveSpring);
 
-  if (!discreteInteraction) {
-    animatedX.set(xWithMargin);
-  }
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: we need to jump the animatedX when the visible prop changes
   useEffect(() => {
-    animatedX.set(xWithMargin);
-  }, [animatedX, visible]);
+    const frame = requestAnimationFrame(() => animatedX.set(xWithMargin));
+    return () => cancelAnimationFrame(frame);
+  }, [animatedX, visible, xWithMargin, discreteInteraction]);
 
   return (
     <motion.div
