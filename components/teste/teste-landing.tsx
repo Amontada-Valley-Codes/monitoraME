@@ -1,8 +1,23 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Play, Search, SearchCheck, TrendingUp, UsersRound } from "lucide-react";
+import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Search, SearchCheck, TrendingUp, UsersRound } from "lucide-react";
 import { testeContent as c } from "./content";
 import { MunicipalitySearch } from "./municipality-search";
+import { RegisterForm } from "@/features/auth/components/register-form";
+import { apiService } from "@/features/auth/services/auth.service";
+import type { AuthFormData } from "@/features/auth/schemas/auth.schema";
+import { ApiError } from "@/services/api";
+
+async function handleLandingRegister(data: AuthFormData) {
+  "use server";
+  try {
+    await apiService.registerPerson({ name: data.name, cpf: data.cpf, email: data.email, password: data.senha });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 409) return { error: "E-mail ou CPF já cadastrado." };
+    return { error: error instanceof Error ? error.message : "Não foi possível criar a conta." };
+  }
+  return { error: "Conta criada com sucesso. Faça login para continuar." };
+}
 
 const icons = {
   search: Search,
@@ -59,12 +74,10 @@ export function Landing() {
                   {c.hero.cta}
                   <ArrowUpRight size={17} aria-hidden="true" />
                 </Link>
-                <a className="landing-play-link" href="#sobre">
-                  <span>
-                    <Play size={15} fill="currentColor" aria-hidden="true" />
-                  </span>
-                  {c.hero.play}
-                </a>
+                <Link className="landing-button landing-button-secondary" href="/analitico">
+                  Explorar poder público
+                  <ArrowUpRight size={17} aria-hidden="true" />
+                </Link>
               </div>
             </div>
 
@@ -217,34 +230,17 @@ export function Landing() {
           </div>
         </section>
 
-        {/* Seção Resultados */}
-        <section className="landing-results" id="resultados" aria-labelledby="landing-results-title">
-          <div className="landing-mosaic" aria-hidden="true">
-            {Array.from({ length: 16 }, (_, i) => (
-              <div key={i}>
-                <Image
-                  src={`/persons/${["xdavid.png", "mario-adriano.png", "valley-team.png"][i % 3]}`}
-                  alt=""
-                  fill
-                  sizes="25vw"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="landing-results-overlay" />
-
-          <div className="landing-container landing-results-content">
-            <h2 id="landing-results-title">{c.results.title}</h2>
-            <p>{c.results.description}</p>
-            
-            <div className="landing-metrics">
-              {c.results.metrics.map((metric) => (
-                <div key={metric.label}>
-                  <strong>{metric.value}</strong>
-                  <span>{metric.label}</span>
-                </div>
-              ))}
+        {/* CTA de cadastro */}
+        <section className="landing-register" id="criar-conta" aria-labelledby="landing-register-title">
+          <div className="landing-container landing-register-grid">
+            <div className="landing-register-copy">
+              <span className="landing-eyebrow">COMECE GRATUITAMENTE</span>
+              <h2 id="landing-register-title">Crie sua conta e acompanhe novas oportunidades.</h2>
+              <p>Tenha acesso às análises e descubra compras públicas relevantes para o seu negócio.</p>
+              <div className="landing-register-note"><span aria-hidden="true">✓</span> Seus dados são usados para criar seu acesso ao MonitoraME.</div>
+            </div>
+            <div className="landing-register-card">
+              <RegisterForm variant="landing" onSubmitAction={handleLandingRegister} />
             </div>
           </div>
         </section>

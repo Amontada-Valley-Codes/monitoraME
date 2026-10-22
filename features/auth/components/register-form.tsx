@@ -13,13 +13,14 @@ import { authSchema, type AuthFormData, completeAuthSchema, type CompleteAuthFor
 
 type SubmitResult = { error?: string } | void;
 type RegisterFormProps =
-  | { mode?: "register"; onSubmitAction: (data: AuthFormData) => Promise<SubmitResult> }
+  | { mode?: "register"; onSubmitAction: (data: AuthFormData) => Promise<SubmitResult>; variant?: "default" | "landing" }
   | { mode: "complete"; onSubmitAction: (data: CompleteAuthFormData) => Promise<SubmitResult> };
 
 const fieldClass = "h-11 rounded-lg bg-background pl-10";
 
 export function RegisterForm(props: RegisterFormProps) {
   const isCompletion = props.mode === "complete";
+  const isLanding = "variant" in props && props.variant === "landing";
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -49,16 +50,16 @@ export function RegisterForm(props: RegisterFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md">
+    <div className={`mx-auto w-full ${isLanding ? "max-w-none" : "max-w-md"}`}>
       <div className="mb-7">
-        <span className="eyebrow text-primary">{isCompletion ? "Última etapa" : "Comece agora"}</span>
-        <h2 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">{isCompletion ? "Complete seu cadastro." : "Crie sua conta."}</h2>
+        <span className={`eyebrow ${isLanding ? "text-white/70" : "text-primary"}`}>{isCompletion ? "Última etapa" : "Comece agora"}</span>
+        <h2 className={`mt-3 text-3xl font-bold tracking-[-0.04em] sm:text-4xl ${isLanding ? "text-white" : "text-foreground"}`}>{isCompletion ? "Complete seu cadastro." : "Crie sua conta."}</h2>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {isCompletion ? "Revise seus dados e defina a senha que usará nos próximos acessos." : "Preencha seus dados para acessar as análises e oportunidades do MonitoraME."}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-3.5">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className={`space-y-3.5 ${isLanding ? "landing-register-form" : ""}`}>
         <div className="grid gap-3.5 sm:grid-cols-2">
           <Field id="register-name" label="Nome completo" error={errors.name?.message} icon={<UserRound />}>
             <Input id="register-name" autoComplete="name" placeholder="Seu nome" aria-invalid={Boolean(errors.name)} className={fieldClass} {...register("name")} />
@@ -109,7 +110,7 @@ export function RegisterForm(props: RegisterFormProps) {
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-xs text-muted-foreground">Já possui uma conta? <Link href="/login" className="font-semibold text-primary hover:underline">Faça login</Link></p>
+      <p className={`mt-5 text-center text-xs ${isLanding ? "text-white/75" : "text-muted-foreground"}`}>Já possui uma conta? <Link href="/login" className={`font-semibold hover:underline ${isLanding ? "text-white" : "text-primary"}`}>Faça login</Link></p>
     </div>
   );
 }
