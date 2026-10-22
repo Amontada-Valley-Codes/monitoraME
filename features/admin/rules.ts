@@ -3,9 +3,14 @@ import type {
   AdminCompany,
   AdminOverview,
   AdminRole,
+  CompanyAccessChange,
   CompanyAccessStatus,
   CompanySize,
 } from './types';
+
+export class AdminRuleError extends Error {}
+
+export const SUSPENSION_REASON_MIN = 10;
 
 export const accessStatusLabel: Record<CompanyAccessStatus, string> = {
   pending: 'Pendente',
@@ -41,6 +46,40 @@ export const formatCnpj = (value: string) => {
   const digits = value.replace(/\D/g, '');
   return digits.length === 14 ? digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : value;
 };
+
+/** Valida e aplica a mudança de situação de acesso, registrando autor e motivo no histórico. */
+export function applyCompanyAccessChange(
+  company: AdminCompany,
+  change: CompanyAccessChange,
+  authorName: string,
+  at = new Date().toISOString(),
+): AdminCompany {
+  let status: CompanyAccessStatus;
+  let reason: string | undefined;
+
+  if (change.kind === 'suspend') {
+    if (company.access_status !== 'active') throw new AdminRuleError('Somente empresas ativas podem ser suspensas.');
+    reason = change.reason.trim();
+    if (reason.length < SUSPENSION_REASON_MIN) {
+      throw new AdminRuleError(`Informe o motivo da suspensão (mínimo de ${SUSPENSION_REASON_MIN} caracteres).`);
+    }
+    status = 'suspended';
+  } else {
+    if (company.access_status !== 'suspended') throw new AdminRuleError('Somente empresas suspensas podem ser reativadas.');
+    status = 'active';
+  }
+
+  return {
+    ...company,
+    access_status: status,
+    updated_at: at,
+    version: company.version + 1,
+    status_history: [
+      { id: `${company.id}-v${company.version + 1}`, status, occurred_at: at, author_name: authorName, reason },
+      ...company.status_history,
+    ],
+  };
+}
 
 export function buildAdminOverview(companies: AdminCompany[], activity: AdminActivity[], generatedAt: string): AdminOverview {
   const byStatus: Record<CompanyAccessStatus, number> = { pending: 0, active: 0, suspended: 0, rejected: 0 };
