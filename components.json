@@ -23,6 +23,7 @@
   "menuAccent": "subtle",
   "registries": {
     "@bklit": "https://ui.bklit.com/r/{name}.json",
-    "@efferd": "https://efferd.com/r/{name}.json"
+    "@efferd": "https://efferd.com/r/{name}.json",
+    "@reui": "https://reui.io/r/{style}/{name}.json"
   }
 }

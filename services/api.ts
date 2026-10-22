@@ -1,8 +1,8 @@
 export class ApiError extends Error {
   status: number;
-  data: any;
+  data: unknown;
 
-  constructor(status: number, message: string, data?: any) {
+  constructor(status: number, message: string, data?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -22,14 +22,16 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
   });
 
   if (!response.ok) {
-    let errorData;
+    let errorData: { message?: string } | Record<string, unknown>;
     try {
       errorData = await response.json();
     } catch {
       errorData = { message: response.statusText };
     }
 
-    const errorMessage = errorData.message || "Erro na requisição";
+    const errorMessage = "message" in errorData && typeof errorData.message === "string"
+      ? errorData.message
+      : "Erro na requisição";
     throw new ApiError(response.status, errorMessage, errorData);
   }
 

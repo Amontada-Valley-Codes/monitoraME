@@ -46,7 +46,7 @@ export function AuthPageShell({ children, completion = false }: AuthPageShellPro
             </div>
 
             <div className="relative mt-8">
-              <div className="relative aspect-16/9 overflow-hidden border border-white/20 bg-landing-ink shadow-[0_28px_60px_-28px_rgb(0_20_41/65%)]">
+              <div className="relative aspect-video overflow-hidden border border-white/20 bg-landing-ink shadow-[0_28px_60px_-28px_rgb(0_20_41/65%)]">
                 <Image
                   src="/auth/login-team.png"
                   alt="Profissionais colaborando com informações públicas em um tablet"

@@ -137,17 +137,20 @@ export function useAnimatedYDomains({
     targetByAxis
   );
   const destinationRef = useRef(destinationByAxis);
-  destinationRef.current = destinationByAxis;
   const skeletonRef = useRef(skeletonByAxis);
-  skeletonRef.current = skeletonByAxis;
   const targetRef = useRef(targetByAxis);
-  targetRef.current = targetByAxis;
 
   const [animatedByAxis, setAnimatedByAxis] = useState(destinationByAxis);
   const animatedRef = useRef(animatedByAxis);
   const prevPhaseRef = useRef(chartPhase);
   const onSettledRef = useRef(onSettled);
-  onSettledRef.current = onSettled;
+
+  useEffect(() => {
+    destinationRef.current = destinationByAxis;
+    skeletonRef.current = skeletonByAxis;
+    targetRef.current = targetByAxis;
+    onSettledRef.current = onSettled;
+  }, [destinationByAxis, skeletonByAxis, targetByAxis, onSettled]);
 
   useEffect(() => {
     animatedRef.current = animatedByAxis;

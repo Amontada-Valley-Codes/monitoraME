@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ interface MunicipioIBGE {
   id: number;
   nome: string;
 }
-
 interface Props {
   municipiosAtuais: string[];
   onSave: (municipios: string[]) => Promise<void>;
@@ -29,15 +28,12 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
   const [listaMunicipios, setListaMunicipios] = useState<string[]>([]);
   const [loadingIbge, setLoadingIbge] = useState(false);
 
-  useEffect(() => {
-    setMunicipios(municipiosAtuais);
-  }, [municipiosAtuais, open]);
-
   // Busca os municípios do Ceará do IBGE
   useEffect(() => {
     if (open && listaMunicipios.length === 0) {
-      setLoadingIbge(true);
-      fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados/CE/municipios?orderBy=nome")
+      const controller = new AbortController();
+      const frame = requestAnimationFrame(() => setLoadingIbge(true));
+      fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados/CE/municipios?orderBy=nome", { signal: controller.signal })
         .then((res) => res.json())
         .then((data: MunicipioIBGE[]) => {
           const formatted = data.map((m) => m.nome);
@@ -45,9 +41,11 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
           setLoadingIbge(false);
         })
         .catch(() => {
+          if (controller.signal.aborted) return;
           setListaMunicipios(["Fortaleza", "Caucaia", "Maracanaú", "Sobral", "Itarema", "Acaraú"]);
           setLoadingIbge(false);
         });
+      return () => { cancelAnimationFrame(frame); controller.abort(); };
     }
   }, [open, listaMunicipios.length]);
 
@@ -66,10 +64,15 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
     setOpen(false);
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setMunicipios(municipiosAtuais);
+    setOpen(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-amber-600 hover:text-amber-700">
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary hover:text-primary/80">
           <Edit2 className="w-3 h-3 mr-1" /> Alterar
         </Button>
       </DialogTrigger>
@@ -142,7 +145,7 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
         </div>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button size="sm" disabled={saving} onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button size="sm" disabled={saving} onClick={handleSave} >
             {saving && <Loader2 className="w-3 h-3 mr-2 animate-spin" />} Salvar
           </Button>
         </DialogFooter>

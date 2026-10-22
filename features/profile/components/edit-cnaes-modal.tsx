@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -31,19 +31,17 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
   const [loadingIbge, setLoadingIbge] = useState(false);
 
   useEffect(() => {
-    setCnaes(cnaesAtuais);
-  }, [cnaesAtuais, open]);
-
-  useEffect(() => {
     if (open && listaCnaes.length === 0) {
-      setLoadingIbge(true);
-      fetch("https://servicodados.ibge.gov.br/api/v2/cnae/classes")
+      const controller = new AbortController();
+      const frame = requestAnimationFrame(() => setLoadingIbge(true));
+      fetch("https://servicodados.ibge.gov.br/api/v2/cnae/classes", { signal: controller.signal })
         .then((res) => res.json())
         .then((data: CnaeIBGE[]) => {
           setListaCnaes(data);
           setLoadingIbge(false);
         })
         .catch(() => {
+          if (controller.signal.aborted) return;
           setListaCnaes([
             { id: "6201501", descricao: "Desenvolvimento de programas de computador sob encomenda" },
             { id: "6204000", descricao: "Consultoria em tecnologia da informação" },
@@ -51,6 +49,7 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
           ]);
           setLoadingIbge(false);
         });
+      return () => { cancelAnimationFrame(frame); controller.abort(); };
     }
   }, [open, listaCnaes.length]);
 
@@ -80,10 +79,15 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
     setOpen(false);
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setCnaes(cnaesAtuais);
+    setOpen(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-amber-600 hover:text-amber-700">
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary hover:text-primary/80">
           <Edit2 className="w-3 h-3 mr-1" /> Alterar
         </Button>
       </DialogTrigger>
@@ -95,7 +99,7 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
           <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1 border rounded-md">
             {cnaes.map((cnae) => (
               <Badge key={cnae.codigo} variant="secondary" className="px-2.5 py-1 text-xs flex items-center gap-1">
-                <span className="font-mono font-bold text-amber-600">{cnae.codigo}</span>
+                <span className="font-mono font-bold text-primary">{cnae.codigo}</span>
                 <span className="max-w-40 truncate">{cnae.descricao}</span>
                 <button type="button" onClick={() => handleRemove(cnae.codigo)} className="text-muted-foreground hover:text-destructive">
                   <X className="w-3 h-3" />
@@ -145,7 +149,7 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
                               selectedCnae?.id === item.id ? "opacity-100" : "opacity-0"
                             )}
                           />
-                          <span className="font-mono font-bold mr-1 text-amber-600 shrink-0">{item.id}</span> 
+                          <span className="mr-1 shrink-0 font-mono font-bold text-primary">{item.id}</span>
                           <span className="truncate">{item.descricao}</span>
                         </CommandItem>
                       ))}
@@ -162,7 +166,7 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
         </div>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button size="sm" disabled={saving} onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button size="sm" disabled={saving} onClick={handleSave} >
             {saving && <Loader2 className="w-3 h-3 mr-2 animate-spin" />} Salvar
           </Button>
         </DialogFooter>

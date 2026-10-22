@@ -12,18 +12,18 @@ export function useMountProgress(
 ) {
   const progress = useMotionValue(0);
   const transitionRef = useRef(enterTransition);
-  transitionRef.current = enterTransition;
 
   // replayKey intentionally retriggers enter when motion settings change
   // biome-ignore lint/correctness/useExhaustiveDependencies: replayKey
   useEffect(() => {
+    transitionRef.current = enterTransition;
     progress.set(0);
     const controls = animate(progress, 1, {
       ...(transitionRef.current ?? DEFAULT_CHART_ENTER_TRANSITION),
       delay: delaySeconds,
     });
     return () => controls.stop();
-  }, [delaySeconds, replayKey, progress]);
+  }, [delaySeconds, enterTransition, replayKey, progress]);
 
   return progress;
 }

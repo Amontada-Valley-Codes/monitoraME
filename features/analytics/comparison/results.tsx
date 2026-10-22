@@ -163,6 +163,7 @@ export function ComparisonResults({ data }: { data: ComparisonResponse }) {
       />
 
       <ChartPanel
+        className="analytics-fixed-chart"
         title="Elementos de despesa"
         description="Valores líquidos empenhados por classificação da despesa"
         legend={series}
@@ -175,7 +176,7 @@ export function ComparisonResults({ data }: { data: ComparisonResponse }) {
         }))}
         empty={expenseData.length === 0}
       >
-        <div className="h-(--chart-height)">
+        <div className="h-(--chart-height) min-h-(--chart-height)">
           <BarsChart data={expenseData} series={series} />
         </div>
       </ChartPanel>
@@ -461,6 +462,7 @@ function EvolutionComparisonChart({
 
   return (
     <ChartPanel
+      className="analytics-fixed-chart"
       title="Evolução mensal"
       description="Valores mensais de compras consideradas, sem acumulação"
       legend={series}

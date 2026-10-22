@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { lookupCompanyByCnpj } from './company-access-api'
 import { CompanyLookupResult } from './types'
 import { useCompanyAccess } from './company-access-state'
-import { Search, Building2, AlertTriangle, Zap, CheckCircle2, Lock, FileText, MapPin, ExternalLink, ChevronRight } from 'lucide-react'
+import { Search, Building2, AlertTriangle, Zap, Lock, FileText, MapPin, ExternalLink, ChevronRight } from 'lucide-react'
 
 export function CompanyIdentificationForm() {
   const router = useRouter()
@@ -21,8 +21,8 @@ export function CompanyIdentificationForm() {
     try {
       const data = await lookupCompanyByCnpj(cnpj)
       setResult(data)
-    } catch (err: any) {
-      setError(err.message || 'Erro ao buscar CNPJ')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao buscar CNPJ')
       setResult(null)
     } finally {
       setLoading(false)
@@ -31,7 +31,13 @@ export function CompanyIdentificationForm() {
 
   const handleContinue = () => {
     if (result) {
-      updateFormData(result as any)
+      updateFormData({
+        ...result,
+        companySize:
+          result.companySize === 'mei' || result.companySize === 'me' || result.companySize === 'epp'
+            ? result.companySize
+            : undefined,
+      })
       router.push('/request-access/company/review')
     }
   }

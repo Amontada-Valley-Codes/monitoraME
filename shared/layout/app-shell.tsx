@@ -39,7 +39,7 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { Logo, LogoIcon } from '@/shared/components/logo';
+import { Logo } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
@@ -75,10 +75,10 @@ function Navigation() {
   const isSupplierDetail = path.startsWith('/analytics/fornecedores/');
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="h-(--header-height) justify-center border-b border-sidebar-border bg-sidebar/80 px-3 group-data-[collapsible=icon]:px-2">
+    <Sidebar collapsible="icon" className="analytics-navigation">
+      <SidebarHeader className="analytics-navigation-header h-(--header-height) justify-center px-3 group-data-[collapsible=icon]:px-2">
         <div className="flex w-full items-center gap-2">
-          <Button
+          {(isMobile || state === 'expanded') && <Button
             variant="ghost"
             disabled={loadState === 'loading'}
             onClick={() => {
@@ -88,11 +88,10 @@ function Navigation() {
             className="min-w-0 flex-1 justify-start p-0 hover:bg-transparent group-data-[collapsible=icon]:justify-center"
             aria-label="MonitoraME início"
           >
-            {isMobile || state === 'expanded'
-              ? <Logo className="size-6 w-auto max-w-full text-brand-ink" />
-              : <LogoIcon className="size-6 shrink-0 text-brand-ink" />}
-          </Button>
-          {isMobile && <SidebarTrigger aria-label="Fechar navegação" title="Fechar navegação (Ctrl+B)" className="size-9 shrink-0" />}
+            <Logo className="size-6 w-auto max-w-full text-brand-ink" />
+          </Button>}
+          {isMobile && <SidebarTrigger aria-label="Fechar navegação" title="Fechar navegação (Ctrl+B)" className="size-11 shrink-0" />}
+          {!isMobile && <SidebarTrigger aria-label={state === 'expanded' ? 'Recolher navegação' : 'Expandir navegação'} title="Alternar navegação (Ctrl+B)" className="size-11 shrink-0 rounded-xl border border-sidebar-border" />}
         </div>
       </SidebarHeader>
 
@@ -121,9 +120,9 @@ function Navigation() {
                     else navigate(item.path);
                     setOpenMobile(false);
                   }}
-                  className="relative min-h-10 gap-2.5 rounded-md px-2.5 text-xs transition-colors data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-semibold"
+                  className="analytics-navigation-link relative min-h-12 gap-3 rounded-xl px-3 text-base transition-colors data-[active=true]:font-semibold"
                 >
-                  <item.icon className="size-4" />
+                  <item.icon className="size-5" />
                   <span>{item.label}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -142,6 +141,7 @@ function ShellContent({ children }: { children: ReactNode }) {
   const protectedNavigate = useProtectedNavigate();
   const [search, setSearch] = useState(false);
   const { state: sidebarState, isMobile, openMobile } = useSidebar();
+  const isOverview = path === '/analitico';
 
   const current = path.startsWith('/analytics/empenhos/')
     ? NAV.find((item) => item.path === '/analitico/empenhos')!
@@ -181,8 +181,8 @@ function ShellContent({ children }: { children: ReactNode }) {
   return (
     <>
       <Navigation />
-      <SidebarInset className="min-w-0 overflow-clip border-l border-border/70 bg-background">
-        <header className="sticky top-0 z-20 flex h-(--header-height) items-center gap-2 border-b border-border/70 bg-card/95 px-4 backdrop-blur">
+      <SidebarInset className="analytics-main-panel min-w-0 overflow-clip">
+        <header className="analytics-topbar sticky top-0 z-20 flex min-h-(--header-height) flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
           <SidebarTrigger
             aria-label={isMobile
               ? openMobile ? 'Fechar navegação' : 'Abrir navegação'
@@ -190,20 +190,23 @@ function ShellContent({ children }: { children: ReactNode }) {
             title={isMobile
               ? openMobile ? 'Fechar navegação (Ctrl+B)' : 'Abrir navegação (Ctrl+B)'
               : sidebarState === 'expanded' ? 'Recolher navegação (Ctrl+B)' : 'Expandir navegação (Ctrl+B)'}
-            className="size-8 text-muted-foreground"
+            className="size-11 rounded-xl border border-border bg-muted text-foreground md:hidden"
           />
-          <Separator orientation="vertical" className="h-5!" />
-          <div className="flex items-center gap-2 text-xs min-w-0">
-            <span className="text-muted-foreground hidden sm:block">Análises públicas</span>
-            <ChevronRight className="text-muted-foreground size-3 hidden sm:block" />
-            <span className="font-medium truncate">{current.label}</span>
+          <Separator orientation="vertical" className="h-5! md:hidden" />
+          <div className="analytics-breadcrumb flex min-w-0 flex-col gap-0.5">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Análises públicas</span>
+              <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
+              <strong className="truncate text-foreground">{current.label}</strong>
+            </div>
+            {isOverview && <p className="text-sm text-muted-foreground">Compras públicas do Ceará, em números claros.</p>}
           </div>
 
           <div className="flex items-center ml-auto gap-3">
             {path === '/analitico' && (
               <>
                 <OverviewFilters />
-                <Button variant="outline" size="sm" className="size-8 px-0 sm:h-9 sm:w-auto sm:px-3" aria-label="Compartilhar recorte" onClick={async () => {
+                <Button variant="outline" size="sm" className="analytics-top-action min-h-11 px-3" aria-label="Compartilhar recorte" onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(window.location.href);
                     toast.success('Link com o recorte copiado.');
@@ -220,7 +223,7 @@ function ShellContent({ children }: { children: ReactNode }) {
               variant="ghost"
               size="icon"
               aria-label="Buscar no MonitoraME"
-              className="size-8"
+              className="analytics-top-action size-11 border border-border bg-muted"
               disabled={state === 'loading'}
               onClick={() => setSearch(true)}
             >
@@ -231,10 +234,10 @@ function ShellContent({ children }: { children: ReactNode }) {
 
         <div id="main-content" tabIndex={-1} className="analytics-page-content page-content flex flex-col outline-none">
           {children}
-          <footer className="mt-auto pt-10 text-xs text-muted-foreground">
+          <footer className="analytics-footer mt-auto pt-10 text-sm text-muted-foreground">
             <div className="flex flex-col gap-4 border-t py-5 lg:flex-row lg:items-center lg:justify-between">
               <nav aria-label="Navegação do rodapé" className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                {[['Visão geral', '/analitico'], ['Empenhos', '/analitico/empenhos'], ['Fornecedores', '/analitico/fornecedores'], ['Metodologia', '/analitico/metodologia']].map(([label, href]) => <Button key={href} variant="link" disabled={state === 'loading'} className="h-auto min-h-0 p-0 text-xs font-normal text-muted-foreground hover:text-primary" onClick={() => navigate(href)}>{label}</Button>)}
+                {[['Visão geral', '/analitico'], ['Empenhos', '/analitico/empenhos'], ['Fornecedores', '/analitico/fornecedores'], ['Metodologia', '/analitico/metodologia']].map(([label, href]) => <Button key={href} variant="link" disabled={state === 'loading'} className="min-h-11 p-0 text-sm font-normal text-muted-foreground hover:text-primary" onClick={() => navigate(href)}>{label}</Button>)}
               </nav>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <span className="font-medium text-foreground">Fontes:</span>
@@ -245,7 +248,7 @@ function ShellContent({ children }: { children: ReactNode }) {
                 <a href="https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME." target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 transition-colors hover:text-primary"><MessageCircle className="size-3.5" />Contato</a>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-2 border-t py-4 text-[0.6875rem] text-muted-foreground/80">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t py-4 text-sm text-muted-foreground">
               <span>© {new Date().getFullYear()} MonitoraME</span>
               <span>Ceará, Brasil · Dados públicos de fontes oficiais</span>
             </div>
@@ -310,8 +313,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a className="skip-link" href="#main-content">
         Pular para o conteúdo
       </a>
-      <SidebarProvider
-        className="analytics-shell-scale"
+      <div className="analytics-stage"><SidebarProvider
+        className="analytics-shell-scale analytics-window"
         style={
           {
             '--sidebar-width': 'var(--sidebar-size)',
@@ -321,7 +324,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         }
       >
         <ShellContent>{children}</ShellContent>
-      </SidebarProvider>
+      </SidebarProvider></div>
     </>
   );
 }

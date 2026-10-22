@@ -32,7 +32,8 @@ export function useSavedSearches() {
   }, []);
 
   useEffect(() => {
-    fetchSearches();
+    const timer = window.setTimeout(() => void fetchSearches(), 0);
+    return () => window.clearTimeout(timer);
   }, [fetchSearches]);
 
   const createSearch = async (name: string, filters: SavedSearchEntity["filters"]) => {

@@ -1,8 +1,14 @@
+import { connection } from "next/server";
 import { OnboardingForm } from "@/features/auth/components/onboarding-form";
 import { apiService } from "@/features/auth/services/auth.service";
 import { ApiError } from "@/services/api";
 
-export default function OnboardingPage() {
+export const instant = false;
+
+export default async function OnboardingPage() {
+  // This authenticated flow is request-time UI, not a page to prerender.
+  await connection();
+
   async function handleOnboarding(data: { name: string; email: string; phone: string }) {
     "use server";
     try {

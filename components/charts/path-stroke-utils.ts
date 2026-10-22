@@ -46,6 +46,7 @@ export function usePathStrokeMetrics(
 ): PathStrokeMetrics {
   const [metrics, setMetrics] = useState<PathStrokeMetrics>(EMPTY_METRICS);
 
+  // The caller supplies the full reactive identity list for the path geometry.
   useEffect(() => {
     const path = pathRef.current;
     if (!path) {
@@ -58,6 +59,7 @@ export function usePathStrokeMetrics(
         ? prev
         : { pathD: d, pathLength: len }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   return metrics;

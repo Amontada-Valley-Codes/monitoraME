@@ -1,15 +1,14 @@
 'use client';
 
 import type { FormEvent } from 'react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import './landing.css';
+import { MotionAction, useLandingMotion } from './landing-motion';
 import {
-  ArrowDownRight,
-  ArrowRight,
+  ArrowUpRight,
   BarChart3,
   BookmarkCheck,
   Building2,
@@ -211,8 +210,62 @@ const faqs = [
 const whatsappUrl =
   'https://wa.me/5588999513204?text=Ol%C3%A1%2C%20gostaria%20de%20conhecer%20melhor%20a%20MonitoraME.';
 
+function FaqItems() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const reduced = useReducedMotion();
+
+  return faqs.map(({ question, answer }, index) => {
+    const open = openIndex === index;
+    const panelId = `landing-faq-answer-${index}`;
+    return (
+      <div key={question} className="faq-item">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpenIndex(open ? null : index)}
+          className="flex w-full cursor-pointer items-start justify-between gap-6 py-6 text-left sm:py-7"
+        >
+          <span className="flex gap-4">
+            <span className="mt-1 font-mono text-[10px] font-semibold text-primary">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <span className="text-base font-semibold leading-6 sm:text-lg">{question}</span>
+          </span>
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: reduced ? 0 : 0.2 }}
+            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-primary"
+          >
+            <ChevronDown className="size-4" />
+          </motion.span>
+        </button>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              id={panelId}
+              role="region"
+              initial={reduced ? false : { height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: reduced ? 0 : 0.23 }}
+              className="overflow-hidden"
+            >
+              <p className="max-w-3xl pb-7 pl-10 pr-12 text-sm leading-7 text-muted-foreground sm:text-base">
+                {answer}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  });
+}
+
 export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState('');
+  useLandingMotion(rootRef, setActiveSection);
   const protectedNavigate = useProtectedNavigate();
   const [municipality, setMunicipality] = useState('');
   const [municipalityOpen, setMunicipalityOpen] = useState(false);
@@ -227,126 +280,6 @@ export function LandingPage() {
     updateHeader();
     window.addEventListener('scroll', updateHeader, { passive: true });
     return () => window.removeEventListener('scroll', updateHeader);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!rootRef.current) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const lenis = new Lenis({
-      anchors: { offset: -80 },
-      duration: 1.05,
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-    });
-    const updateScrollTrigger = () => ScrollTrigger.update();
-    const updateLenis = (time: number) => lenis.raf(time * 1000);
-
-    lenis.on('scroll', updateScrollTrigger);
-    gsap.ticker.add(updateLenis);
-    gsap.ticker.lagSmoothing(0);
-
-    if (reduceMotion) {
-      return () => {
-        gsap.ticker.remove(updateLenis);
-        lenis.destroy();
-      };
-    }
-
-    const context = gsap.context(() => {
-      gsap
-        .timeline({ defaults: { ease: 'power3.out' } })
-        .to('[data-hero-reveal]', {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.85,
-          stagger: 0.12,
-        })
-        .to(
-          '[data-hero-proof]',
-          { autoAlpha: 1, y: 0, duration: 0.55, stagger: 0.08 },
-          '-=0.35',
-        );
-
-      gsap.utils.toArray<HTMLElement>('[data-reveal-section]').forEach((section) => {
-        const items = section.querySelectorAll<HTMLElement>('[data-reveal-item]');
-        if (!items.length) return;
-
-        gsap.to(items, {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 78%',
-            once: true,
-          },
-        });
-      });
-
-      gsap.utils.toArray<HTMLElement>('[data-parallax]').forEach((element) => {
-        gsap.to(element, {
-          yPercent: 8,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: element,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: 0.8,
-          },
-        });
-      });
-
-      gsap.to('[data-scroll-progress]', {
-        scaleX: 1,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.2,
-        },
-      });
-
-      const faqSection = rootRef.current?.querySelector<HTMLElement>('[data-faq-section]');
-      const faqViewport = rootRef.current?.querySelector<HTMLElement>('[data-faq-viewport]');
-      const faqTrack = rootRef.current?.querySelector<HTMLElement>('[data-faq-track]');
-
-      if (faqSection && faqViewport && faqTrack) {
-        const distance = () =>
-          Math.max(0, faqTrack.scrollHeight - faqViewport.clientHeight);
-
-        gsap.to(faqTrack, {
-          y: () => -distance(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: faqSection,
-            start: 'top top',
-            end: () =>
-              `+=${Math.max(distance(), faqViewport.clientHeight * 0.85)}`,
-            pin: true,
-            pinSpacing: true,
-            scrub: 0.8,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        const resizeObserver = new ResizeObserver(() => ScrollTrigger.refresh());
-        resizeObserver.observe(faqTrack);
-        return () => resizeObserver.disconnect();
-      }
-    }, rootRef);
-
-    return () => {
-      context.revert();
-      gsap.ticker.remove(updateLenis);
-      lenis.destroy();
-    };
   }, []);
 
   function submitMunicipality(event: FormEvent<HTMLFormElement>) {
@@ -376,12 +309,7 @@ export function LandingPage() {
     : 'transition-colors hover:text-white';
 
   return (
-    <div ref={rootRef} className="min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
-      <div
-        data-scroll-progress
-        aria-hidden="true"
-        className="fixed inset-x-0 top-0 z-60 h-0.5 origin-left scale-x-0 bg-[#76a5ff]"
-      />
+    <div ref={rootRef} className="landing min-h-screen overflow-x-hidden bg-landing-paper text-foreground">
       <header
         className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ${headerScrolled
             ? 'border-border/65 bg-card/82 shadow-[0_10px_35px_-24px_rgb(0_20_41/45%)] backdrop-blur-xl'
@@ -407,25 +335,26 @@ export function LandingPage() {
             className={`hidden items-center gap-7 text-xs font-medium transition-colors duration-300 lg:flex ${headerScrolled ? 'text-muted-foreground' : 'text-white/75'
               }`}
           >
-            <Link className={headerNavLinkClass} href="#plataforma">
+            <Link className={`${headerNavLinkClass} ${activeSection === 'plataforma' ? 'is-active' : ''}`} aria-current={activeSection === 'plataforma' ? 'location' : undefined} href="#plataforma">
               Plataforma
             </Link>
-            <Link className={headerNavLinkClass} href="#oportunidades">
+            <Link className={`${headerNavLinkClass} ${activeSection === 'oportunidades' ? 'is-active' : ''}`} aria-current={activeSection === 'oportunidades' ? 'location' : undefined} href="#oportunidades">
               Oportunidades
             </Link>
-            <Link className={headerNavLinkClass} href="#solucoes">
+            <Link className={`${headerNavLinkClass} ${activeSection === 'solucoes' ? 'is-active' : ''}`} aria-current={activeSection === 'solucoes' ? 'location' : undefined} href="#solucoes">
               Soluções
             </Link>
             <Link
-              className={headerNavLinkClass}
+              className={`${headerNavLinkClass} ${activeSection === 'metodologia' ? 'is-active' : ''}`}
+              aria-current={activeSection === 'metodologia' ? 'location' : undefined}
               href="#metodologia"
             >
               Metodologia
             </Link>
-            <Link className={headerNavLinkClass} href="#faq">
+            <Link className={`${headerNavLinkClass} ${activeSection === 'faq' ? 'is-active' : ''}`} aria-current={activeSection === 'faq' ? 'location' : undefined} href="#faq">
               Dúvidas
             </Link>
-            <Link className={headerNavLinkClass} href="#contato">
+            <Link className={`${headerNavLinkClass} ${activeSection === 'contato' ? 'is-active' : ''}`} aria-current={activeSection === 'contato' ? 'location' : undefined} href="#contato">
               Contato
             </Link>
           </nav>
@@ -440,17 +369,19 @@ export function LandingPage() {
             >
               <Link href="/login">Entrar</Link>
             </Button>
+            <MotionAction>
             <Button
               asChild
               className={`rounded-full px-5 text-xs transition-colors ${headerScrolled
                   ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/80'
-                  : 'bg-white! text-[#0a1930]! shadow-lg shadow-black/10 hover:bg-white/90!'
+                  : 'bg-landing-paper text-landing-ink shadow-lg hover:bg-landing-tint'
                 }`}
             >
               <Link href="/analitico">
-                Acessar compras públicas <ArrowRight className="size-3.5" />
+                Acessar compras públicas <ArrowUpRight className="size-3.5" />
               </Link>
             </Button>
+            </MotionAction>
           </div>
         </div>
       </header>
@@ -460,34 +391,27 @@ export function LandingPage() {
           id="inicio"
           className="relative min-h-dvh overflow-hidden bg-landing-ink text-white lg:min-h-dvh-90"
         >
-          <Image
-            src="/landing/hero-david.webp"
-            alt="Profissionais analisando informações públicas em um ambiente de trabalho colaborativo"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[66%_center]"
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-ink)_0%,color-mix(in_srgb,var(--landing-ink)_96%,transparent)_38%,color-mix(in_srgb,var(--landing-ink)_40%,transparent)_72%,color-mix(in_srgb,var(--landing-ink)_12%,transparent)_100%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(0deg,var(--landing-ink)_0%,transparent_34%)]" />
-          <div className="relative mx-auto flex min-h-180 max-w-7xl flex-col justify-center gap-10 px-5 pb-12 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:min-h-190">
-            <div className="flex max-w-2xl flex-col gap-6 sm:gap-7">
-              <h1 data-hero-reveal className="text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
-                Mais oportunidade para quem vende e clareza para quem decide.
+          <div className="hero-layout relative mx-auto flex min-h-180 max-w-7xl flex-col justify-center gap-10 px-5 pb-12 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:min-h-190">
+            <div className="hero-copy flex max-w-2xl flex-col gap-6 sm:gap-7">
+              <h1 className="text-[clamp(2.9rem,4vw,5.6rem)] font-bold leading-[0.94] tracking-[-0.06em] text-white">
+                Mais <span className="title-accent">oportunidade</span> para quem vende e clareza para quem decide.
               </h1>
-              <p data-hero-reveal className="max-w-xl text-base leading-7 text-white/72 sm:text-lg">
+              <p className="max-w-xl text-base leading-7 text-white/72 sm:text-lg">
                 Transformamos dados dispersos de compras públicas em clareza para gestores e oportunidades para pequenos negócios.
               </p>
-              <div data-hero-reveal className="flex flex-wrap gap-3 pt-1">
+              <div className="hero-actions flex flex-wrap gap-3 pt-1">
+                <MotionAction>
                 <Button
                   asChild
                   size="lg"
                   className="h-12 rounded-full bg-card px-6 text-foreground hover:bg-card/88 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80"
                 >
                   <Link href="#consulta">
-                    Consultar meu município <ArrowDownRight className="size-4" />
+                    Consultar meu município <ArrowUpRight className="size-4" />
                   </Link>
                 </Button>
+                </MotionAction>
+                <MotionAction>
                 <Button
                   asChild
                   size="lg"
@@ -496,25 +420,31 @@ export function LandingPage() {
                 >
                   <Link href="/analitico">Explorar dados públicos</Link>
                 </Button>
+                </MotionAction>
               </div>
-              <div className="flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-5 text-xs text-white/64 sm:pt-6">
-                <span data-hero-proof className="flex items-center gap-2">
+              <div className="hero-sources flex flex-wrap gap-x-8 gap-y-3 border-t border-white/15 pt-5 text-xs text-white/64 sm:pt-6">
+                <span className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
                   TCE
                 </span>
-                <span data-hero-proof className="flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
                   PNCP
                 </span>
-                <span data-hero-proof className="flex items-center gap-2">
+                <span className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-[#8fb4ff]" />
                   Receita Federal
                 </span>
               </div>
             </div>
 
+          <div className="hero-portrait">
+            <div className="portrait-panel" aria-hidden="true" />
+            <Image src="/persons/xdavid.png" alt="Profissional trabalhando em um notebook" width={1500} height={1060} priority sizes="(max-width: 1024px) 90vw, 45vw" />
+            <Link href="#plataforma" className="portrait-arrow" aria-label="Conhecer a plataforma"><ArrowUpRight /></Link>
+          </div>
           <section id="consulta" className="z-10 w-full scroll-mt-28">
-            <div data-hero-reveal className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="mx-auto grid max-w-6xl overflow-hidden rounded-2xl bg-card shadow-[0_24px_70px_-30px_rgb(0_20_41/35%)] lg:grid-cols-[0.72fr_1.28fr]">
             <div className="flex flex-col justify-center gap-3 bg-landing-blue p-7 text-white sm:p-9">
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/65">
                 Consulta aberta
@@ -567,10 +497,10 @@ export function LandingPage() {
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="w-(--radix-popover-trigger-width) overflow-hidden p-0"
+                    className="landing w-(--radix-popover-trigger-width) overflow-hidden bg-landing-paper text-foreground p-0"
                     align="start"
                   >
-                    <Command>
+                    <Command className="bg-landing-paper text-foreground">
                       <CommandInput placeholder="Pesquisar por nome ou código..." />
                       <CommandList className="max-h-72">
                         <CommandEmpty>Município não encontrado.</CommandEmpty>
@@ -616,7 +546,7 @@ export function LandingPage() {
                 type="submit"
                 className="mt-6 h-12 rounded-full px-6 md:shrink-0"
               >
-                Ver dados do município <ArrowRight className="size-4" />
+                Ver dados do município <ArrowUpRight className="size-4" />
               </Button>
             </form>
             </div>
@@ -626,27 +556,21 @@ export function LandingPage() {
 
         <section
           id="plataforma"
-          data-reveal-section
           className="scroll-mt-20 bg-landing-paper px-5 pb-24 pt-28 sm:px-8 lg:pb-32 lg:pt-36"
         >
           <div className="mx-auto max-w-7xl">
-            <div data-reveal-item className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+            <div className="grid items-end gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
               <div>
+                <p className="section-tag">Plataforma</p>
                 <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
-                  A informação certa para quem faz a economia local acontecer.
+                  A informação certa para quem faz a <span className="title-accent">economia local</span> acontecer.
                 </h2>
               </div>
-              {/* <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                O monitoraME conecta a necessidade de transparência da gestão
-                pública à camada de crescimento dos pequenos negócios. Menos tempo
-                interpretando bases; mais clareza para agir.
-              </p> */}
             </div>
             <div className="mt-14 grid gap-4 lg:grid-cols-3">
               {audiences.map(({ title, description, icon: Icon }) => (
                 <article
                   key={title}
-                  data-reveal-item
                   className="group border border-border/80 bg-card p-7 shadow-[0_12px_35px_-30px_rgb(0_20_41/30%)] sm:p-8"
                 >
                   <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-white">
@@ -662,39 +586,31 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section data-reveal-section className="overflow-hidden bg-landing-ink py-20 text-white lg:py-28">
+        <section className="analytics-panel overflow-hidden bg-landing-ink py-20 text-white lg:py-28">
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
-            <div data-reveal-item>
-              <h2 className="mt-4 text-3xl font-bold leading-[1.04] text-white sm:text-5xl">
-                Enxergue o movimento das compras públicas.
+            <div>
+              <p className="section-tag">Compras públicas</p>
+                <h2 className="mt-4 text-3xl font-bold leading-[1.04] text-white sm:text-5xl">
+                Enxergue o <span className="title-accent">movimento</span> das compras públicas.
               </h2>
               <p className="mt-6 max-w-lg text-sm leading-7 text-white/65 sm:text-base">
                 Acompanhe a evolução das compras, compare a participação das
                 microempresas e investigue fornecedores sem navegar por planilhas
                 dispersas.
               </p>
-              
+
               <Button
                 asChild
                 className="mt-8 rounded-full bg-landing-blue px-6 text-white hover:bg-landing-blue/80"
               >
                 <Link href="/analitico">
-                  Acessar compras públicas <ArrowRight className="size-4" />
+                  Acessar compras públicas <ArrowUpRight className="size-4" />
                 </Link>
               </Button>
             </div>
-            <div data-reveal-item className="relative">
-              {/* <div className="absolute -left-5 -top-5 hidden border border-white/15 bg-white/8 px-5 py-3 backdrop-blur-sm sm:block">
-                <span className="block font-mono text-[9px] uppercase tracking-[0.15em] text-white/50">
-                  Leitura territorial
-                </span>
-                <span className="mt-1 block text-sm font-semibold">
-                  Dados que explicam o cenário
-                </span>
-              </div> */}
-              <div className="overflow-hidden rounded-xl border border-white/15 bg-white shadow-2xl shadow-black/35">
+            <div className="relative">
+              <div className="overflow-hidden rounded-xl border border-white/15 bg-landing-paper shadow-2xl shadow-black/35">
                 <Image
-                  data-parallax
                   src="/project/Analytics.png"
                   alt="Painel analítico do monitoraME com evolução de compras públicas e participação de microempresas"
                   width={1599}
@@ -715,34 +631,33 @@ export function LandingPage() {
 
         <section
           id="oportunidades"
-          data-reveal-section
           className="scroll-mt-20 overflow-hidden bg-landing-paper py-24 lg:py-32"
         >
           <div className="mx-auto grid max-w-7xl items-center gap-14 px-5 sm:px-8 lg:grid-cols-[1.03fr_0.97fr] lg:gap-24">
             <div>
-              <h2 data-reveal-item className="mt-5 max-w-3xl text-3xl font-bold leading-[1.04] sm:text-5xl">
-                Encontre compras públicas compatíveis com seu negócio.
+              <p className="section-tag">Oportunidades</p>
+                <h2 className="mt-5 max-w-3xl text-3xl font-bold leading-[1.04] sm:text-5xl">
+                Encontre compras públicas compatíveis com <span className="title-accent">seu negócio</span>.
               </h2>
-              <p data-reveal-item className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
+              <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground">
                 Em vez de procurar edital por edital em diferentes portais, consulte
                 oportunidades em uma experiência única, compare informações essenciais
                 e concentre sua atenção no que tem mais potencial para a sua empresa.
               </p>
 
-              <div data-reveal-item className="mt-10 flex flex-wrap items-center gap-4">
+              <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Button asChild size="lg" className="h-12 rounded-full px-6">
                   <Link href="/oportunidades">
-                    Acessar oportunidades públicas <ArrowRight className="size-4" />
+                    Acessar oportunidades públicas <ArrowUpRight className="size-4" />
                   </Link>
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-4 lg:pt-10">
+            <div className="benefits-card grid gap-4 lg:pt-10">
               {opportunityBenefits.map(({ title, description, icon: Icon }) => (
                 <article
                   key={title}
-                  data-reveal-item
                   className="flex gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-[0_12px_35px_-30px_rgb(0_20_41/30%)] sm:p-6"
                 >
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -762,28 +677,27 @@ export function LandingPage() {
 
         <section
           id="solucoes"
-          data-reveal-section
           className="scroll-mt-20 bg-landing-tint py-24 lg:py-32"
         >
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div data-reveal-item className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
+                <p className="section-tag">Soluções</p>
                 <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-[1.05] sm:text-5xl">
-                  Do orçamento público à oportunidade local.
+                  Do orçamento público à <span className="title-accent">oportunidade local</span>.
                 </h2>
               </div>
               <Link
                 href="/analitico"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
               >
-                Explorar todas as análises <ArrowRight className="size-4" />
+                Explorar todas as análises <ArrowUpRight className="size-4" />
               </Link>
             </div>
             <div className="mt-14 grid gap-4 md:grid-cols-2">
               {modules.map(({ title, description, icon: Icon, tone }, index) => (
                 <article
                   key={title}
-                  data-reveal-item
                   className={`group relative min-h-80 overflow-hidden p-8 transition-transform duration-300 hover:-translate-y-1 sm:p-10 ${tone === 'dark'
                       ? 'bg-landing-ink text-white'
                       : tone === 'blue'
@@ -821,7 +735,7 @@ export function LandingPage() {
                     {title === 'Radar de oportunidades MPE'
                       ? 'Ver oportunidades públicas'
                       : 'Ver no painel'}{' '}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </article>
               ))}
@@ -831,26 +745,25 @@ export function LandingPage() {
 
         <section
           id="metodologia"
-          data-reveal-section
           className="scroll-mt-20 border-y border-border bg-landing-paper py-24 lg:py-32"
         >
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="grid gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
-              <div data-reveal-item>
+              <div>
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                   <DatabaseZap className="size-5" />
                 </span>
                 <h2 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl">
-                  Simplicidade na sua tela.
+                  <span className="title-accent">Simplicidade</span> na sua tela.
                 </h2>
                 <p className="mt-6 text-sm leading-7 text-muted-foreground">
                   Nossa metodologia organiza o caminho do dado para que você possa se
                   concentrar no que importa: compreender e agir.
                 </p>
               </div>
-              <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2">
+              <div className="process-grid grid gap-4 sm:grid-cols-2">
                 {processSteps.map(([number, title, description]) => (
-                  <article key={number} data-reveal-item className="min-h-56 bg-card p-7 sm:p-8">
+                  <article key={number} className="min-h-56 bg-card p-7 sm:p-8">
                     <span className="metric text-sm font-semibold text-primary">
                       {number}
                     </span>
@@ -867,22 +780,21 @@ export function LandingPage() {
 
         <section
           id="faq"
-          data-faq-section
-          data-reveal-section
-          className="flex min-h-svh scroll-mt-20 items-center overflow-hidden bg-landing-tint px-5 py-16 sm:px-8 lg:py-20"
+
+          className="flex scroll-mt-20 items-start bg-landing-tint px-5 py-16 sm:px-8 lg:py-20"
         >
-          <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-24">
-            <div data-reveal-item>
-              <p className="eyebrow text-primary">Perguntas frequentes</p>
+          <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-start lg:gap-24">
+            <div className="faq-intro">
+              <p className="section-tag">Perguntas frequentes</p>
               <h2 className="mt-4 text-3xl font-bold leading-[1.05] sm:text-5xl">
-                Clareza antes de começar.
+                <span className="title-accent">Clareza</span> antes de começar.
               </h2>
               <p className="mt-6 max-w-md text-sm leading-7 text-muted-foreground sm:text-base">
                 Entenda como os dados são organizados, quais cuidados considerar e
                 como o monitoraME pode apoiar sua rotina.
               </p>
               <p className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                <ArrowDownRight className="size-4 text-primary" />
+                <ArrowUpRight className="size-4 text-primary" />
                 Continue rolando para explorar
               </p>
               <Button asChild variant="outline" className="mt-8 rounded-full px-6">
@@ -892,72 +804,49 @@ export function LandingPage() {
               </Button>
             </div>
 
-            <div data-reveal-item className="relative min-h-0">
+            <div className="relative min-h-0">
               <div
-                data-faq-viewport
-                className="h-[min(68svh,42rem)] overflow-hidden border-y border-border pr-2 sm:pr-5"
+                className="faq-list"
               >
-                <div data-faq-track>
-                  {faqs.map(({ question, answer }, index) => (
-                    <details
-                      key={question}
-                      className="group border-b border-border last:border-b-0"
-                    >
-                      <summary className="flex cursor-pointer list-none items-start justify-between gap-6 py-6 text-left marker:content-none sm:py-7 [&::-webkit-details-marker]:hidden">
-                        <span className="flex gap-4">
-                          <span className="mt-1 font-mono text-[10px] font-semibold text-primary">
-                            {String(index + 1).padStart(2, '0')}
-                          </span>
-                          <span className="text-base font-semibold leading-6 sm:text-lg">
-                            {question}
-                          </span>
-                        </span>
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-primary transition-transform duration-300 group-open:rotate-180">
-                          <ChevronDown className="size-4" />
-                        </span>
-                      </summary>
-                      <div className="overflow-hidden">
-                        <p className="max-w-3xl pb-7 pl-10 pr-12 text-sm leading-7 text-muted-foreground sm:text-base">
-                          {answer}
-                        </p>
-                      </div>
-                    </details>
-                  ))}
+                <div>
+                  <FaqItems />
                 </div>
               </div>
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-linear-to-t from-landing-tint to-transparent" />
+
             </div>
           </div>
         </section>
 
         <section
           id="contato"
-          data-reveal-section
           className="scroll-mt-20 bg-landing-paper px-5 py-24 sm:px-8 lg:py-32"
         >
-          <div data-reveal-item className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl bg-landing-blue text-white lg:grid-cols-[1.15fr_0.85fr]">
             <div className="p-8 sm:p-12 lg:p-16">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65">
+              <div className="section-tag inline-flex items-center gap-2">
                 <Sparkles className="size-4" />
                 Próximo passo
               </div>
               <h2 className="mt-5 max-w-2xl text-3xl font-bold leading-[1.03] text-white sm:text-5xl">
-                Use dados públicos para abrir novas possibilidades.
+                Use dados públicos para abrir <span className="title-accent">novas possibilidades</span>.
               </h2>
               <p className="mt-6 max-w-xl text-base leading-7 text-white/70">
                 Explore o painel gratuitamente ou converse com nossa equipe para
                 entender como o monitoraME pode apoiar sua empresa ou município.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
+                <MotionAction>
                 <Button
                   asChild
                   size="lg"
                   className="h-12 rounded-full bg-card px-6 text-foreground hover:bg-card/88 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/80"
                 >
                   <Link href="/register">
-                    Criar minha conta <ArrowRight className="size-4" />
+                    Criar minha conta <ArrowUpRight className="size-4" />
                   </Link>
                 </Button>
+                </MotionAction>
+                <MotionAction>
                 <Button
                   asChild
                   size="lg"
@@ -969,18 +858,19 @@ export function LandingPage() {
                     Falar com a equipe
                   </a>
                 </Button>
+                </MotionAction>
               </div>
             </div>
-            <div className="relative hidden min-h-96 overflow-hidden bg-landing-ink lg:block">
+            <div className="cta-portrait relative min-h-80 lg:min-h-96">
               <Image
-                src="/landing/hero-david.webp"
-                alt="Equipe trabalhando com dados públicos"
+                src="/persons/xdavid.png"
+                alt="Profissional trabalhando em um notebook"
                 fill
                 sizes="36vw"
-                className="scale-110 object-cover object-[78%_center] opacity-80"
-                data-parallax
+                className="object-contain object-bottom"
+
               />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--landing-blue),transparent_55%)]" />
+
             </div>
           </div>
         </section>
@@ -996,7 +886,7 @@ export function LandingPage() {
                 className="inline-block text-white"
               >
                 <Image
-                  src="/brand/horizontal-light.svg"
+                  src="/brand/light-horizontal-logo.svg"
                   alt="MonitoraME"
                   width={613}
                   height={100}
@@ -1088,7 +978,7 @@ export function LandingPage() {
             <span>© 2026 MonitoraME. Todos os direitos reservados.</span>
             <div className="flex items-center gap-5">
               <Image
-                src="/brand/standalone-m.svg"
+                src="/brand/default-vertical-icon.svg"
                 alt=""
                 aria-hidden="true"
                 width={200}

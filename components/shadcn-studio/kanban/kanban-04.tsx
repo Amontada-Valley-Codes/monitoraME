@@ -61,7 +61,7 @@ function StageColumn({ stage, opportunities, overlay = false }: { stage: Opportu
   const meta = stageMeta[stage]
   return (
     <KanbanColumn value={stage}>
-      <section className="flex min-h-[30rem] flex-col rounded-2xl border bg-muted/35 p-2">
+      <section className="flex min-h-120 flex-col rounded-2xl border bg-muted/35 p-2">
         <header className="rounded-xl bg-card p-3 shadow-xs">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span className={cn('size-2 rounded-full', meta.dot)} />
@@ -126,7 +126,7 @@ export default function SavedOpportunitiesKanban() {
 
   return (
     <Kanban value={pipeline} onValueChange={updatePipeline} getItemValue={(item) => item.id} className="overflow-x-auto pb-4">
-      <KanbanBoard className="grid min-w-[54rem] grid-cols-3 gap-3">
+      <KanbanBoard className="grid min-w-216 grid-cols-3 gap-3">
         {(Object.entries(pipeline) as [OpportunityStage, Opportunity[]][]).map(([stage, opportunities]) => (
           <StageColumn key={stage} stage={stage} opportunities={opportunities} />
         ))}

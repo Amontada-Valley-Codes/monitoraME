@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Archive, ArchiveRestore, ExternalLink, History, Lock } from 'lucide-react';
+import { Archive, ArchiveRestore, ExternalLink, History, Lock, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
@@ -25,6 +25,7 @@ import {
   StageBadge,
   StageSelect,
 } from './portfolio-controls';
+import { PortfolioNoteDialog } from './portfolio-note-dialog';
 
 const money = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value);
@@ -38,6 +39,7 @@ function describe(entry: PortfolioHistoryEntry, members: PortfolioMember[]) {
     case 'deadline': return entry.to ? `definiu o prazo interno para ${formatDay(entry.to)}` : 'removeu o prazo interno';
     case 'archived': return 'arquivou a oportunidade';
     case 'restored': return 'restaurou a oportunidade';
+    case 'note': return entry.from ? 'editou a observação' : 'registrou uma observação';
   }
 }
 
@@ -49,6 +51,7 @@ export function PortfolioItemSheet({
   pending,
   onClose,
   onChange,
+  onNoteSave,
   onStageRequest,
 }: {
   entry: PortfolioEntry | null;
@@ -58,6 +61,7 @@ export function PortfolioItemSheet({
   pending: boolean;
   onClose: () => void;
   onChange: (entry: PortfolioEntry, change: PortfolioChange) => void;
+  onNoteSave: (entry: PortfolioEntry, text: string) => Promise<boolean>;
   onStageRequest: (entry: PortfolioEntry, stage: PortfolioStage) => void;
 }) {
   const [deadlineDraft, setDeadlineDraft] = useState<{ id: string; value: string } | null>(null);
@@ -111,13 +115,12 @@ export function PortfolioItemSheet({
                 <section className="space-y-3" aria-label="Organização interna">
                   <label className="block text-xs text-muted-foreground">
                     Etapa interna
-                    <StageSelect entry={entry} disabled={pending} className="mt-1 w-full" onRequest={(stage) => onStageRequest(entry, stage)} />
+                    <StageSelect entry={entry} disabled={pending} className="mt-1 w-full data-[size=sm]:h-9" onRequest={(stage) => onStageRequest(entry, stage)} />
                   </label>
                   <label className="block text-xs text-muted-foreground">
                     Responsável
                     <NativeSelect
-                      size="sm"
-                      className="mt-1 w-full"
+                      className="mt-1 h-9 w-full"
                       value={entry.assigneeId ?? ''}
                       disabled={pending}
                       onChange={(event) => onChange(entry, { kind: 'assignee', assigneeId: event.target.value || null })}
@@ -134,13 +137,14 @@ export function PortfolioItemSheet({
                       <Input
                         id="internal-deadline"
                         type="date"
-                        className="h-8"
+                        className="h-9 min-h-9!"
                         value={deadline}
                         disabled={pending}
                         onChange={(event) => setDeadlineDraft({ id: entry.id, value: event.target.value })}
                       />
                       <Button
                         variant="outline"
+                        className="h-9 min-h-9!"
                         disabled={pending || deadline === (entry.internalDeadline ?? '')}
                         onClick={() => {
                           onChange(entry, { kind: 'deadline', deadline: deadline || null });
@@ -191,6 +195,37 @@ export function PortfolioItemSheet({
                   </Button>
                 )}
               </div>
+
+              <section className="border-t pt-5" aria-labelledby="portfolio-note-title">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 id="portfolio-note-title" className="flex items-center gap-2 text-sm font-semibold">
+                    <StickyNote className="size-4" />
+                    Observação interna
+                  </h3>
+                  {canEdit && !entry.archived && (
+                    <PortfolioNoteDialog
+                      key={`${entry.id}-${entry.version}`}
+                      entry={entry}
+                      disabled={pending}
+                      onSave={(text) => onNoteSave(entry, text)}
+                    />
+                  )}
+                </div>
+                {entry.note ? (
+                  <figure className="mt-3 rounded-lg border bg-muted/40 p-3">
+                    <blockquote className="whitespace-pre-wrap break-words text-sm leading-relaxed">{entry.note.text}</blockquote>
+                    <figcaption className="mt-2 text-xs text-muted-foreground">
+                      {members.find((person) => person.id === entry.note?.authorId)?.name ?? 'Equipe'} ·{' '}
+                      <time dateTime={entry.note.updatedAt}>{formatDateTime(entry.note.updatedAt)}</time>
+                    </figcaption>
+                  </figure>
+                ) : (
+                  <p className="mt-3 rounded-lg border border-dashed p-3 text-xs text-muted-foreground">
+                    Nenhuma observação registrada. Use as notas para combinar próximos passos com a equipe.
+                  </p>
+                )}
+                <p className="mt-2 text-[11px] text-muted-foreground">Privada da empresa: não é publicada nem enviada ao órgão.</p>
+              </section>
 
               <section className="border-t pt-5">
                 <h3 className="flex items-center gap-2 text-sm font-semibold">

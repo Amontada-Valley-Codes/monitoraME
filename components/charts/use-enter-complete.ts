@@ -13,8 +13,8 @@ export function useEnterComplete(mountProgress: MotionValue<number>): boolean {
 
   useEffect(() => {
     if (mountProgress.get() >= 1) {
-      setComplete(true);
-      return;
+      const frame = requestAnimationFrame(() => setComplete(true));
+      return () => cancelAnimationFrame(frame);
     }
 
     return mountProgress.on("change", (value) => {

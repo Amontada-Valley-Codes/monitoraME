@@ -76,16 +76,12 @@ function resolveTickLabelColor(
 
 export function YAxis(props: YAxisProps) {
   const { containerRef } = useChartStable();
-  const [mounted, setMounted] = useState(false);
-
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const container = containerRef.current;
-  if (!(mounted && container)) {
-    return null;
-  }
+    const frame = requestAnimationFrame(() => setContainer(containerRef.current));
+    return () => cancelAnimationFrame(frame);
+  }, [containerRef]);
+  if (!container) return null;
 
   return <YAxisInner {...props} container={container} />;
 }

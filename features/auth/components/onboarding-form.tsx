@@ -37,8 +37,8 @@ export function OnboardingForm({ onSubmitAction }: OnboardingFormProps) {
       setLoading(true);
       await onSubmitAction(data);
       toast.success("Link de ativação enviado! Verifique o seu e-mail.");
-    } catch (error: any) {
-      toast.error(error.message || "Ocorreu um erro ao iniciar o onboarding.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Ocorreu um erro ao iniciar o onboarding.");
     } finally {
       setLoading(false);
     }

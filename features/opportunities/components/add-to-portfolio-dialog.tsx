@@ -35,7 +35,7 @@ export function AddToPortfolioDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={disabled}>
+        <Button className="h-9 min-h-9!" disabled={disabled}>
           <Plus />
           Adicionar oportunidade
         </Button>

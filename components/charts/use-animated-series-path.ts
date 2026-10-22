@@ -1,6 +1,7 @@
 "use client";
 
 import { animate, useReducedMotion } from "motion/react";
+import type { CurveFactory } from "d3-shape";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LINE_LOADING_PULSE_EASE } from "./line-loading-timing";
 import {
@@ -10,9 +11,6 @@ import {
   seriesPathFromPoints,
   seriesPathTransitionSignature,
 } from "./series-path-utils";
-
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
-type CurveFactory = any;
 
 export interface UseAnimatedSeriesPathOptions {
   renderData: Record<string, unknown>[];
@@ -88,10 +86,10 @@ export function useAnimatedSeriesPath({
 
     if (!shouldAnimate) {
       animatingRef.current = false;
-      setAnimatedPoints(null);
       displayedPointsRef.current = targetPoints;
       prevTransitionSignatureRef.current = transitionSignature;
-      return;
+      const frame = requestAnimationFrame(() => setAnimatedPoints(null));
+      return () => cancelAnimationFrame(frame);
     }
 
     if (prevTransitionSignatureRef.current === transitionSignature) {
