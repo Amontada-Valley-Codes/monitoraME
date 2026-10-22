@@ -50,14 +50,14 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-end gap-2">
           <label className="text-xs text-muted-foreground">
             Cenário
-            <NativeSelect size="sm" className="mt-1 w-40" value={scenario} onChange={(event) => setScenario(event.target.value as Scenario)}>
+            <NativeSelect className="mt-1 h-9 w-40" value={scenario} onChange={(event) => setScenario(event.target.value as Scenario)}>
               <NativeSelectOption value="success">Com dados</NativeSelectOption>
               <NativeSelectOption value="loading">Carregando</NativeSelectOption>
               <NativeSelectOption value="empty">Vazio</NativeSelectOption>
               <NativeSelectOption value="error">Erro</NativeSelectOption>
             </NativeSelect>
           </label>
-          <Button variant="outline" disabled={state.status === 'loading'} onClick={reload}>
+          <Button variant="outline" className="h-9 min-h-9!" disabled={state.status === 'loading'} onClick={reload}>
             <RefreshCw className={cn(state.status === 'loading' && 'animate-spin')} />
             Atualizar
           </Button>
@@ -71,10 +71,10 @@ export default function AdminDashboardPage() {
       ) : (
         <div className="space-y-4">
           <section aria-label="Resumo das empresas por situação" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Solicitações pendentes" value={overview.companies_by_status.pending} icon={FileClock} tone="warning" detail="Aguardando análise documental" />
-            <StatCard label="Empresas ativas" value={overview.companies_by_status.active} icon={CircleCheck} tone="success" detail="Com acesso liberado" />
-            <StatCard label="Empresas suspensas" value={overview.companies_by_status.suspended} icon={CircleSlash} tone="destructive" detail="Acesso bloqueado pela administração" />
-            <StatCard label="Rejeitadas" value={overview.companies_by_status.rejected} icon={Building2} detail="Solicitações não aprovadas" />
+            <StatCard label="Solicitações pendentes" value={overview.companies_by_status.pending} icon={FileClock} tone="warning" href="/admin/empresas?situacao=pending" detail="Aguardando análise documental" />
+            <StatCard label="Empresas ativas" value={overview.companies_by_status.active} icon={CircleCheck} tone="success" href="/admin/empresas?situacao=active" detail="Com acesso liberado" />
+            <StatCard label="Empresas suspensas" value={overview.companies_by_status.suspended} icon={CircleSlash} tone="destructive" href="/admin/empresas?situacao=suspended" detail="Acesso bloqueado pela administração" />
+            <StatCard label="Rejeitadas" value={overview.companies_by_status.rejected} icon={Building2} href="/admin/empresas?situacao=rejected" detail="Solicitações não aprovadas" />
           </section>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
@@ -111,6 +111,7 @@ export default function AdminDashboardPage() {
             <Panel title="Atalhos" icon={Radar} description={role === 'monitor' ? 'Perfil Monitor: acesso somente leitura.' : 'Acesso rápido às rotinas administrativas.'}>
               <nav aria-label="Atalhos administrativos" className="grid gap-2">
                 {[
+                  { href: '/admin/empresas', label: 'Gerenciar empresas', description: 'Consultar, suspender e reativar acessos', icon: Building2 },
                   ...(overview.pending_requests[0]
                     ? [{ href: `/access-requests/${overview.pending_requests[0].protocol}`, label: 'Revisar solicitação mais antiga', description: overview.pending_requests[0].legal_name, icon: FileClock }]
                     : []),

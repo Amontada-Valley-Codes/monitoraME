@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, LayoutDashboard, Radar, type LucideIcon } from 'lucide-react';
+import { BarChart3, Building2, LayoutDashboard, Radar, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/shared/components/logo';
 
@@ -10,6 +10,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon };
 
 export const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Visão geral', icon: LayoutDashboard },
+  { href: '/admin/empresas', label: 'Empresas', icon: Building2 },
 ];
 
 const PLATFORM_NAV: NavItem[] = [
