@@ -78,26 +78,7 @@ export function Landing() {
                 sizes="(max-width: 700px) 85vw, 47vw"
                 priority
               />
-              
-              <div className="landing-float landing-float-left">
-                <span className="landing-float-icon">
-                  <BarChart3 size={19} />
-                </span>
-                <span>
-                  <strong>{c.hero.leftCard.value}</strong>
-                  <small>{c.hero.leftCard.label}</small>
-                </span>
-              </div>
-
-              <div className="landing-float landing-float-top">
-                <span className="landing-float-icon">
-                  <UsersRound size={18} />
-                </span>
-                <span>
-                  <strong>{c.hero.topCard.value}</strong>
-                  <small>{c.hero.topCard.label}</small>
-                </span>
-              </div>
+            
 
               <div className="landing-float landing-float-chart">
                 <small>{c.hero.chartLabel}</small>

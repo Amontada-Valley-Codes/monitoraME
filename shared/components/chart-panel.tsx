@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Table2, ChartNoAxesCombined } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EmptyState, ErrorState } from './states';
-import { ExportButton } from './export-button';
+import { CopyChartButton } from './copy-chart-button';
 import type { LoadState } from '@/features/analytics/data/types';
 
 export function ChartPanel({
@@ -44,11 +44,7 @@ export function ChartPanel({
   contentClassName?: string;
 }) {
   const [view, setView] = useState('chart');
-  const exportData = {
-    title,
-    columns: ['Categoria / período', ...(legend?.map((item) => item.label) ?? ['Valor'])],
-    rows: rows.map((row) => [row.label, ...row.values]),
-  };
+  const chartContainerRef = useRef<HTMLDivElement>(null);
 
   return (
     <section className={`panel min-w-0 overflow-visible ${className}`}>
@@ -62,7 +58,7 @@ export function ChartPanel({
         </div>
         <div className="flex items-center gap-2">
           {action}
-          <ExportButton compact dataset={exportData} />
+          {view === 'chart' && <CopyChartButton title={title} target={() => chartContainerRef.current} dataset={{ title, columns: ['Categoria / período', ...(legend?.map((item) => item.label) ?? ['Valor'])], rows: rows.map((row) => [row.label, ...row.values]) }} />}
           <Tabs value={view} onValueChange={setView}>
             <TabsList className="h-9">
               <TabsTrigger
@@ -138,6 +134,7 @@ export function ChartPanel({
           </Table>
         ) : (
           <div
+            ref={chartContainerRef}
             className="h-full"
             role="group"
             aria-label={`${title}. ${description ?? ''} Use Ver tabela para acessar todos os valores.`}

@@ -496,6 +496,78 @@
   border-color: var(--border);
 }
 
+/* Municipal detail: keep charts and metrics on a quiet, high-contrast canvas. */
+.analytics-shell-scale .municipal-overview {
+  --chart-height: clamp(16rem, 28vw, 23rem);
+  display: grid;
+  gap: 1rem;
+}
+
+.analytics-shell-scale .municipal-overview .dashboard-metrics {
+  gap: .875rem;
+  margin-bottom: 0;
+}
+
+.analytics-shell-scale .municipal-overview .dashboard-metric,
+.analytics-shell-scale .municipal-overview .panel {
+  border-radius: .875rem;
+  border-color: #dce4ef;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(23 43 77 / 4%);
+}
+
+.analytics-shell-scale .municipal-overview .dashboard-metric {
+  min-height: 9rem;
+  padding: 1.125rem;
+}
+
+.analytics-shell-scale .municipal-overview .dashboard-metric .metric {
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.15;
+}
+
+.analytics-shell-scale .municipal-overview > .mb-3 {
+  margin-bottom: 0;
+}
+
+.analytics-shell-scale .municipal-overview .panel > div:first-child {
+  padding: 1.125rem 1.25rem;
+}
+
+.analytics-shell-scale .municipal-overview .panel [role="list"] {
+  gap: .5rem 1.25rem;
+  padding: .75rem 1.25rem;
+  background: #f8fafc;
+}
+
+.analytics-shell-scale .municipal-overview .panel > div:last-child {
+  padding: 1.25rem;
+}
+
+.analytics-shell-scale .municipal-filters > div:first-child {
+  gap: 1rem;
+  border-color: #dce4ef;
+  background: #f8fafc;
+}
+
+.analytics-shell-scale .municipal-filters [role="combobox"] {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .analytics-shell-scale .municipal-overview {
+    --chart-height: 16rem;
+  }
+
+  .analytics-shell-scale .municipal-overview .dashboard-metrics {
+    gap: .625rem;
+  }
+
+  .analytics-shell-scale .municipal-overview .panel > div:first-child {
+    align-items: flex-start;
+  }
+}
+
 @media (max-width: 1279px) {
   :root {
     --page-padding: 1.5rem;

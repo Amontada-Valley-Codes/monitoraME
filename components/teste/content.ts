@@ -14,8 +14,6 @@ export const testeContent = {
     description: "Descubra oportunidades de compras públicas e entenda o mercado da sua região em um só lugar.",
     cta: "Explorar oportunidades",
     play: "Conhecer a plataforma",
-    leftCard: { value: "4.310", label: "oportunidades*" },
-    topCard: { value: "9.702", label: "negócios*" },
     chartLabel: "Visão de mercado*",
   },
   social: {
