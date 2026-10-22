@@ -3,21 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, BarChart3, BriefcaseBusiness, ChevronDown, Database, Landmark, Layers3, MapPinned, Network, Search, SearchCheck, TrendingUp, UsersRound } from "lucide-react";
 import { testeContent as c } from "./content";
 import { MunicipalitySearch } from "./municipality-search";
-import { RegisterForm } from "@/features/auth/components/register-form";
-import { apiService } from "@/features/auth/services/auth.service";
-import type { AuthFormData } from "@/features/auth/schemas/auth.schema";
-import { ApiError } from "@/services/api";
-
-async function handleLandingRegister(data: AuthFormData) {
-  "use server";
-  try {
-    await apiService.registerPerson({ name: data.name, cpf: data.cpf, email: data.email, password: data.senha });
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 409) return { error: "E-mail ou CPF já cadastrado." };
-    return { error: error instanceof Error ? error.message : "Não foi possível criar a conta." };
-  }
-  return { error: "Conta criada com sucesso. Faça login para continuar." };
-}
+import { LandingLeadCta } from "./landing-lead-cta";
 
 const icons = {
   search: Search,
@@ -53,7 +39,7 @@ export function Landing() {
             ))}
           </nav>
 
-          <a className="landing-button landing-header-cta" href="#solucoes">
+          <a className="landing-button landing-header-cta" href="#criar-conta">
             {c.headerCta}
             <ArrowUpRight size={15} aria-hidden="true" />
           </a>
@@ -240,7 +226,7 @@ export function Landing() {
               <div className="landing-register-note"><span aria-hidden="true">✓</span> Seus dados são usados para criar seu acesso ao MonitoraME.</div>
             </div>
             <div className="landing-register-card">
-              <RegisterForm variant="landing" onSubmitAction={handleLandingRegister} />
+              <LandingLeadCta />
             </div>
           </div>
         </section>
