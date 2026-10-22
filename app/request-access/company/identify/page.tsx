@@ -7,7 +7,7 @@ export default function IdentifyPage() {
     <main className="min-h-screen bg-slate-50/50 pb-20">
       <AppHeader />
       
-      <div className="max-w-[1200px] mx-auto px-4 pt-8">
+      <div className="max-w-300 mx-auto px-4 pt-8">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 mb-6">
           <div className="flex items-center gap-2 text-blue-600 text-xs font-bold tracking-wider uppercase mb-3">
             <ShieldCheck className="w-4 h-4" />
@@ -24,7 +24,7 @@ export default function IdentifyPage() {
               <div className="font-bold text-slate-800 mb-2">Identificação</div>
               <div className="text-xs text-slate-500 mb-3">CNPJ & RFB</div>
               <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">Em andamento</span>
-              <div className="absolute top-1/2 left-[60%] w-full h-[1px] bg-slate-200 -z-10"></div>
+              <div className="absolute top-1/2 left-[60%] w-full h-px bg-slate-200 -z-10"></div>
             </div>
 
             <div className="flex flex-col items-center flex-1 relative">
@@ -32,7 +32,7 @@ export default function IdentifyPage() {
               <div className="font-bold text-slate-400 mb-2">Revisão Cadastral</div>
               <div className="text-xs text-slate-400 mb-3">Dados da Empresa</div>
               <span className="px-3 py-1 bg-slate-100 text-slate-500 text-xs font-semibold rounded-full border border-slate-200">Pendente</span>
-              <div className="absolute top-1/2 left-[60%] w-full h-[1px] bg-slate-200 -z-10"></div>
+              <div className="absolute top-1/2 left-[60%] w-full h-px bg-slate-200 -z-10"></div>
             </div>
             
             <div className="flex flex-col items-center flex-1">
@@ -47,7 +47,7 @@ export default function IdentifyPage() {
           <div className="flex-1 w-full">
             <CompanyIdentificationForm />
           </div>
-          <div className="w-full lg:w-[380px] flex flex-col gap-6 shrink-0">
+          <div className="w-full lg:w-95 flex flex-col gap-6 shrink-0">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
               <h3 className="text-lg font-bold text-slate-900 mb-4">Vantagens do Credenciamento</h3>
               <p className="text-sm text-slate-500 mb-6">Ao validar o CNPJ da sua Micro ou Pequena Empresa, você destrava os privilégios da LC 123/2006:</p>

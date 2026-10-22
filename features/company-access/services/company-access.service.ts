@@ -1,5 +1,4 @@
 import { ICompanyAccessRepository } from '../infrastructure/company-access-api';
-import { validateRequiredDocuments } from '../domain/validation';
 import { CompanyAccessRequest } from '../domain/entities';
 
 export class CompanyAccessService {

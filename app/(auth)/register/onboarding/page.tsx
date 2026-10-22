@@ -3,6 +3,8 @@ import { OnboardingForm } from "@/features/auth/components/onboarding-form";
 import { apiService } from "@/features/auth/services/auth.service";
 import { ApiError } from "@/services/api";
 
+export const instant = false;
+
 export default async function OnboardingPage() {
   // This authenticated flow is request-time UI, not a page to prerender.
   await connection();

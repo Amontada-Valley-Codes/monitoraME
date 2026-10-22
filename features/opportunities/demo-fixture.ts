@@ -18,8 +18,6 @@ const opportunity = (data: Partial<Opportunity> & Pick<Opportunity, 'id' | 'orga
 
 export const companyDemoFixture = {
   company: { id: 'company-demo-nordeste', legalName: 'Nordeste Soluções e Suprimentos Ltda.', tradeName: 'Nordeste Conecta', cnpj: '00.000.000/0001-91', size: 'Microempresa — ME', status: 'Empresa validada e acesso ativo', plan: 'Equipe — R$ 119,99/mês', city: 'Fortaleza', state: 'CE', ibgeCode: '2304400', email: 'contato@nordeste-conecta.example', phone: '(85) 3000-0000' },
-  people: [{ id: 'ana', name: 'Ana Martins', role: 'Administradora' }, { id: 'bruno', name: 'Bruno Lima', role: 'Gestor' }, { id: 'carla', name: 'Carla Souza', role: 'Colaboradora' }],
-  documents: [{ id: 'certidao-federal', name: 'Certidão Federal', expiresAt: '2026-10-20', href: '/oportunidades/perfil?tab=documentos' }],
   people: [{ id: 'ana', name: 'Ana Martins', role: 'Administradora', permission: 'admin' }, { id: 'bruno', name: 'Bruno Lima', role: 'Gestor', permission: 'manager' }, { id: 'carla', name: 'Carla Souza', role: 'Colaboradora', permission: 'collaborator' }] satisfies PortfolioMember[],
   workspaceUsage: {
     savedSearches: { used: 8, limit: 30 }, activeMonitors: { used: 24, limit: 100 }, activeOpportunities: { used: 42, limit: 500 },

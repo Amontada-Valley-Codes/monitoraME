@@ -1,4 +1,4 @@
-import { CompanyAccessRequest, CompanyDocument } from '../domain/entities';
+import { CompanyAccessRequest } from '../domain/entities';
 
 export interface CreateCompanyPayload {
   cnpj: string;
@@ -25,7 +25,7 @@ export interface CreateCompanyPayload {
 export interface ICompanyAccessRepository {
   getRequestStatus(cnpj: string): Promise<CompanyAccessRequest>;
   createCompany(data: CreateCompanyPayload): Promise<{ id: string; status: string }>;
-  submitAccessRequest(companySize: 'mei' | 'me' | 'eep' | 'gov', file: File): Promise<any>;
+  submitAccessRequest(companySize: 'mei' | 'me' | 'eep' | 'gov', file: File): Promise<unknown>;
 }
 
 export const companyAccessApiRepository: ICompanyAccessRepository = {
@@ -52,7 +52,7 @@ export const companyAccessApiRepository: ICompanyAccessRepository = {
     return res.json();
   },
 
-  async submitAccessRequest(companySize: 'mei' | 'me' | 'eep' | 'gov', file: File): Promise<any> {
+  async submitAccessRequest(companySize: 'mei' | 'me' | 'eep' | 'gov', file: File): Promise<unknown> {
     const formData = new FormData();
     
     const fieldMap = {

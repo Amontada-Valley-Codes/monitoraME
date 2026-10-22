@@ -26,7 +26,7 @@ function SavedOpportunitiesLoading() {
   return (
     <main className="min-h-[calc(100svh-var(--header-height))] bg-muted/20">
       <div className="p-4 sm:p-6">
-        <div className="h-[38rem] animate-pulse rounded-xl bg-muted" />
+        <div className="h-152 animate-pulse rounded-xl bg-muted" />
       </div>
     </main>
   );

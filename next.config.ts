@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
+  partialPrefetching: false,
   logging: {
     // Server Function arguments include credentials in the onboarding flow.
     serverFunctions: false,

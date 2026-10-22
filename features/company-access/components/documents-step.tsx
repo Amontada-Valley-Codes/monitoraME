@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CompanyDocument } from '../domain/entities';
 import { validateFileConstraints, validateRequiredDocuments } from '../domain/validation';
 import { companyAccessApiRepository } from '../infrastructure/company-access-api';
@@ -12,6 +13,7 @@ interface DocumentsStepProps {
 }
 
 export function DocumentsStep({ documents, onUpdateDocuments, onPrev }: DocumentsStepProps) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -51,7 +53,7 @@ export function DocumentsStep({ documents, onUpdateDocuments, onPrev }: Document
     try {
       // Passa explicitamente o porte ('me') e o arquivo selecionado
       await companyAccessApiRepository.submitAccessRequest('me', selectedFile);
-      window.location.href = '/access-requests/protocolo-gerado';
+      router.push('/access-requests/protocolo-gerado');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro inesperado ao submeter.');
     } finally {
