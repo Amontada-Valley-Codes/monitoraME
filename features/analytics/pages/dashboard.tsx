@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
 import {
-  OverviewBusinessSizes,
-  OverviewDestinations,
+  OverviewDistribution,
   OverviewEvolution,
   OverviewExpenses,
   OverviewKpis,
@@ -74,10 +73,7 @@ export default function Dashboard() {
           <OverviewKpis params={params} />
           <OverviewMunicipalityRanking items={view.municipalityRanking} />
           <OverviewExpenses params={params} />
-          <div className="analytics-overview-grid analytics-overview-grid-pies">
-            <OverviewBusinessSizes params={params} />
-            <OverviewDestinations params={params} />
-          </div>
+          <OverviewDistribution params={params} />
           <OverviewEvolution params={params} />
 
         </>

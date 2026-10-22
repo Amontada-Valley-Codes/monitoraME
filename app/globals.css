@@ -704,10 +704,10 @@
 }
 
 .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:first-child {
-  width: clamp(12rem, 52%, 16rem);
+  width: clamp(12rem, 32vw, 16rem);
   height: auto;
   aspect-ratio: 1;
-  flex: 0 1 52%;
+  flex: 0 0 auto;
 }
 
 .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child {
@@ -729,6 +729,16 @@
 
 .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child > button > span:last-child {
   flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div {
+    flex-direction: column;
+  }
+
+  .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:first-child {
+    width: min(16rem, 100%);
+  }
 }
 
 @media (max-width: 1199px) {

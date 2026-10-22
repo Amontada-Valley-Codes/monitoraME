@@ -1,14 +1,17 @@
 'use client';
 
-import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { compactMoney, money, number, percent } from '@/shared/lib/format';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PipelineOverviewParams } from '../pipeline/types';
 import type { OverviewMunicipalityRankingItem } from '../pipeline/view-model';
+import { DEFAULT_CHART_ENTER_TRANSITION } from '@/components/charts/animation';
 import {
   useOverviewBusinessSizes,
   useOverviewDestinations,
@@ -163,43 +166,64 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   );
 }
 
-export function OverviewBusinessSizes({ params }: { params: PipelineOverviewParams }) {
-  const { data, status, retry, view } = useOverviewBusinessSizes(params);
-  const rows = data ?? [];
+export function OverviewDistribution({ params }: { params: PipelineOverviewParams }) {
+  const [activeView, setActiveView] = useState<'businessSizes' | 'destinations'>('businessSizes');
+  const [isSwitching, setIsSwitching] = useState(false);
+  const businessSizes = useOverviewBusinessSizes(params);
+  const destinations = useOverviewDestinations(params);
+  const showingBusinessSizes = activeView === 'businessSizes';
+  const rows = showingBusinessSizes
+    ? businessSizes.data ?? []
+    : destinations.data ?? [];
+  const status = showingBusinessSizes ? businessSizes.status : destinations.status;
+  const retry = showingBusinessSizes ? businessSizes.retry : destinations.retry;
+  const title = showingBusinessSizes
+    ? 'Participa\u00e7\u00e3o por porte empresarial'
+    : 'Destino dos recursos';
+  const nextTitle = showingBusinessSizes
+    ? 'Ver destino dos recursos'
+    : 'Ver porte empresarial';
+  const total = showingBusinessSizes
+    ? businessSizes.view?.totalCents ?? 0
+    : rows.reduce((sum, item) => sum + item.value, 0);
+
+  useEffect(() => {
+    if (!isSwitching || status === 'loading') return;
+    const timer = window.setTimeout(() => setIsSwitching(false), status === 'ready' && rows.length > 0
+      ? ((DEFAULT_CHART_ENTER_TRANSITION.duration ?? 1.1) + 0.1 + Math.max(0, rows.length - 1) * 0.08) * 1000
+      : 0);
+    return () => window.clearTimeout(timer);
+  }, [activeView, isSwitching, rows.length, status]);
+
   return (
     <ChartPanel
+      action={(
+        <Button
+          aria-label={nextTitle}
+          className="min-h-9 gap-2"
+          disabled={isSwitching}
+          onClick={() => {
+            setIsSwitching(true);
+            setActiveView(showingBusinessSizes ? 'destinations' : 'businessSizes');
+          }}
+          variant="outline"
+        >
+          <span className="hidden sm:inline">{nextTitle}</span>
+          <ArrowRight aria-hidden="true" />
+        </Button>
+      )}
       className="analytics-overview-panel analytics-overview-donut"
-      title="Participação por porte empresarial"
-      description="Percentual do valor líquido anual"
+      description={showingBusinessSizes ? 'Percentual do valor l\u00edquido anual' : 'Origem das compras de ME e MEI'}
+      empty={status === 'ready' && rows.length === 0}
+      onRetry={retry}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
-      onRetry={retry}
-      empty={status === 'ready' && rows.length === 0}
+      title={title}
     >
-      <DonutChart data={rows} total={view?.totalCents ?? 0} />
+      <DonutChart key={activeView} data={rows} total={total} />
     </ChartPanel>
   );
 }
-
-export function OverviewDestinations({ params }: { params: PipelineOverviewParams }) {
-  const { data, status, retry } = useOverviewDestinations(params);
-  const rows = data ?? [];
-  const meTotalCents = rows.reduce((total, item) => total + item.value, 0);
-  return (
-    <ChartPanel
-      className="analytics-overview-panel analytics-overview-donut"
-      title="Destino dos recursos"
-      description="Origem das compras de ME e MEI"
-      rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
-      state={status}
-      onRetry={retry}
-      empty={status === 'ready' && rows.length === 0}
-    >
-      <DonutChart data={rows} total={meTotalCents} />
-    </ChartPanel>
-  );
-}
-
 // export function OverviewReading({ params }: { params: PipelineOverviewParams }) {
 //   const { data, view } = useOverviewKpis(params);
 //   if (!data || !view) return null;
