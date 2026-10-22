@@ -11,6 +11,7 @@ import {
   OverviewEvolution,
   OverviewExpenses,
   OverviewKpis,
+  OverviewMunicipalityRanking,
 } from '../components/overview-sections';
 import { usePipelineOverview } from '../pipeline/use-overview';
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
@@ -71,14 +72,13 @@ export default function Dashboard() {
             <Button variant="outline" onClick={retry} className="min-h-11 gap-2" aria-label="Atualizar dados da visão geral"><RefreshCw className="size-4" />Atualizar dados</Button>
           </div>
           <OverviewKpis params={params} />
-          <div className="analytics-overview-grid analytics-overview-grid-primary">
-            <OverviewEvolution params={params} />
+          <OverviewMunicipalityRanking items={view.municipalityRanking} />
+          <OverviewExpenses params={params} />
+          <div className="analytics-overview-grid analytics-overview-grid-pies">
             <OverviewBusinessSizes params={params} />
-          </div>
-          <div className="analytics-overview-grid analytics-overview-grid-secondary">
-            <OverviewExpenses params={params} />
             <OverviewDestinations params={params} />
           </div>
+          <OverviewEvolution params={params} />
 
         </>
       )}

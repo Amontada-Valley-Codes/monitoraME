@@ -231,7 +231,7 @@ export function DonutChart({
       >
         {data.map((item, index) => (
           <Button
-            key={item.key}
+            key={`${item.key}-${index}`}
             variant="ghost"
             onClick={() => onSelect?.(item.key)}
             onMouseEnter={() => setHover(index)}

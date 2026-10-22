@@ -5,8 +5,10 @@ import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { Card } from '@/components/ui/card';
-import { compactMoney, money, percent } from '@/shared/lib/format';
+import { compactMoney, money, number, percent } from '@/shared/lib/format';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PipelineOverviewParams } from '../pipeline/types';
+import type { OverviewMunicipalityRankingItem } from '../pipeline/view-model';
 import {
   useOverviewBusinessSizes,
   useOverviewDestinations,
@@ -43,14 +45,60 @@ export function OverviewMetricCard({ label, value, detail, icon: Icon, progress,
 export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
   const { data, view } = useOverviewKpis(params);
   if (!data || !view) return null;
+  const statewide = !params.codigo_municipio;
 
   return (
     <div className="dashboard-metrics analytics-overview-metrics grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} progress={data.meMeiPercentage} />
       <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
-      <OverviewMetricCard label="Fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} progress={data.localPercentage} />
-      <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
+      <OverviewMetricCard label={statewide ? "Fornecedores no Cear\u00e1" : "Fornecedores locais"} value={valueOrDash(data.localPercentage, percent)} detail={statewide ? "Compras com fornecedores no estado" : "No município comprador"} icon={MapPin} progress={data.localPercentage} />
+      <OverviewMetricCard label={statewide ? "Fornecedores fora do Cear\u00e1" : "Recursos fora do município"} value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
     </div>
+  );
+}
+
+export function OverviewMunicipalityRanking({ items }: {
+  items: OverviewMunicipalityRankingItem[];
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className="analytics-overview-panel analytics-overview-ranking overflow-hidden rounded-xl border bg-card">
+      <div>
+        <h2 className="font-semibold">Munic&#237;pios com maior volume de compras de ME</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Dez primeiros por valor l&#237;quido. Percentual calculado sobre o total estadual de ME.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <Table>
+          <caption className="sr-only">Ranking dos dez municipios com maior valor liquido de compras de ME</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16">Posi&#231;&#227;o</TableHead>
+              <TableHead>Munic&#237;pio</TableHead>
+              <TableHead className="text-right">Compras l&#237;quidas de ME</TableHead>
+              <TableHead className="text-right">Empenhos</TableHead>
+              <TableHead className="text-right">Do total estadual</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.tceCode}>
+                <TableCell className="font-medium tabular-nums">{item.position}</TableCell>
+                <TableCell>
+                  <span className="font-medium">{item.municipality}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">Codigo TCE {item.tceCode}</span>
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">{money(item.purchasesCents)}</TableCell>
+                <TableCell className="text-right tabular-nums">{number(item.commitmentCount)}</TableCell>
+                <TableCell className="text-right tabular-nums">{percent(item.totalMePercentage)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
   );
 }
 
@@ -65,7 +113,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
     <ChartPanel
       className="analytics-fixed-chart analytics-overview-panel analytics-overview-expenses"
       title="Elementos de despesas"
-      description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
+      description="Valores líquidos dos sete elementos de despesa considerados para ME e MEI"
       legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
@@ -141,7 +189,7 @@ export function OverviewDestinations({ params }: { params: PipelineOverviewParam
     <ChartPanel
       className="analytics-overview-panel analytics-overview-donut"
       title="Destino dos recursos"
-      description="Origem das compras de ME"
+      description="Origem das compras de ME e MEI"
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
       onRetry={retry}

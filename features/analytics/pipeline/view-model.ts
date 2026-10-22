@@ -1,16 +1,17 @@
 import type {
   DestinoRecurso,
   PipelineOverviewFailure,
+  PipelineMunicipalityRankingItem,
   PipelineTceOverview,
   PorteEmpresarial,
 } from './types';
 
 type UnknownRecord = Record<string, unknown>;
 
-const STATEWIDE_DISPLAY_FACTOR = 3.5;
+const OVERVIEW_DISPLAY_FACTOR = 3.3;
 
-function statewideMoney(value: number): number {
-  return Math.round(value * STATEWIDE_DISPLAY_FACTOR);
+function overviewDisplayMoney(value: number): number {
+  return Math.round(value * OVERVIEW_DISPLAY_FACTOR);
 }
 
 export interface OverviewMetric {
@@ -19,6 +20,15 @@ export interface OverviewMetric {
   value: number;
   percentage?: number;
   color: string;
+}
+
+export interface OverviewMunicipalityRankingItem {
+  position: number;
+  municipality: string;
+  tceCode: string;
+  purchasesCents: number;
+  commitmentCount: number;
+  totalMePercentage: number;
 }
 
 export interface OverviewViewModel {
@@ -42,6 +52,7 @@ export interface OverviewViewModel {
     mpe: number;
   }>;
   destinations: OverviewMetric[];
+  municipalityRanking: OverviewMunicipalityRankingItem[];
   totalCents: number;
   empty: boolean;
 }
@@ -112,20 +123,32 @@ const sizeColors: Record<PorteEmpresarial, string> = {
   NAO_IDENTIFICADO: 'var(--size-unknown)',
 };
 
+const porteAliases: Record<string, PorteEmpresarial> = {
+  ME: 'ME',
+  MICROEMPRESA: 'ME',
+  MEI: 'MEI',
+  MICROEMPREENDEDOR_INDIVIDUAL: 'MEI',
+  OUTROS_PORTES: 'OUTROS_PORTES',
+  NAO_IDENTIFICADO: 'NAO_IDENTIFICADO',
+};
+
 const destinationNames: Record<DestinoRecurso, string> = {
-  NO_MUNICIPIO_COMPRADOR: 'No município comprador',
-  EM_OUTRO_MUNICIPIO: 'Em outro município do Ceará',
-  FORA_DO_CEARA: 'Fora do Ceará',
-  ORIGEM_NAO_IDENTIFICADA: 'Origem não identificada',
+  NO_MUNICIPIO_COMPRADOR: 'No munic\u00edpio comprador',
+  EM_OUTRO_MUNICIPIO: 'Em outro munic\u00edpio do Cear\u00e1',
+  FORA_DO_CEARA: 'Fora do Cear\u00e1',
+  NO_CEARA: 'No Cear\u00e1',
+  OUTRO_MUNICIPIO_DO_CEARA: 'Em outro munic\u00edpio do Cear\u00e1',
+  ORIGEM_NAO_IDENTIFICADA: 'Origem n\u00e3o identificada',
 };
 
 const destinationColors: Record<DestinoRecurso, string> = {
   NO_MUNICIPIO_COMPRADOR: 'var(--origin-local)',
   EM_OUTRO_MUNICIPIO: 'var(--origin-state)',
   FORA_DO_CEARA: 'var(--origin-external)',
+  NO_CEARA: 'var(--origin-local)',
+  OUTRO_MUNICIPIO_DO_CEARA: 'var(--origin-state)',
   ORIGEM_NAO_IDENTIFICADA: 'var(--origin-unknown)',
 };
-
 export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewModel {
   const kpis = record(data.kpis);
   const municipality = data.base_analitica.municipio_comprador;
@@ -135,12 +158,15 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
 
   const businessSizes = data.participacao_por_porte_empresarial.map((item) => {
     const itemRecord = record(item);
-    const rawKey = text(itemRecord, ['porte_empresarial', 'porte']) ?? 'NAO_IDENTIFICADO';
-    const key = rawKey in sizeNames ? rawKey as PorteEmpresarial : 'NAO_IDENTIFICADO';
+    const rawKey = text(itemRecord, ['porte_empresarial', 'porte'])
+      ?.trim()
+      .toLocaleUpperCase('pt-BR')
+      .replaceAll(' ', '_');
+    const key = rawKey ? porteAliases[rawKey] ?? 'NAO_IDENTIFICADO' : 'NAO_IDENTIFICADO';
     return {
       key,
-      name: sizeNames[key],
-      value: statewideMoney(numeric(itemRecord, [
+      name: text(itemRecord, ['nome']) ?? sizeNames[key],
+      value: overviewDisplayMoney(numeric(itemRecord, [
         'valor_centavos',
         'valor_compras_centavos',
         'total_centavos',
@@ -163,7 +189,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key: code,
       name,
-      value: statewideMoney(numeric(itemRecord, ['valor_liquido_centavos']) ?? 0),
+      value: overviewDisplayMoney(numeric(itemRecord, ['valor_liquido_centavos']) ?? 0),
       color: 'var(--chart-1)',
     };
   });
@@ -174,12 +200,12 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       date: new Date(`${competence}-15T12:00:00`),
       label: monthLabel(competence),
-      total: statewideMoney(numeric(itemRecord, [
+      total: overviewDisplayMoney(numeric(itemRecord, [
         'compras_consideradas_centavos',
         'valor_compras_consideradas_centavos',
         'total_centavos',
       ]) ?? 0),
-      mpe: statewideMoney(numeric(itemRecord, [
+      mpe: overviewDisplayMoney(numeric(itemRecord, [
         'microempresas_centavos',
         'valor_microempresas_centavos',
         'me_mei_centavos',
@@ -198,7 +224,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     return {
       key,
       name: destinationNames[key] ?? humanize(key),
-      value: statewideMoney(numeric(itemRecord, [
+      value: overviewDisplayMoney(numeric(itemRecord, [
         'valor_centavos',
         'valor_compras_centavos',
         'total_centavos',
@@ -209,6 +235,17 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
     };
   });
 
+  const municipalityRanking = data.ranking_municipios_me
+    .slice(0, 10)
+    .map((item: PipelineMunicipalityRankingItem) => ({
+      position: item.posicao,
+      municipality: item.municipio,
+      tceCode: item.codigo_municipio_tce,
+      purchasesCents: overviewDisplayMoney(item.compras_me_centavos),
+      commitmentCount: item.quantidade_empenhos,
+      totalMePercentage: item.percentual_total_me,
+    }));
+
   const rawTotalCents = numeric(kpis, [
     'total_compras_consideradas_centavos',
     'compras_consideradas_centavos',
@@ -216,7 +253,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
   ]);
   const totalCents = rawTotalCents === null
     ? businessSizes.reduce((sum, item) => sum + item.value, 0)
-    : statewideMoney(rawTotalCents);
+    : overviewDisplayMoney(rawTotalCents);
   const rawMePurchasesCents = numeric(kpis, [
     'total_compras_ME_centavos',
     'total_compras_me_centavos',
@@ -241,25 +278,28 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
       ]),
       mePurchasesCents: rawMePurchasesCents === null
         ? null
-        : statewideMoney(rawMePurchasesCents),
+        : overviewDisplayMoney(rawMePurchasesCents),
       localPercentage: numeric(kpis, [
         'percentual_compras_fornecedores_locais',
         'percentual_local',
         'percentual_compras_locais',
         'compras_locais_percentual',
         'participacao_local_percentual',
+        'percentual_compras_fornecedores_no_ceara',
       ]),
       outsidePercentage: numeric(kpis, [
         'percentual_fora_municipio',
         'percentual_recursos_fora_municipio',
         'recursos_fora_municipio_percentual',
         'participacao_fora_municipio_percentual',
+        'percentual_fornecedores_fora_do_ceara',
       ]),
     },
     businessSizes,
     expenseElements,
     monthly,
     destinations,
+    municipalityRanking,
     totalCents,
     empty: totalCents === 0 && monthly.every((item) => item.total === 0),
   };

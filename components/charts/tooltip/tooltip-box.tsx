@@ -124,7 +124,13 @@ function TooltipBoxInner({
     const h = el.offsetHeight;
     const w2 = w > 0 ? w : tooltipSize.width;
     const h2 = h > 0 ? h : tooltipSize.height;
-    if (w > 0 && h > 0) setTooltipSize({ width: w, height: h });
+    if (
+      w > 0 &&
+      h > 0 &&
+      (tooltipSize.width !== w || tooltipSize.height !== h)
+    ) {
+      setTooltipSize({ width: w, height: h });
+    }
     const flip = x + w2 + offset > containerWidth;
     const tx = flip ? x - offset - w2 : x + offset;
     const ty = Math.max(
@@ -132,7 +138,11 @@ function TooltipBoxInner({
       Math.min(y - h2 / 2, containerHeight - h2 - offset)
     );
     if (!animate) {
-      setStaticPosition({ left: tx, top: ty });
+      setStaticPosition((current) =>
+        current.left === tx && current.top === ty
+          ? current
+          : { left: tx, top: ty }
+      );
       return;
     }
     if (leftOverride === undefined) {

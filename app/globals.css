@@ -671,6 +671,10 @@
   align-items: stretch;
 }
 
+.analytics-overview-grid-pies {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .analytics-window .analytics-overview .analytics-overview-panel {
   min-width: 0;
   overflow: hidden;
@@ -689,19 +693,42 @@
 }
 
 .analytics-window .analytics-overview .analytics-overview-panel > div:last-child {
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1rem 1rem 1.25rem;
   border-color: #e4eaf3;
 }
 
 .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div {
-  gap: .5rem;
-  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex-direction: row;
 }
 
 .analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:first-child {
-  width: 10rem;
-  height: 10rem;
-  align-self: center;
+  width: clamp(12rem, 52%, 16rem);
+  height: auto;
+  aspect-ratio: 1;
+  flex: 0 1 52%;
+}
+
+.analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child {
+  flex: 1 1 48%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child > button {
+  min-width: 0;
+  gap: .5rem;
+  padding-inline: .5rem;
+}
+
+.analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child > button > span:first-child,
+.analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child > button > span:first-child > span:last-child {
+  min-width: 0;
+}
+
+.analytics-window .analytics-overview .analytics-overview-donut > div:last-child > [role="group"] > div > div:last-child > button > span:last-child {
+  flex: 0 0 auto;
 }
 
 @media (max-width: 1199px) {

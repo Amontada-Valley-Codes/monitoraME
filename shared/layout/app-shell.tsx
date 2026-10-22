@@ -98,7 +98,7 @@ function Navigation() {
       <SidebarContent className="px-2">
         <SidebarGroup className="pt-5">
           <SidebarGroupLabel className="sr-only">
-            Análises públicas
+            Poder Público
           </SidebarGroupLabel>
           <SidebarMenu className="gap-1">
             {NAV.slice(0, 6).map((item) => (
@@ -199,7 +199,7 @@ function ShellContent({ children }: { children: ReactNode }) {
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
               <strong className="truncate text-foreground">{current.label}</strong>
             </div>
-            {isOverview && <p className="text-sm text-muted-foreground">Compras públicas do Ceará, em números claros.</p>}
+            {isOverview && <p className="text-sm text-muted-foreground">Compras públicas do Ceará</p>}
           </div>
 
           <div className="flex items-center ml-auto gap-3">
