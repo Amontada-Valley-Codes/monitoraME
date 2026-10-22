@@ -1,0 +1,105 @@
+name: Deploy de produção
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Publicar Next.js
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    env:
+      SSH_HOST: ${{ vars.SSH_HOST }}
+      SSH_USER: ${{ vars.SSH_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+      - name: Validar configuração do ambiente
+        run: |
+          test -n "$SSH_HOST" || { echo "Variável SSH_HOST ausente"; exit 1; }
+          test -n "$SSH_USER" || { echo "Variável SSH_USER ausente"; exit 1; }
+          test -n "$DEPLOY_PATH" || { echo "Variável DEPLOY_PATH ausente"; exit 1; }
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Gerar pacote standalone do Next.js
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          mkdir -p release/web/.next
+          cp -R .next/standalone/. release/web/
+          cp -R .next/static release/web/.next/static
+          cp -R public release/web/public
+          mkdir -p release/deploy/systemd
+          cp deploy/remote-deploy.sh release/deploy/remote-deploy.sh
+          cp deploy/systemd/monitorame-web.service.template release/deploy/systemd/
+          tar -czf release.tgz -C release .
+      - name: Configurar acesso SSH pelo Cloudflare
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_PRIVATE_KEY" || { echo "Secret SSH_PRIVATE_KEY ausente"; exit 1; }
+          test -n "$SSH_KNOWN_HOSTS" || { echo "Secret SSH_KNOWN_HOSTS ausente"; exit 1; }
+          curl -fsSL -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host monitorame
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            ProxyCommand cloudflared access ssh --hostname %h
+          EOF
+          chmod 600 ~/.ssh/config
+      - name: Enviar e ativar a versão
+        env:
+          RELEASE_FILE: /tmp/monitorame-${{ github.sha }}.tgz
+        run: |
+          scp release.tgz "monitorame:$RELEASE_FILE"
+          ssh monitorame bash -s -- "$DEPLOY_PATH" "$RELEASE_FILE" <<'REMOTE'
+          set -euo pipefail
+          deploy_path="$1"
+          release_file="$2"
+          mkdir -p "$deploy_path"
+          staging_dir="$(mktemp -d "$deploy_path/.release.XXXXXX")"
+          trap 'rm -rf "$staging_dir" "$release_file"' EXIT
+          tar -xzf "$release_file" -C "$staging_dir"
+          bash "$staging_dir/deploy/remote-deploy.sh" "$deploy_path"
+          REMOTE
+      - name: Teste de fumaça
+        if: ${{ env.SITE_URL != '' }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl --fail --silent --show-error --location "$SITE_URL/" --output /dev/null; then
+              exit 0
+            fi
+            echo "Aplicação ainda não respondeu (tentativa $attempt/6)"
+            sleep 5
+          done
+          echo "A aplicação não respondeu após o deploy"
+          exit 1

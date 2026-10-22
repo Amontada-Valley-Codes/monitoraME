@@ -69,7 +69,7 @@ export function TrendChart({
   series: Series[];
 }) {
   return (
-    <div className="chart-box min-w-0">
+    <div className="chart-box h-80 min-h-80 min-w-0">
       <AreaChart
         data={data}
         className="h-full w-full"

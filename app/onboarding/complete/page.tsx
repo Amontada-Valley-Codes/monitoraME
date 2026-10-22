@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { CompleteRegisterWrapper } from "@/features/auth/components/complete-register-wrapper";
 import { ApiError, apiService } from "@/features/auth/services/auth.service";
 import { completeAuthSchema, CompleteAuthFormData } from "@/features/auth/schemas/auth.schema";
@@ -8,6 +9,8 @@ import { isValidReturnTo } from "@/shared/auth/return-to";
 export const instant = false;
 
 export default async function CompleteRegisterPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  await connection();
+
   const cookieStore = await cookies();
   if (!cookieStore.has("access_token") && !cookieStore.has("refresh_token")) redirect("/?cta=lead");
   const requestedReturnTo = (await searchParams).returnTo;

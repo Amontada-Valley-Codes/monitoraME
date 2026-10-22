@@ -1,6 +1,7 @@
 'use client';
 
-import { Info, TriangleAlert } from 'lucide-react';
+import { Info, RefreshCw, TriangleAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
@@ -20,7 +21,7 @@ export default function Dashboard() {
   const currentExercise = Number(year) === new Date().getFullYear();
 
   return (
-    <div className="dashboard-overview">
+    <div className="dashboard-overview analytics-overview">
       <h1 className="sr-only">Panorama das compras públicas</h1>
 
       {status === 'loading' ? (
@@ -65,19 +66,18 @@ export default function Dashboard() {
             </div>
           )}
 
+          <div className="analytics-overview-heading">
+            <div><h2>Indicadores em destaque</h2><p>Uma leitura rápida do recorte selecionado.</p></div>
+            <Button variant="outline" onClick={retry} className="min-h-11 gap-2" aria-label="Atualizar dados da visão geral"><RefreshCw className="size-4" />Atualizar dados</Button>
+          </div>
           <OverviewKpis params={params} />
-
-          <div className="mb-3">
+          <div className="analytics-overview-grid analytics-overview-grid-primary">
             <OverviewEvolution params={params} />
-          </div>
-
-          <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
             <OverviewBusinessSizes params={params} />
-            <OverviewDestinations params={params} />
           </div>
-
-          <div className="mb-3">
+          <div className="analytics-overview-grid analytics-overview-grid-secondary">
             <OverviewExpenses params={params} />
+            <OverviewDestinations params={params} />
           </div>
 
         </>

@@ -63,16 +63,13 @@ const TOOLTIP_PANEL_INNER_CLASS_NAME =
 // Inner-only-on-visible so `useSpring` initializes at the cursor's actual x/y
 // instead of (0, 0) on first hover.
 export function TooltipBox(props: TooltipBoxProps) {
-  const [mounted, setMounted] = useState(false);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const container = props.containerRef.current;
-  if (!(mounted && container)) {
-    return null;
-  }
+    const frame = requestAnimationFrame(() => setContainer(props.containerRef.current));
+    return () => cancelAnimationFrame(frame);
+  }, [props.containerRef]);
+  if (!container) return null;
   if (!props.visible) {
     return null;
   }
@@ -103,12 +100,11 @@ function TooltipBoxInner({
   const effectiveSpring = springConfig ?? tooltipBoxSpring;
 
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const tooltipWidthRef = useRef(180);
-  const tooltipHeightRef = useRef(80);
+  const [tooltipSize, setTooltipSize] = useState({ width: 180, height: 80 });
   const [staticPosition, setStaticPosition] = useState({ left: x, top: y });
 
-  const tw = tooltipWidthRef.current;
-  const th = tooltipHeightRef.current;
+  const tw = tooltipSize.width;
+  const th = tooltipSize.height;
   const shouldFlipX = x + tw + offset > containerWidth;
   const targetX = shouldFlipX ? x - offset - tw : x + offset;
   const targetY = Math.max(
@@ -119,13 +115,6 @@ function TooltipBoxInner({
   const animatedLeft = useSpring(targetX, effectiveSpring);
   const animatedTop = useSpring(targetY, effectiveSpring);
 
-  if (animate && leftOverride === undefined) {
-    animatedLeft.set(targetX);
-  }
-  if (animate && topOverride === undefined) {
-    animatedTop.set(targetY);
-  }
-
   useLayoutEffect(() => {
     if (!tooltipRef.current) {
       return;
@@ -133,14 +122,9 @@ function TooltipBoxInner({
     const el = tooltipRef.current;
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    if (w > 0) {
-      tooltipWidthRef.current = w;
-    }
-    if (h > 0) {
-      tooltipHeightRef.current = h;
-    }
-    const w2 = tooltipWidthRef.current;
-    const h2 = tooltipHeightRef.current;
+    const w2 = w > 0 ? w : tooltipSize.width;
+    const h2 = h > 0 ? h : tooltipSize.height;
+    if (w > 0 && h > 0) setTooltipSize({ width: w, height: h });
     const flip = x + w2 + offset > containerWidth;
     const tx = flip ? x - offset - w2 : x + offset;
     const ty = Math.max(
@@ -168,17 +152,10 @@ function TooltipBoxInner({
     animate,
     animatedLeft,
     animatedTop,
+    tooltipSize,
   ]);
 
-  const prevFlipRef = useRef(shouldFlipX);
-  const [flipKey, setFlipKey] = useState(0);
-
-  useEffect(() => {
-    if (prevFlipRef.current !== shouldFlipX) {
-      setFlipKey((k) => k + 1);
-      prevFlipRef.current = shouldFlipX;
-    }
-  }, [shouldFlipX]);
+  const flipKey = shouldFlipX ? "flipped" : "normal";
 
   const finalLeft = animate
     ? (leftOverride ?? animatedLeft)

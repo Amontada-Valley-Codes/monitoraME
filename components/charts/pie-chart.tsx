@@ -271,11 +271,12 @@ const PieChartCore = memo(function PieChartCore({
     if (geometryScrubbing) {
       return;
     }
-    setIsLoaded(false);
-    const timer = setTimeout(() => {
-      setIsLoaded(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    const frame = requestAnimationFrame(() => setIsLoaded(false));
+    const timer = setTimeout(() => setIsLoaded(true), 100);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
   }, [enterTransition, enterStaggerScale, geometryScrubbing]);
 
   // Separate children into categories

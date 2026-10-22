@@ -31,19 +31,17 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
   const [loadingIbge, setLoadingIbge] = useState(false);
 
   useEffect(() => {
-    setCnaes(cnaesAtuais);
-  }, [cnaesAtuais, open]);
-
-  useEffect(() => {
     if (open && listaCnaes.length === 0) {
-      setLoadingIbge(true);
-      fetch("https://servicodados.ibge.gov.br/api/v2/cnae/classes")
+      const controller = new AbortController();
+      const frame = requestAnimationFrame(() => setLoadingIbge(true));
+      fetch("https://servicodados.ibge.gov.br/api/v2/cnae/classes", { signal: controller.signal })
         .then((res) => res.json())
         .then((data: CnaeIBGE[]) => {
           setListaCnaes(data);
           setLoadingIbge(false);
         })
         .catch(() => {
+          if (controller.signal.aborted) return;
           setListaCnaes([
             { id: "6201501", descricao: "Desenvolvimento de programas de computador sob encomenda" },
             { id: "6204000", descricao: "Consultoria em tecnologia da informação" },
@@ -51,6 +49,7 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
           ]);
           setLoadingIbge(false);
         });
+      return () => { cancelAnimationFrame(frame); controller.abort(); };
     }
   }, [open, listaCnaes.length]);
 
@@ -80,8 +79,13 @@ export function EditCnaesModal({ cnaesAtuais, onSave, saving }: Props) {
     setOpen(false);
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setCnaes(cnaesAtuais);
+    setOpen(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary hover:text-primary/80">
           <Edit2 className="w-3 h-3 mr-1" /> Alterar

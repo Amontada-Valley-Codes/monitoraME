@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Info, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { formatPlanPrice, type CheckoutPlan } from './plans';
+import { type CheckoutPlan } from './plans';
 
 export function PlanReview({ plan, onBack, onContinue }: { plan: CheckoutPlan; onBack: () => void; onContinue: () => void }) {
   return (

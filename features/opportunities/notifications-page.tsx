@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
-import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
+import { ErrorState, LoadingState } from '@/shared/components/states';
 import { cn } from '@/lib/utils';
 import { companyDemoFixture, type NotificationItem } from './demo-fixture';
 import { useNotifications } from './notification-context';

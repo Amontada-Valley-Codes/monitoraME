@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Columns3,
+  FolderKanban,
   LayoutDashboard,
   List,
   LogOut,
@@ -120,8 +121,10 @@ const isCurrent = (pathname: string, href: string, exact?: boolean) =>
 
 function OpportunityNavigation({
   onOpenSearch,
+  active = 'open',
 }: {
-  onOpenSearch: () => void;
+  onOpenSearch?: () => void;
+  active?: 'open' | 'saved' | 'portfolio' | 'notifications';
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -206,7 +209,7 @@ function OpportunityNavigation({
             variant="outline"
             onClick={() => {
               closeMobile();
-              onOpenSearch();
+              onOpenSearch?.();
             }}
             aria-label="Busca rápida"
             className="flex h-10 w-full items-center justify-start gap-3 overflow-hidden bg-background px-3 font-normal text-muted-foreground shadow-none group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0"
@@ -224,6 +227,16 @@ function OpportunityNavigation({
         </SidebarGroup>
 
         <SidebarSeparator className="my-0" />
+        <nav aria-label="Atalhos da carteira">
+          <Button asChild variant={active === 'portfolio' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
+            <Link href="/oportunidades/carteira" aria-current={active === 'portfolio' ? 'page' : undefined}>
+              <FolderKanban className="size-4" />
+              <span>Minhas oportunidades</span>
+            </Link>
+          </Button>
+        </nav>
+
+        <SidebarSeparator />
 
         <SidebarGroup className="py-1.5">
           <SidebarGroupLabel className="h-7">Visão geral</SidebarGroupLabel>
@@ -425,6 +438,10 @@ function OpportunityNavigation({
       <SidebarRail />
     </Sidebar>
   );
+}
+
+export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'portfolio' | 'notifications' }) {
+  return <OpportunityNavigation active={active} />;
 }
 
 function OpportunityShellContent({ children }: { children: ReactNode }) {
