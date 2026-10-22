@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -39,7 +40,6 @@ import {
   CommandGroup,
   CommandItem,
 } from '@/components/ui/command';
-import { Logo } from '@/shared/components/logo';
 import { useAnalytics } from '@/features/analytics/data/context';
 import { MUNICIPALITIES, SUPPLIERS } from '@/features/analytics/data/fixtures';
 import { TCE_MUNICIPALITIES } from '@/features/analytics/pipeline/municipalities';
@@ -76,22 +76,27 @@ function Navigation() {
 
   return (
     <Sidebar collapsible="icon" className="analytics-navigation">
-      <SidebarHeader className="analytics-navigation-header h-(--header-height) justify-center px-3 group-data-[collapsible=icon]:px-2">
-        <div className="flex w-full items-center gap-2">
-          {(isMobile || state === 'expanded') && <Button
+      <SidebarHeader className="analytics-navigation-header h-(--header-height) justify-center px-3 group-data-[collapsible=icon]:px-1">
+        <div className="analytics-navigation-brand-row flex w-full items-center gap-2 group-data-[collapsible=icon]:gap-1">
+          <Button
             variant="ghost"
             disabled={loadState === 'loading'}
             onClick={() => {
               navigate('/');
               setOpenMobile(false);
             }}
-            className="min-w-0 flex-1 justify-start p-0 hover:bg-transparent group-data-[collapsible=icon]:justify-center"
+            className="analytics-navigation-brand min-w-0 justify-start p-0 hover:bg-transparent"
             aria-label="MonitoraME início"
           >
-            <Logo className="size-6 w-auto max-w-full text-brand-ink" />
-          </Button>}
-          {isMobile && <SidebarTrigger aria-label="Fechar navegação" title="Fechar navegação (Ctrl+B)" className="size-11 shrink-0" />}
-          {!isMobile && <SidebarTrigger aria-label={state === 'expanded' ? 'Recolher navegação' : 'Expandir navegação'} title="Alternar navegação (Ctrl+B)" className="size-11 shrink-0 rounded-xl border border-sidebar-border" />}
+            <Image
+              src={state === 'collapsed' && !isMobile ? '/brand/monochrome-default.svg' : '/brand/default-text-dark.svg'}
+              alt=""
+              aria-hidden="true"
+              width={state === 'collapsed' && !isMobile ? 32 : 160}
+              height={state === 'collapsed' && !isMobile ? 32 : 24}
+              className="analytics-navigation-logo"
+            />
+          </Button>
         </div>
       </SidebarHeader>
 
@@ -105,6 +110,7 @@ function Navigation() {
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
                   tooltip={item.label}
+                  aria-label={item.label}
                   isActive={
                     item.path === '/analitico/empenhos' && isCommitmentDetail
                       ? true
@@ -190,9 +196,14 @@ function ShellContent({ children }: { children: ReactNode }) {
             title={isMobile
               ? openMobile ? 'Fechar navegação (Ctrl+B)' : 'Abrir navegação (Ctrl+B)'
               : sidebarState === 'expanded' ? 'Recolher navegação (Ctrl+B)' : 'Expandir navegação (Ctrl+B)'}
-            className="size-11 rounded-xl border border-border bg-muted text-foreground md:hidden"
+            className="size-10 shrink-0 rounded-lg border border-border bg-muted text-foreground md:hidden"
           />
           <Separator orientation="vertical" className="h-5! md:hidden" />
+          <SidebarTrigger
+            aria-label={sidebarState === 'expanded' ? 'Recolher navegação' : 'Expandir navegação'}
+            title="Alternar navegação (Ctrl+B)"
+            className="hidden size-9 shrink-0 rounded-lg border border-border bg-background text-foreground md:inline-flex"
+          />
           <div className="analytics-breadcrumb flex min-w-0 flex-col gap-0.5">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Análises públicas</span>
