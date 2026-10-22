@@ -11,8 +11,6 @@ import {
   CalendarDays,
   ChevronsUpDown,
   Columns3,
-  BriefcaseBusiness,
-  Ellipsis,
   FolderKanban,
   LayoutDashboard,
   List,
@@ -103,8 +101,10 @@ const isCurrent = (pathname: string, href: string, exact?: boolean) =>
 
 function OpportunityNavigation({
   onOpenSearch,
+  active = 'open',
 }: {
-  onOpenSearch: () => void;
+  onOpenSearch?: () => void;
+  active?: 'open' | 'saved' | 'portfolio' | 'notifications';
 }) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile, state } = useSidebar();
@@ -128,7 +128,6 @@ function OpportunityNavigation({
     }
   };
 
-export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'portfolio' | 'notifications' }) {
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="flex h-(--header-height) items-center justify-center border-b border-sidebar-border px-3 group-data-[collapsible=icon]:px-0">
@@ -186,7 +185,7 @@ export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'sav
             variant="outline"
             onClick={() => {
               closeMobile();
-              onOpenSearch();
+              onOpenSearch?.();
             }}
             aria-label="Busca rápida"
             className="flex h-10 w-full items-center justify-start gap-3 overflow-hidden bg-background px-3 font-normal text-muted-foreground shadow-none group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-0"
@@ -203,6 +202,7 @@ export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'sav
           </Button>
         </SidebarGroup>
 
+        <nav aria-label="Atalhos da carteira">
           <Button asChild variant={active === 'portfolio' ? 'default' : 'ghost'} className="h-11 w-full justify-start gap-3 px-3">
             <Link href="/oportunidades/carteira" aria-current={active === 'portfolio' ? 'page' : undefined}>
               <FolderKanban className="size-4" />
@@ -375,6 +375,10 @@ export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'sav
       <SidebarRail />
     </Sidebar>
   );
+}
+
+export function OpportunitySidebar({ active = 'open' }: { active?: 'open' | 'saved' | 'portfolio' | 'notifications' }) {
+  return <OpportunityNavigation active={active} />;
 }
 
 function OpportunityShellContent({ children }: { children: ReactNode }) {
