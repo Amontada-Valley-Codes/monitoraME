@@ -71,9 +71,11 @@ export default function Dashboard() {
             <Button variant="outline" onClick={retry} className="min-h-11 gap-2" aria-label="Atualizar dados da visão geral"><RefreshCw className="size-4" />Atualizar dados</Button>
           </div>
           <OverviewKpis params={params} />
+          <div className="analytics-overview-grid analytics-overview-grid-featured">
+            <OverviewExpenses params={params} />
+            <OverviewDistribution params={params} />
+          </div>
           <OverviewMunicipalityRanking items={view.municipalityRanking} />
-          <OverviewExpenses params={params} />
-          <OverviewDistribution params={params} />
           <OverviewEvolution params={params} />
 
         </>

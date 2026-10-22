@@ -671,7 +671,7 @@
   align-items: stretch;
 }
 
-.analytics-overview-grid-pies {
+.analytics-overview-grid-featured {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
