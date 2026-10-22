@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,6 @@ interface MunicipioIBGE {
   id: number;
   nome: string;
 }
-
 interface Props {
   municipiosAtuais: string[];
   onSave: (municipios: string[]) => Promise<void>;
@@ -73,7 +72,7 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-amber-600 hover:text-amber-700">
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-primary hover:text-primary/80">
           <Edit2 className="w-3 h-3 mr-1" /> Alterar
         </Button>
       </DialogTrigger>
@@ -146,7 +145,7 @@ export function EditMunicipiosModal({ municipiosAtuais, onSave, saving }: Props)
         </div>
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Cancelar</Button>
-          <Button size="sm" disabled={saving} onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button size="sm" disabled={saving} onClick={handleSave} >
             {saving && <Loader2 className="w-3 h-3 mr-2 animate-spin" />} Salvar
           </Button>
         </DialogFooter>

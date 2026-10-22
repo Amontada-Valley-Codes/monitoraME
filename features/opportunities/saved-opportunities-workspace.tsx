@@ -13,9 +13,7 @@ import {
   Clock3,
   ChevronLeft,
   ChevronRight,
-  Columns3,
   ExternalLink,
-  List,
   MapPin,
   Plus,
   RotateCcw,
@@ -26,8 +24,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -52,6 +50,7 @@ import {
   readAllSavedOpportunities,
   removeSavedOpportunity,
 } from './saved-opportunities';
+import { companyDemoFixture } from './demo-fixture';
 
 import type { Opportunity } from './types';
 
@@ -236,34 +235,8 @@ export default function SavedOpportunitiesWorkspace({ initialView = 'calendar' }
   return (
     <div className="space-y-4">
       <Card className="gap-0 overflow-hidden py-0 shadow-none">
-        <div className="flex flex-col gap-2 border-b p-2 xl:flex-row xl:items-end">
-          <div className="flex flex-wrap gap-1">
-            <ViewButton
-              active={view === 'calendar'}
-              onClick={() => setView('calendar')}
-              icon={CalendarDays}
-            >
-              Calendário
-            </ViewButton>
-
-            <ViewButton
-              active={view === 'agenda'}
-              onClick={() => setView('agenda')}
-              icon={List}
-            >
-              Agenda
-            </ViewButton>
-
-            <ViewButton
-              active={view === 'kanban'}
-              onClick={() => setView('kanban')}
-              icon={Columns3}
-            >
-              Kanban
-            </ViewButton>
-          </div>
-
-          <div className="grid flex-1 gap-2 border-t pt-2 sm:grid-cols-3 xl:border-l xl:border-t-0 xl:pl-2 xl:pt-0">
+        {view !== 'agenda' && <div className="flex flex-col gap-2 border-b p-2 xl:flex-row xl:items-end">
+          <div className="grid flex-1 gap-2 sm:grid-cols-3">
             <Filter
               label="Situação"
               value={status}
@@ -308,7 +281,7 @@ export default function SavedOpportunitiesWorkspace({ initialView = 'calendar' }
             <RotateCcw className="size-4" />
             Limpar filtros
           </Button>
-        </div>
+        </div>}
 
         {view === 'kanban' ? (
           <div className="p-4">
@@ -376,29 +349,6 @@ function CalendarEventContent({ event, timeText }: EventContentArg) {
   );
 }
 
-function ViewButton({
-  active,
-  onClick,
-  icon: Icon,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: typeof CalendarDays;
-  children: string;
-}) {
-  return (
-    <Button
-      variant={active ? 'default' : 'ghost'}
-      className="h-9 min-h-9! rounded-md"
-      onClick={onClick}
-    >
-      <Icon className="size-4" />
-      {children}
-    </Button>
-  );
-}
-
 function Filter({
   label,
   value,
@@ -431,15 +381,13 @@ function Filter({
 
 function PersonalAgenda() {
   const [tasks, setTasks] = useState<AgendaTask[]>([]);
-  const [date, setDate] = useState<Date>(() => new Date());
-  const [time, setTime] = useState('09:00');
-  const [description, setDescription] = useState('');
-  const [dateOpen, setDateOpen] = useState(false);
-  const [timeOpen, setTimeOpen] = useState(false);
-  const [draftHour, setDraftHour] = useState('09');
-  const [draftMinute, setDraftMinute] = useState('00');
-  const [clockMode, setClockMode] = useState<'hour' | 'minute'>('hour');
-  const [message, setMessage] = useState('');
+  const [startDate, setStartDate] = useState<Date>(() => startOfWeek(new Date()));
+  const [editingSlot, setEditingSlot] = useState<{ date: string; hour: number; time: string } | null>(null);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [draftTitle, setDraftTitle] = useState('');
+  const companyName = companyDemoFixture.company.tradeName;
+  const days = Array.from({ length: 7 }, (_, index) => addDays(startDate, index));
+  const hours = Array.from({ length: 23 }, (_, index) => index + 1);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -457,183 +405,165 @@ function PersonalAgenda() {
     localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(next));
   };
 
-  const addTask = () => {
-    if (!description.trim()) {
-      setMessage('Escreva uma descrição para a tarefa.');
-      return;
-    }
-
-    persist([
-      ...tasks,
-      {
-        id: crypto.randomUUID(),
-        date: localDateValue(date),
-        time,
-        description: description.trim(),
-      },
-    ]);
-    setDescription('');
-    setMessage('Tarefa adicionada à agenda.');
+  const saveTask = () => {
+    if (!editingSlot || !draftTitle.trim()) return;
+    const task = {
+      id: editingTaskId ?? crypto.randomUUID(),
+      date: editingSlot.date,
+      time: editingSlot.time,
+      description: draftTitle.trim(),
+    };
+    persist(editingTaskId
+      ? tasks.map((item) => item.id === editingTaskId ? task : item)
+      : [...tasks, task]);
+    setDraftTitle('');
+    setEditingSlot(null);
+    setEditingTaskId(null);
   };
 
-  const sortedTasks = [...tasks].sort((left, right) =>
-    `${left.date}T${left.time}`.localeCompare(`${right.date}T${right.time}`),
-  );
-
-  const openTimePicker = () => {
-    const [hour, minute] = time.split(':');
-    setDraftHour(hour);
-    setDraftMinute(minute);
-    setClockMode('hour');
-    setTimeOpen(true);
+  const openSlot = (date: Date, hour: number) => {
+    setEditingSlot({ date: localDateValue(date), hour, time: `${String(hour).padStart(2, '0')}:00` });
+    setEditingTaskId(null);
+    setDraftTitle('');
   };
 
-  const confirmTime = () => {
-    const hour = Math.min(23, Math.max(0, Number(draftHour) || 0));
-    const minute = Math.min(59, Math.max(0, Number(draftMinute) || 0));
-    setTime(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
-    setTimeOpen(false);
+  const openTask = (task: AgendaTask) => {
+    setEditingSlot({ date: task.date, hour: Number(task.time.slice(0, 2)), time: task.time });
+    setEditingTaskId(task.id);
+    setDraftTitle(task.description);
+  };
+
+  const closeEditor = () => {
+    setEditingSlot(null);
+    setEditingTaskId(null);
+    setDraftTitle('');
   };
 
   return (
-    <div className="grid min-h-[32rem] xl:grid-cols-[minmax(0,1fr)_360px]">
-      <section className="min-w-0 border-r" aria-labelledby="agenda-title">
-        <div className="border-b px-4 py-4">
-          <h2 id="agenda-title" className="font-semibold">Minha agenda</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Anotações pessoais para organizar suas tarefas. Dados demonstrativos.</p>
+    <section className="min-w-0" aria-labelledby="agenda-title">
+      <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
+          <h2 id="agenda-title" className="font-semibold">Agenda da {companyName}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Clique em um horário vazio para incluir uma tarefa. Dados demonstrativos salvos neste navegador.
+          </p>
         </div>
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon-sm" onClick={() => setStartDate(addDays(startDate, -7))} aria-label="Ver semana anterior">
+            <ChevronLeft />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setStartDate(startOfWeek(new Date()))}>Hoje</Button>
+          <Button variant="ghost" size="icon-sm" onClick={() => setStartDate(addDays(startDate, 7))} aria-label="Ver próxima semana">
+            <ChevronRight />
+          </Button>
+        </div>
+      </div>
 
-        {sortedTasks.length ? (
-          <div className="divide-y">
-            {sortedTasks.map((task) => (
-              <div key={task.id} className="flex items-start gap-4 p-4">
-                <div className="w-28 shrink-0">
-                  <span className="block text-xs font-medium text-primary">{formatAgendaDate(task.date)}</span>
-                  <span className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="size-3" />{task.time}</span>
-                </div>
-                <p className="min-w-0 flex-1 text-sm leading-relaxed">{task.description}</p>
-                <Button variant="ghost" size="icon-sm" className="shrink-0 text-muted-foreground hover:text-destructive" onClick={() => persist(tasks.filter((item) => item.id !== task.id))} aria-label={`Excluir tarefa: ${task.description}`}><Trash2 /></Button>
+      <div className="overflow-x-auto">
+        <div className="min-w-[1180px]">
+          <div className="sticky top-0 z-10 grid grid-cols-[5rem_repeat(7,minmax(0,1fr))] border-b bg-card">
+            <div className="border-r p-3" />
+            {days.map((day) => (
+              <div key={localDateValue(day)} className="border-r px-3 py-3 text-center last:border-r-0">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{formatWeekday(day)}</p>
+                <p className="mt-1 text-sm font-semibold">{formatDayHeader(day)}</p>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="grid min-h-72 place-items-center p-8 text-center">
-            <div><CalendarDays className="mx-auto size-8 text-muted-foreground/60" /><p className="mt-3 text-sm font-medium">Nenhuma tarefa anotada</p><p className="mt-1 text-xs text-muted-foreground">Use o formulário ao lado para criar sua primeira anotação.</p></div>
-          </div>
-        )}
-      </section>
 
-      <aside className="min-w-0 p-4 sm:p-5">
-        <h2 className="text-lg font-semibold">Adicionar tarefa</h2>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Escolha o dia e o horário para lembrar desta atividade.</p>
+          {hours.map((hour) => (
+            <div key={hour} className="grid grid-cols-[5rem_repeat(7,minmax(0,1fr))] border-b last:border-b-0">
+              <div className="border-r px-2 py-3 text-right text-[10px] text-muted-foreground">{formatHour(hour)}</div>
+              {days.map((day) => {
+                const dateValue = localDateValue(day);
+                const slotTasks = tasks.filter((task) => task.date === dateValue && Number(task.time.slice(0, 2)) === hour);
 
-        <div className="mt-6 grid gap-5">
-          <div className="grid gap-2">
-            <Label>Dia</Label>
-            <Popover open={dateOpen} onOpenChange={setDateOpen}>
-              <PopoverTrigger asChild><Button variant="outline" className="justify-start font-normal"><CalendarDays />{formatSelectedDate(date)}</Button></PopoverTrigger>
-              <PopoverContent align="end" className="w-auto p-0"><Calendar mode="single" selected={date} onSelect={(value) => { if (value) { setDate(value); setDateOpen(false); } }} /></PopoverContent>
-            </Popover>
-          </div>
+                return (
+                  <div key={`${dateValue}-${hour}`} className="min-h-20 border-r p-1.5 last:border-r-0">
+                    {slotTasks.map((task) => (
+                      <article
+                        key={task.id}
+                        role="button"
+                        tabIndex={0}
+                        className="group mb-1 cursor-pointer rounded-lg border border-primary/15 bg-secondary p-2.5 text-secondary-foreground shadow-sm transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        onClick={() => openTask(task)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openTask(task);
+                          }
+                        }}
+                        aria-label={`Abrir tarefa: ${task.description}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-semibold" title={task.description}>{task.description}</p>
+                            <p className="mt-1 flex items-center gap-1 text-[10px] opacity-75"><Clock3 className="size-3" />{task.time} · {companyName}</p>
+                          </div>
+                          <Button variant="ghost" size="icon-xs" className="size-6 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100" onClick={(event) => { event.stopPropagation(); persist(tasks.filter((item) => item.id !== task.id)); }} aria-label={`Excluir tarefa: ${task.description}`}>
+                            <Trash2 className="size-3" />
+                          </Button>
+                        </div>
+                      </article>
+                    ))}
 
-          <div className="grid gap-2">
-            <Label>Horário</Label>
-            <Button type="button" variant="outline" className="justify-start font-normal" onClick={openTimePicker}><Clock3 />{time}</Button>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="agenda-description">Descrição</Label>
-            <Textarea id="agenda-description" value={description} onChange={(event) => { setDescription(event.target.value); setMessage(''); }} rows={5} placeholder="Ex.: Revisar os documentos do edital antes do prazo." />
-          </div>
-
-          {message && <p className="text-xs text-muted-foreground" role="status">{message}</p>}
-
-          <Button onClick={addTask}><Plus />Adicionar à agenda</Button>
+                    {slotTasks.length === 0 && (
+                      <button type="button" className="min-h-14 w-full rounded-md text-left text-xs text-transparent transition-colors hover:bg-muted/60 hover:text-muted-foreground focus-visible:bg-muted/60 focus-visible:text-muted-foreground" onClick={() => openSlot(day, hour)} aria-label={`Adicionar tarefa em ${formatDayHeader(day)} às ${formatHour(hour)}`}>
+                        <span className="inline-flex items-center gap-1 px-2"><Plus className="size-3" /> Adicionar tarefa</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
-      </aside>
+      </div>
 
-      <Dialog open={timeOpen} onOpenChange={setTimeOpen}>
-        <DialogContent className="sm:max-w-sm">
+      <Dialog open={editingSlot !== null} onOpenChange={(open) => { if (!open) closeEditor(); }}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Escolher horário</DialogTitle>
-            <DialogDescription>Informe a hora e os minutos exatos da tarefa.</DialogDescription>
+            <DialogTitle>{editingTaskId ? 'Editar tarefa' : 'Adicionar tarefa'}</DialogTitle>
+            <DialogDescription>
+              {editingTaskId ? 'Altere as informações do evento e salve novamente.' : `Novo evento para a agenda da ${companyName}.`}
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="py-2">
-            <div className="mb-4 flex items-center justify-center text-3xl font-semibold tabular-nums" aria-live="polite">
-              <button type="button" className={clockMode === 'hour' ? 'text-primary' : 'text-muted-foreground'} onClick={() => setClockMode('hour')}>{draftHour.padStart(2, '0')}</button>
-              <span className="px-1 text-muted-foreground">:</span>
-              <button type="button" className={clockMode === 'minute' ? 'text-primary' : 'text-muted-foreground'} onClick={() => setClockMode('minute')}>{draftMinute.padStart(2, '0')}</button>
+          <div className="grid gap-4 py-2">
+            {editingSlot && (
+              <div className="flex items-center gap-3 rounded-lg bg-muted/60 px-3 py-2.5 text-sm">
+                <CalendarDays className="size-4 text-primary" />
+                <span className="font-medium">{formatAgendaSlot(editingSlot.date, editingSlot.time)}</span>
+              </div>
+            )}
+
+            <div className="grid gap-2">
+              <Label htmlFor="agenda-task-title">Título</Label>
+              <Input
+                id="agenda-task-title"
+                autoFocus
+                value={draftTitle}
+                maxLength={48}
+                placeholder="Ex.: Revisar documentos do edital"
+                onChange={(event) => setDraftTitle(event.target.value)}
+                onKeyDown={(event) => { if (event.key === 'Enter') saveTask(); }}
+              />
+              <div className="flex justify-between text-[11px] text-muted-foreground">
+                <span>{companyName}</span><span>{draftTitle.length}/48</span>
+              </div>
             </div>
 
-            <AnalogClock
-              mode={clockMode}
-              hour={Number(draftHour)}
-              minute={Number(draftMinute)}
-              onHourChange={(value) => {
-                setDraftHour(String(value).padStart(2, '0'));
-                setClockMode('minute');
-              }}
-              onMinuteChange={(value) => setDraftMinute(String(value).padStart(2, '0'))}
-            />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setTimeOpen(false)}>Cancelar</Button>
-            <Button type="button" onClick={confirmTime}>Confirmar horário</Button>
+            <Button type="button" variant="outline" onClick={closeEditor}>Cancelar</Button>
+            <Button type="button" onClick={saveTask} disabled={!draftTitle.trim() || !editingSlot?.date}>
+              {editingTaskId ? 'Salvar alterações' : 'Salvar tarefa'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function AnalogClock({ mode, hour, minute, onHourChange, onMinuteChange }: { mode: 'hour' | 'minute'; hour: number; minute: number; onHourChange: (value: number) => void; onMinuteChange: (value: number) => void }) {
-  const [afternoon, setAfternoon] = useState(hour >= 12);
-  const values = mode === 'hour'
-    ? Array.from({ length: 12 }, (_, index) => index + (afternoon ? 12 : 0))
-    : Array.from({ length: 12 }, (_, index) => index * 5);
-  const activeIndex = mode === 'hour' ? hour % 12 : Math.round(minute / 5) % 12;
-
-  return (
-    <div>
-      {mode === 'hour' && (
-        <div className="mb-3 flex justify-center gap-1" aria-label="Período do dia">
-          <Button type="button" size="sm" variant={!afternoon ? 'default' : 'outline'} onClick={() => setAfternoon(false)}>00–11</Button>
-          <Button type="button" size="sm" variant={afternoon ? 'default' : 'outline'} onClick={() => setAfternoon(true)}>12–23</Button>
-        </div>
-      )}
-
-      <div className="relative mx-auto size-64 rounded-full bg-muted/70 shadow-inner" role="group" aria-label={mode === 'hour' ? 'Escolher hora no relógio' : 'Escolher minutos no relógio'}>
-        <span className="absolute left-1/2 top-1/2 z-10 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary" />
-        <span
-          className="pointer-events-none absolute left-1/2 top-1/2 h-0.5 w-[5.25rem] origin-left bg-primary transition-transform"
-          style={{ transform: `rotate(${activeIndex * 30 - 90}deg)` }}
-        />
-
-        {values.map((value, index) => {
-          const angle = index * 30 - 90;
-          const radians = angle * Math.PI / 180;
-          const x = 128 + Math.cos(radians) * 102;
-          const y = 128 + Math.sin(radians) * 102;
-          const active = index === activeIndex;
-          return (
-            <button
-              key={value}
-              type="button"
-              className={`absolute z-20 grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-primary text-primary-foreground' : 'hover:bg-background'}`}
-              style={{ left: x, top: y }}
-              onClick={() => mode === 'hour' ? onHourChange(value) : onMinuteChange(value)}
-              aria-label={mode === 'hour' ? `${value} horas` : `${value} minutos`}
-            >
-              {String(value).padStart(2, '0')}
-            </button>
-          );
-        })}
-      </div>
-
-      {mode === 'minute' && <p className="mt-3 text-center text-xs text-muted-foreground">Selecione os minutos em intervalos de 5.</p>}
-    </div>
+    </section>
   );
 }
 
@@ -642,13 +572,38 @@ function localDateValue(date: Date) {
   return new Date(+date - offset * 60000).toISOString().slice(0, 10);
 }
 
-function formatAgendaDate(value: string) {
-  const [year, month, day] = value.split('-').map(Number);
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(new Date(year, month - 1, day));
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function formatSelectedDate(date: Date) {
-  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short', day: '2-digit', month: 'long' }).format(date);
+function startOfWeek(date: Date) {
+  const day = startOfDay(date);
+  return addDays(day, -day.getDay());
+}
+
+function addDays(date: Date, amount: number) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + amount);
+}
+
+function formatWeekday(date: Date) {
+  return new Intl.DateTimeFormat('pt-BR', { weekday: 'short' }).format(date).replace('.', '');
+}
+
+function formatDayHeader(date: Date) {
+  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' }).format(date).replace('.', '');
+}
+
+function formatHour(hour: number) {
+  const period = hour < 12 ? 'AM' : 'PM';
+  const displayHour = hour % 12 || 12;
+  return `${String(displayHour).padStart(2, '0')} ${period}`;
+}
+
+function formatAgendaSlot(dateValue: string, time: string) {
+  const [year, month, day] = dateValue.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  const hour = Number(time.slice(0, 2));
+  return `${new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' }).format(date)}, às ${formatHour(hour)}`;
 }
 
 function Details({
