@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { ArrowLeftRight, ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
@@ -181,8 +181,8 @@ export function OverviewDistribution({ params }: { params: PipelineOverviewParam
     ? 'Participa\u00e7\u00e3o por porte empresarial'
     : 'Destino dos recursos';
   const nextTitle = showingBusinessSizes
-    ? 'Ver destino dos recursos'
-    : 'Ver porte empresarial';
+    ? 'Destino dos recursos'
+    : 'Porte empresarial';
   const total = showingBusinessSizes
     ? businessSizes.view?.totalCents ?? 0
     : rows.reduce((sum, item) => sum + item.value, 0);
@@ -197,7 +197,7 @@ export function OverviewDistribution({ params }: { params: PipelineOverviewParam
 
   return (
     <ChartPanel
-      action={(
+      belowTitleAction={(
         <Button
           aria-label={nextTitle}
           className="min-h-9 gap-2"
@@ -208,8 +208,8 @@ export function OverviewDistribution({ params }: { params: PipelineOverviewParam
           }}
           variant="outline"
         >
-          <span className="hidden sm:inline">{nextTitle}</span>
-          <ArrowRight aria-hidden="true" />
+          <ArrowLeftRight aria-hidden="true" />
+          <span>{nextTitle}</span>
         </Button>
       )}
       className="analytics-overview-panel analytics-overview-donut"

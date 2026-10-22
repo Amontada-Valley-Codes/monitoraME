@@ -26,6 +26,7 @@ export function ChartPanel({
   onRetry = () => {},
   empty = false,
   action,
+  belowTitleAction,
   className = '',
   contentClassName = '',
 }: {
@@ -38,6 +39,7 @@ export function ChartPanel({
   onRetry?: () => void;
   empty?: boolean;
   action?: ReactNode;
+  belowTitleAction?: ReactNode;
   className?: string;
   contentClassName?: string;
 }) {
@@ -56,6 +58,7 @@ export function ChartPanel({
           {description && (
             <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           )}
+          {belowTitleAction && <div className="mt-3">{belowTitleAction}</div>}
         </div>
         <div className="flex items-center gap-2">
           {action}
