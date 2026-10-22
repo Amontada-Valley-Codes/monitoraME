@@ -5,7 +5,7 @@ export const testeContent = {
     { label: "Sobre", href: "#sobre" },
     { label: "Soluções", href: "#solucoes", dropdown: true },
     { label: "Contato", href: "#contato" },
-    { label: "Explorar", href: "#resultados", dropdown: true },
+    { label: "Criar conta", href: "#criar-conta" },
   ],
   headerCta: "Ver compras públicas",
   hero: {
@@ -14,8 +14,6 @@ export const testeContent = {
     description: "Descubra oportunidades de compras públicas e entenda o mercado da sua região em um só lugar.",
     cta: "Explorar oportunidades",
     play: "Conhecer a plataforma",
-    leftCard: { value: "4.310", label: "oportunidades*" },
-    topCard: { value: "9.702", label: "negócios*" },
     chartLabel: "Visão de mercado*",
   },
   social: {
@@ -56,7 +54,7 @@ export const testeContent = {
     eyebrow: "MÓDULO ANALÍTICO",
     title: "Entenda como o dinheiro público movimenta o seu território.",
     description: "Explore indicadores de compras governamentais por município, período e perfil de fornecedor. Compare cenários e acompanhe despesas empenhadas com origem e atualização dos dados sempre visíveis.",
-    cta: "Explorar módulo analítico",
+    cta: "Explorar poder público",
     source: "Dados públicos consolidados · Consulte a fonte oficial",
     highlights: [
       { title: "Leitura territorial", description: "Indicadores por município, período e perfil de fornecedor." },
@@ -76,7 +74,7 @@ export const testeContent = {
     // tagline: "Dados públicos para novas possibilidades.",
     groups: [
       { title: "Plataforma", links: [{ label: "Início", href: "#inicio" }, { label: "Soluções", href: "#solucoes" }] },
-      { title: "Conheça", links: [{ label: "Sobre", href: "#sobre" }, { label: "Resultados", href: "#resultados" }] },
+      { title: "Conheça", links: [{ label: "Sobre", href: "#sobre" }, { label: "Criar conta", href: "#criar-conta" }] },
       { title: "Contato", links: [{ label: "Fale conosco", href: "#contato" }, { label: "Voltar ao topo", href: "#inicio" }] },
     ],
     copyright: "© MonitoraME. Página conceitual de demonstração.",

@@ -15,7 +15,7 @@ export default async function CompleteRegisterPage({ searchParams }: { searchPar
   if (!cookieStore.has("access_token") && !cookieStore.has("refresh_token")) redirect("/?cta=lead");
   const requestedReturnTo = (await searchParams).returnTo;
   const destination = isValidReturnTo(requestedReturnTo) ? requestedReturnTo : "/analitico/municipios";
-
+  
   async function handleCompleteRegister(data: CompleteAuthFormData) {
     "use server";
     try {

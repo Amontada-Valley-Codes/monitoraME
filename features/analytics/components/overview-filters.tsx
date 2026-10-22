@@ -13,7 +13,7 @@ export function OverviewFilters() {
   const years = Array.from({ length: 5 }, (_, index) => String(currentYear - index));
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="analytics-overview-filters flex items-center gap-2">
       <div className="flex flex-col gap-1">
         <Label htmlFor="overview-year" className="sr-only">
           Exercício

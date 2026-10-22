@@ -1,12 +1,17 @@
 'use client';
 
-import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { ArrowLeftRight, ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { Card } from '@/components/ui/card';
-import { compactMoney, money, percent } from '@/shared/lib/format';
+import { Button } from '@/components/ui/button';
+import { compactMoney, money, number, percent } from '@/shared/lib/format';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PipelineOverviewParams } from '../pipeline/types';
+import type { OverviewMunicipalityRankingItem } from '../pipeline/view-model';
+import { DEFAULT_CHART_ENTER_TRANSITION } from '@/components/charts/animation';
 import {
   useOverviewBusinessSizes,
   useOverviewDestinations,
@@ -19,38 +24,79 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-export function OverviewMetricCard({ label, value, detail, icon: Icon, progress, accent = 'blue' }: {
+export function OverviewMetricCard({ label, value, detail, icon: Icon }: {
   label: string;
   value: string;
   detail: string;
   icon: typeof ChartPie;
-  progress?: number | null;
-  accent?: 'blue' | 'orange';
 }) {
   return (
     <Card className="dashboard-metric analytics-overview-metric gap-0 p-5">
-      <div className="flex items-center justify-between gap-2">
+      <div className="analytics-overview-metric-heading">
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
-        <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        <span className="analytics-overview-metric-icon"><Icon className="size-4" aria-hidden="true" /></span>
       </div>
       <strong className="metric mt-4 block min-w-0 break-words text-3xl font-semibold leading-tight" title={value}>{value}</strong>
       <p className="mt-2 text-sm leading-5 text-muted-foreground">{detail}</p>
-      {progress !== undefined && progress !== null && <div className="analytics-metric-track mt-auto" aria-hidden="true"><span className={accent === 'orange' ? 'analytics-metric-fill is-orange' : 'analytics-metric-fill'} style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} /></div>}
     </Card>
   );
 }
 
 export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
-  const { data, view } = useOverviewKpis(params);
-  if (!data || !view) return null;
+  const { data } = useOverviewKpis(params);
+  if (!data) return null;
 
   return (
-    <div className="dashboard-metrics analytics-overview-metrics grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} progress={data.meMeiPercentage} />
-      <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
-      <OverviewMetricCard label="Fornecedores locais" value={valueOrDash(data.localPercentage, percent)} detail="No município comprador" icon={MapPin} progress={data.localPercentage} />
-      <OverviewMetricCard label="Recursos fora do município" value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
+    <div className="dashboard-metrics analytics-overview-metrics" role="group" aria-label="Indicadores principais">
+      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Sobre o total de compras consideradas" icon={ChartPie} />
+      <OverviewMetricCard label="Compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido · reais" icon={Wallet} />
+      <OverviewMetricCard label="Percentual de compras com fornecedores no Ceará" value={valueOrDash(data.localPercentage, percent)} detail="Do total no recorte consultado" icon={MapPin} />
+      <OverviewMetricCard label="Percentual de compras com fornecedores fora do Ceará" value={valueOrDash(data.outsidePercentage, percent)} detail="Do total no recorte consultado" icon={ArrowUpRight} />
     </div>
+  );
+}
+export function OverviewMunicipalityRanking({ items }: {
+  items: OverviewMunicipalityRankingItem[];
+}) {
+  if (items.length === 0) return null;
+
+  return (
+    <section className="analytics-overview-panel analytics-overview-ranking overflow-hidden rounded-xl border bg-card">
+      <div>
+        <h2 className="font-semibold">Munic&#237;pios com maior volume de compras de ME</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Dez primeiros por valor l&#237;quido. Percentual calculado sobre o total estadual de ME.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <Table>
+          <caption className="sr-only">Ranking dos dez municipios com maior valor liquido de compras de ME</caption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16">Posi&#231;&#227;o</TableHead>
+              <TableHead>Munic&#237;pio</TableHead>
+              <TableHead className="text-right">Compras l&#237;quidas de ME</TableHead>
+              <TableHead className="text-right">Empenhos</TableHead>
+              <TableHead className="text-right">Do total estadual</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.tceCode}>
+                <TableCell className="font-medium tabular-nums">{item.position}</TableCell>
+                <TableCell>
+                  <span className="font-medium">{item.municipality}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">Codigo TCE {item.tceCode}</span>
+                </TableCell>
+                <TableCell className="text-right font-medium tabular-nums">{money(item.purchasesCents)}</TableCell>
+                <TableCell className="text-right tabular-nums">{number(item.commitmentCount)}</TableCell>
+                <TableCell className="text-right tabular-nums">{percent(item.totalMePercentage)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </section>
   );
 }
 
@@ -65,7 +111,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
     <ChartPanel
       className="analytics-fixed-chart analytics-overview-panel analytics-overview-expenses"
       title="Elementos de despesas"
-      description="Valores líquidos dos sete elementos de despesa considerados exclusivamente para microempresas"
+      description="Valores líquidos dos sete elementos de despesa considerados para ME e MEI"
       legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
@@ -115,43 +161,64 @@ export function OverviewEvolution({ params }: { params: PipelineOverviewParams }
   );
 }
 
-export function OverviewBusinessSizes({ params }: { params: PipelineOverviewParams }) {
-  const { data, status, retry, view } = useOverviewBusinessSizes(params);
-  const rows = data ?? [];
+export function OverviewDistribution({ params }: { params: PipelineOverviewParams }) {
+  const [activeView, setActiveView] = useState<'businessSizes' | 'destinations'>('businessSizes');
+  const [isSwitching, setIsSwitching] = useState(false);
+  const businessSizes = useOverviewBusinessSizes(params);
+  const destinations = useOverviewDestinations(params);
+  const showingBusinessSizes = activeView === 'businessSizes';
+  const rows = showingBusinessSizes
+    ? businessSizes.data ?? []
+    : destinations.data ?? [];
+  const status = showingBusinessSizes ? businessSizes.status : destinations.status;
+  const retry = showingBusinessSizes ? businessSizes.retry : destinations.retry;
+  const title = showingBusinessSizes
+    ? 'Participa\u00e7\u00e3o por porte empresarial'
+    : 'Destino dos recursos';
+  const nextTitle = showingBusinessSizes
+    ? 'Destino dos recursos'
+    : 'Porte empresarial';
+  const total = showingBusinessSizes
+    ? businessSizes.view?.totalCents ?? 0
+    : rows.reduce((sum, item) => sum + item.value, 0);
+
+  useEffect(() => {
+    if (!isSwitching || status === 'loading') return;
+    const timer = window.setTimeout(() => setIsSwitching(false), status === 'ready' && rows.length > 0
+      ? ((DEFAULT_CHART_ENTER_TRANSITION.duration ?? 1.1) + 0.1 + Math.max(0, rows.length - 1) * 0.08) * 1000
+      : 0);
+    return () => window.clearTimeout(timer);
+  }, [activeView, isSwitching, rows.length, status]);
+
   return (
     <ChartPanel
+      belowTitleAction={(
+        <Button
+          aria-label={nextTitle}
+          className="min-h-9 gap-2"
+          disabled={isSwitching}
+          onClick={() => {
+            setIsSwitching(true);
+            setActiveView(showingBusinessSizes ? 'destinations' : 'businessSizes');
+          }}
+          variant="outline"
+        >
+          <ArrowLeftRight aria-hidden="true" />
+          <span>{nextTitle}</span>
+        </Button>
+      )}
       className="analytics-overview-panel analytics-overview-donut"
-      title="Participação por porte empresarial"
-      description="Percentual do valor líquido anual"
+      description={showingBusinessSizes ? 'Percentual do valor l\u00edquido anual' : 'Origem das compras de ME e MEI'}
+      empty={status === 'ready' && rows.length === 0}
+      onRetry={retry}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
-      onRetry={retry}
-      empty={status === 'ready' && rows.length === 0}
+      title={title}
     >
-      <DonutChart data={rows} total={view?.totalCents ?? 0} />
+      <DonutChart key={activeView} data={rows} total={total} />
     </ChartPanel>
   );
 }
-
-export function OverviewDestinations({ params }: { params: PipelineOverviewParams }) {
-  const { data, status, retry } = useOverviewDestinations(params);
-  const rows = data ?? [];
-  const meTotalCents = rows.reduce((total, item) => total + item.value, 0);
-  return (
-    <ChartPanel
-      className="analytics-overview-panel analytics-overview-donut"
-      title="Destino dos recursos"
-      description="Origem das compras de ME"
-      rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
-      state={status}
-      onRetry={retry}
-      empty={status === 'ready' && rows.length === 0}
-    >
-      <DonutChart data={rows} total={meTotalCents} />
-    </ChartPanel>
-  );
-}
-
 // export function OverviewReading({ params }: { params: PipelineOverviewParams }) {
 //   const { data, view } = useOverviewKpis(params);
 //   if (!data || !view) return null;

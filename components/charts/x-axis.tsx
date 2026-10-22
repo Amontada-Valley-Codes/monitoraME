@@ -20,6 +20,8 @@ export interface XAxisProps {
    * `"domain"` — evenly spaced ticks across the time domain (may not align with hover).
    */
   tickMode?: "domain" | "data";
+  /** Optional date label formatter for charts with monthly or custom periods. */
+  dateLabelFormat?: (date: Date) => string;
 }
 
 interface AxisTick {
@@ -381,6 +383,7 @@ export function selectEvenlySpacedIndices(
 function buildDataAlignedTicks({
   data,
   dateLabels,
+  dateLabelFormat,
   marginLeft,
   targetTickCount,
   xAccessor,
@@ -388,6 +391,7 @@ function buildDataAlignedTicks({
 }: {
   data: Record<string, unknown>[];
   dateLabels: string[];
+  dateLabelFormat?: (date: Date) => string;
   marginLeft: number;
   targetTickCount: number;
   xAccessor: (d: Record<string, unknown>) => Date;
@@ -415,7 +419,7 @@ function buildDataAlignedTicks({
       continue;
     }
     const date = xAccessor(point);
-    const label = dateLabels[index] ?? shortDateFmt.format(date);
+    const label = dateLabelFormat?.(date) ?? dateLabels[index] ?? shortDateFmt.format(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -433,10 +437,12 @@ function buildDataAlignedTicks({
 function buildDomainTicks({
   marginLeft,
   numTicks,
+  dateLabelFormat,
   xScale,
 }: {
   marginLeft: number;
   numTicks: number;
+  dateLabelFormat?: (date: Date) => string;
   xScale: {
     domain: () => Date[];
     (date: Date): number | undefined;
@@ -460,7 +466,7 @@ function buildDomainTicks({
   for (let i = 0; i < tickCount; i++) {
     const t = i / (tickCount - 1);
     const date = new Date(startTime + t * timeRange);
-    const label = shortDateFmt.format(date);
+    const label = dateLabelFormat?.(date) ?? shortDateFmt.format(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -501,7 +507,8 @@ function appendProjectionTailTicks(
     (date: Date): number | undefined;
   },
   marginLeft: number,
-  maxExtraTicks: number
+  maxExtraTicks: number,
+  dateLabelFormat?: (date: Date) => string
 ): AxisTick[] {
   if (data.length === 0 || maxExtraTicks <= 0) {
     return ticks;
@@ -528,7 +535,7 @@ function appendProjectionTailTicks(
     const date = new Date(
       startTime + (i / (extraCount + 1)) * (endTime - startTime)
     );
-    const label = shortDateFmt.format(date);
+    const label = dateLabelFormat?.(date) ?? shortDateFmt.format(date);
     if (seenLabels.has(label)) {
       continue;
     }
@@ -540,7 +547,7 @@ function appendProjectionTailTicks(
     });
   }
 
-  const endLabel = shortDateFmt.format(domainEnd);
+  const endLabel = dateLabelFormat?.(domainEnd) ?? shortDateFmt.format(domainEnd);
   if (!seenLabels.has(endLabel)) {
     extras.push({
       date: domainEnd,
@@ -572,10 +579,18 @@ const XAxisInner = memo(function XAxisInner({
   numTicks = 5,
   tickerHalfWidth = 50,
   tickMode = "data",
+  dateLabelFormat,
   container,
 }: XAxisProps & { container: HTMLDivElement }) {
   const { xScale, margin, tooltipData, data, xAccessor, dateLabels, xDomain } =
     useChart();
+
+  const axisDateLabels = useMemo(
+    () => dateLabelFormat
+      ? data.map((point) => dateLabelFormat(xAccessor(point)))
+      : dateLabels,
+    [data, dateLabelFormat, dateLabels, xAccessor]
+  );
 
   const labelsToShow = useMemo(() => {
     const projectionExtendsScale =
@@ -583,6 +598,7 @@ const XAxisInner = memo(function XAxisInner({
 
     if (tickMode === "domain") {
       return buildDomainTicks({
+        dateLabelFormat,
         marginLeft: margin.left,
         numTicks,
         xScale,
@@ -592,6 +608,7 @@ const XAxisInner = memo(function XAxisInner({
     // No brush: evenly spaced ticks across the full domain (data + projection).
     if (projectionExtendsScale && xDomain == null) {
       return buildDomainTicks({
+        dateLabelFormat,
         marginLeft: margin.left,
         numTicks,
         xScale,
@@ -600,7 +617,8 @@ const XAxisInner = memo(function XAxisInner({
 
     const dataTicks = buildDataAlignedTicks({
       data,
-      dateLabels,
+      dateLabels: axisDateLabels,
+      dateLabelFormat,
       marginLeft: margin.left,
       targetTickCount: numTicks,
       xAccessor,
@@ -615,7 +633,8 @@ const XAxisInner = memo(function XAxisInner({
         xAccessor,
         xScale,
         margin.left,
-        Math.max(1, numTicks - dataTicks.length + 1)
+        Math.max(1, numTicks - dataTicks.length + 1),
+        dateLabelFormat
       );
     }
 
@@ -624,7 +643,8 @@ const XAxisInner = memo(function XAxisInner({
     tickMode,
     xDomain,
     data,
-    dateLabels,
+    axisDateLabels,
+    dateLabelFormat,
     xAccessor,
     xScale,
     margin.left,
@@ -635,7 +655,7 @@ const XAxisInner = memo(function XAxisInner({
   const crosshairX = tooltipData ? tooltipData.x + margin.left : null;
   const hoveredLabel =
     isHovering && tooltipData
-      ? (dateLabels[tooltipData.index] ??
+      ? (axisDateLabels[tooltipData.index] ??
         shortDateFmt.format(xAccessor(tooltipData.point)))
       : null;
 
