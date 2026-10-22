@@ -22,14 +22,18 @@ export type PortfolioHistoryEntry = {
   id: string;
   at: string;
   authorId: string;
-  action: 'created' | 'stage' | 'assignee' | 'deadline' | 'archived' | 'restored';
+  action: 'created' | 'stage' | 'assignee' | 'deadline' | 'archived' | 'restored' | 'note';
   from?: string | null;
   to?: string | null;
   note?: string;
 };
 
+/** Observação privada da empresa sobre a oportunidade. Não é compartilhada fora do workspace. */
+export type PortfolioNote = { text: string; authorId: string; updatedAt: string };
+
 export type PortfolioItem = {
   id: string;
+  note?: PortfolioNote | null;
   opportunityId: string;
   stage: PortfolioStage;
   assigneeId: string | null;
@@ -47,11 +51,13 @@ export type PortfolioChange =
   | { kind: 'assignee'; assigneeId: string | null }
   | { kind: 'deadline'; deadline: string | null }
   | { kind: 'archive' }
-  | { kind: 'restore' };
+  | { kind: 'restore' }
+  | { kind: 'note'; text: string };
 
 export class PortfolioRuleError extends Error {}
 
 export const DISCARD_REASON_MIN = 10;
+export const NOTE_MAX_LENGTH = 1000;
 const STAGE_IDS = new Set<string>(PORTFOLIO_STAGES.map((stage) => stage.id));
 const BLOCKED_WHEN_SUSPENDED = new Set<PortfolioStage>(['confirmed', 'submitted', 'awaiting', 'won', 'partial', 'lost']);
 const ALLOWED_WHEN_ENDED = new Set<PortfolioStage>(['discarded', 'unconfirmed']);
@@ -139,6 +145,13 @@ export function applyPortfolioChange(
     case 'restore':
       if (!entry.archived) throw new PortfolioRuleError('A oportunidade já está ativa.');
       return bump({ archived: false }, record({ action: 'restored' }));
+    case 'note': {
+      const text = change.text.trim();
+      if (!text) throw new PortfolioRuleError('Escreva a observação antes de salvar.');
+      if (text.length > NOTE_MAX_LENGTH) throw new PortfolioRuleError(`A observação deve ter no máximo ${NOTE_MAX_LENGTH} caracteres.`);
+      if (text === entry.note?.text) throw new PortfolioRuleError('A observação não foi alterada.');
+      return bump({ note: { text, authorId, updatedAt: at } }, record({ action: 'note', from: entry.note ? 'edited' : null }));
+    }
   }
 }
 

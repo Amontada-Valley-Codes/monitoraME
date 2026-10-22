@@ -76,6 +76,11 @@ export default function PortfolioPage() {
     await mutate(entry, value);
     syncOutcome();
   };
+  const saveNote = async (entry: PortfolioEntry, text: string) => {
+    const saved = await mutate(entry, { kind: 'note', text });
+    syncOutcome();
+    return saved;
+  };
   const requestStage = (entry: PortfolioEntry, stage: PortfolioStage) => {
     if (stage === 'discarded' || stage === 'submitted') setStageRequest({ entry, stage });
     else change(entry, { kind: 'stage', stage });
@@ -191,17 +196,17 @@ export default function PortfolioPage() {
                 <Card className="min-w-0 gap-0 overflow-hidden py-0 shadow-sm">
                   <div className="flex flex-col gap-3 border-b p-3 xl:flex-row xl:items-end">
                     <div className="flex flex-wrap gap-1">
-                      <Button variant={tab === 'active' ? 'default' : 'ghost'} className="h-9" onClick={() => setTab('active')}>
+                      <Button variant={tab === 'active' ? 'default' : 'ghost'} className="h-9 min-h-9!" onClick={() => setTab('active')}>
                         Ativas <span className="text-xs opacity-80">{scenario === 'empty' ? 0 : active.length}</span>
                       </Button>
-                      <Button variant={tab === 'archived' ? 'default' : 'ghost'} className="h-9" onClick={() => setTab('archived')}>
+                      <Button variant={tab === 'archived' ? 'default' : 'ghost'} className="h-9 min-h-9!" onClick={() => setTab('archived')}>
                         Arquivadas <span className="text-xs opacity-80">{scenario === 'empty' ? 0 : archived.length}</span>
                       </Button>
                     </div>
                     <div className="grid flex-1 gap-2 sm:grid-cols-2 xl:border-l xl:pl-3">
                       <label className="text-xs text-muted-foreground">
                         Etapa interna
-                        <NativeSelect className="mt-1 w-full" value={stageFilter} onChange={(event) => setStageFilter(event.target.value as 'all' | PortfolioStage)}>
+                        <NativeSelect className="mt-1 h-9 w-full" value={stageFilter} onChange={(event) => setStageFilter(event.target.value as 'all' | PortfolioStage)}>
                           <NativeSelectOption value="all">Todas as etapas</NativeSelectOption>
                           {PORTFOLIO_STAGES.map((stage) => (
                             <NativeSelectOption key={stage.id} value={stage.id}>{stage.label}</NativeSelectOption>
@@ -210,7 +215,7 @@ export default function PortfolioPage() {
                       </label>
                       <label className="text-xs text-muted-foreground">
                         Responsável
-                        <NativeSelect className="mt-1 w-full" value={assigneeFilter} onChange={(event) => setAssigneeFilter(event.target.value)}>
+                        <NativeSelect className="mt-1 h-9 w-full" value={assigneeFilter} onChange={(event) => setAssigneeFilter(event.target.value)}>
                           <NativeSelectOption value="all">Todos</NativeSelectOption>
                           <NativeSelectOption value="none">Sem responsável</NativeSelectOption>
                           {members.map((item) => (
@@ -220,7 +225,7 @@ export default function PortfolioPage() {
                       </label>
                     </div>
                     <div className="flex flex-wrap items-center gap-1">
-                      <Button variant="ghost" className="h-9" onClick={clearFilters}>
+                      <Button variant="ghost" className="h-9 min-h-9!" onClick={clearFilters}>
                         <RotateCcw />
                         Limpar
                       </Button>
@@ -265,6 +270,7 @@ export default function PortfolioPage() {
             pending={selected ? pendingIds.has(selected.id) : false}
             onClose={() => setSelectedId(null)}
             onChange={change}
+            onNoteSave={saveNote}
             onStageRequest={requestStage}
           />
           <StageChangeDialog
@@ -285,7 +291,7 @@ function DemoSelect({ label, value, onChange, options }: { label: string; value:
   return (
     <label className="text-xs text-muted-foreground">
       {label}
-      <NativeSelect size="sm" className="mt-1 w-48" value={value} onChange={(event) => onChange(event.target.value)}>
+      <NativeSelect className="mt-1 h-9 w-48" value={value} onChange={(event) => onChange(event.target.value)}>
         {options.map(([key, text]) => (
           <NativeSelectOption key={key} value={key}>{text}</NativeSelectOption>
         ))}
@@ -297,11 +303,11 @@ function DemoSelect({ label, value, onChange, options }: { label: string; value:
 function ViewToggle({ view, onChange }: { view: View; onChange: (view: View) => void }) {
   return (
     <div className="flex rounded-lg border p-0.5" role="group" aria-label="Visualização">
-      <Button size="sm" variant={view === 'list' ? 'secondary' : 'ghost'} aria-pressed={view === 'list'} onClick={() => onChange('list')}>
+      <Button size="sm" className="h-8 min-h-8!" variant={view === 'list' ? 'secondary' : 'ghost'} aria-pressed={view === 'list'} onClick={() => onChange('list')}>
         <List />
         Lista
       </Button>
-      <Button size="sm" variant={view === 'board' ? 'secondary' : 'ghost'} aria-pressed={view === 'board'} onClick={() => onChange('board')}>
+      <Button size="sm" className="h-8 min-h-8!" variant={view === 'board' ? 'secondary' : 'ghost'} aria-pressed={view === 'board'} onClick={() => onChange('board')}>
         <Columns3 />
         Quadro
       </Button>
