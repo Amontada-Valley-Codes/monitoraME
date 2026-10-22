@@ -23,6 +23,7 @@ import { compactMoney, money, percent, ratio } from '@/shared/lib/format';
 import { ReferenceArea } from 'recharts';
 
 export type Series = { key: string; label: string; color: string };
+const monthOnlyDateFormat = new Intl.DateTimeFormat('pt-BR', { month: 'long' });
 export const EXPENSE_COLORS = [
   'var(--expense-1)',
   'var(--expense-2)',
@@ -91,7 +92,7 @@ export function TrendChart({
             showMarkers
           />
         ))}
-        <XAxis numTicks={6} />
+        <XAxis dateLabelFormat={(date) => monthOnlyDateFormat.format(date)} numTicks={6} />
         <YAxis numTicks={4} formatValue={(value) => compactMoney(value)} />
         <ChartTooltip
           showDatePill={false}
@@ -231,7 +232,7 @@ export function DonutChart({
       >
         {data.map((item, index) => (
           <Button
-            key={item.key}
+            key={`${item.key}-${index}`}
             variant="ghost"
             onClick={() => onSelect?.(item.key)}
             onMouseEnter={() => setHover(index)}

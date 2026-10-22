@@ -12,6 +12,8 @@ export type DestinoRecurso =
   | 'NO_MUNICIPIO_COMPRADOR'
   | 'EM_OUTRO_MUNICIPIO'
   | 'FORA_DO_CEARA'
+  | 'NO_CEARA'
+  | 'OUTRO_MUNICIPIO_DO_CEARA'
   | 'ORIGEM_NAO_IDENTIFICADA';
 
 export interface PipelineOverviewParams {
@@ -42,6 +44,7 @@ const businessSizeSchema = metricSchema.extend({
     'NAO_IDENTIFICADO',
   ]).optional(),
   porte: z.string().optional(),
+  nome: z.string().optional(),
 });
 
 const expenseElementSchema = z.object({
@@ -69,6 +72,8 @@ const resourceDestinationSchema = metricSchema.extend({
     'NO_MUNICIPIO_COMPRADOR',
     'EM_OUTRO_MUNICIPIO',
     'FORA_DO_CEARA',
+    'NO_CEARA',
+    'OUTRO_MUNICIPIO_DO_CEARA',
     'ORIGEM_NAO_IDENTIFICADA',
   ]).optional(),
   destino_recurso: z.string().optional(),
@@ -79,10 +84,25 @@ const overviewKpisSchema = z.object({
   total_compras_ME_centavos: z.number().finite().optional(),
   percentual_compras_fornecedores_locais: z.number().finite().optional(),
   percentual_recursos_fora_municipio: z.number().finite().optional(),
+  percentual_compras_fornecedores_no_ceara: z.number().finite().optional(),
+  percentual_fornecedores_fora_do_ceara: z.number().finite().optional(),
+}).passthrough();
+
+const municipalityRankingSchema = z.object({
+  posicao: z.number().int().positive(),
+  codigo_municipio_tce: z.string(),
+  municipio: z.string(),
+  compras_me_centavos: z.number().finite(),
+  quantidade_empenhos: z.number().int().nonnegative(),
+  percentual_total_me: z.number().finite(),
 }).passthrough();
 
 export const pipelineOverviewSchema = z.object({
   fonte: z.string(),
+  cache_resultado: z.object({
+    atualizado_em: z.string().optional(),
+    gerado_em: z.string().optional(),
+  }).passthrough().optional(),
   parametros: z.object({
     data_inicial: z.string(),
     data_final: z.string(),
@@ -114,6 +134,7 @@ export const pipelineOverviewSchema = z.object({
   elementos_despesa: z.array(expenseElementSchema),
   evolucao_compras_consideradas: z.array(monthlyEvolutionSchema),
   destino_recursos: z.array(resourceDestinationSchema),
+  ranking_municipios_me: z.array(municipalityRankingSchema).default([]),
 }).passthrough();
 
 export type PipelineOverviewFailure = z.infer<typeof failureSchema>;
@@ -121,6 +142,7 @@ export type PipelineBusinessSize = z.infer<typeof businessSizeSchema>;
 export type PipelineExpenseElement = z.infer<typeof expenseElementSchema>;
 export type PipelineMonthlyEvolution = z.infer<typeof monthlyEvolutionSchema>;
 export type PipelineResourceDestination = z.infer<typeof resourceDestinationSchema>;
+export type PipelineMunicipalityRankingItem = z.infer<typeof municipalityRankingSchema>;
 export type PipelineTceOverview = z.infer<typeof pipelineOverviewSchema>;
 
 export type PipelineOverviewErrorCode =
