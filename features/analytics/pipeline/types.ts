@@ -99,6 +99,10 @@ const municipalityRankingSchema = z.object({
 
 export const pipelineOverviewSchema = z.object({
   fonte: z.string(),
+  cache_resultado: z.object({
+    atualizado_em: z.string().optional(),
+    gerado_em: z.string().optional(),
+  }).passthrough().optional(),
   parametros: z.object({
     data_inicial: z.string(),
     data_final: z.string(),

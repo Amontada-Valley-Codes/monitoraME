@@ -34,6 +34,7 @@ export interface OverviewMunicipalityRankingItem {
 export interface OverviewViewModel {
   source: string;
   period: string;
+  cacheUpdatedAt: string | null;
   municipalityName: string | null;
   missingMonths: string[];
   failures: string[];
@@ -265,6 +266,7 @@ export function toOverviewViewModel(data: PipelineTceOverview): OverviewViewMode
   return {
     source: data.fonte,
     period: `${data.parametros.data_inicial} a ${data.parametros.data_final}`,
+    cacheUpdatedAt: text(record(data.cache_resultado), ['atualizado_em', 'gerado_em']),
     municipalityName,
     missingMonths: data.competencias_ausentes,
     failures: data.falhas_competencias.map(failureLabel),

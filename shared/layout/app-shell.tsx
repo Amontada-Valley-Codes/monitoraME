@@ -182,7 +182,7 @@ function ShellContent({ children }: { children: ReactNode }) {
     <>
       <Navigation />
       <SidebarInset className="analytics-main-panel min-w-0 overflow-clip">
-        <header className="analytics-topbar sticky top-0 z-20 flex min-h-(--header-height) flex-wrap items-center gap-3 px-4 py-3 sm:px-6">
+        <header className={`analytics-topbar ${isOverview ? 'analytics-topbar-overview' : ''} sticky top-0 z-20 flex min-h-(--header-height) flex-wrap items-center gap-3 px-4 py-3 sm:px-6`}>
           <SidebarTrigger
             aria-label={isMobile
               ? openMobile ? 'Fechar navegação' : 'Abrir navegação'
@@ -199,10 +199,9 @@ function ShellContent({ children }: { children: ReactNode }) {
               <ChevronRight className="size-4 text-muted-foreground" aria-hidden="true" />
               <strong className="truncate text-foreground">{current.label}</strong>
             </div>
-            {isOverview && <p className="text-sm text-muted-foreground">Compras públicas do Ceará</p>}
           </div>
 
-          <div className="flex items-center ml-auto gap-3">
+          <div className="analytics-topbar-actions flex items-center gap-3">
             {path === '/analitico' && (
               <>
                 <OverviewFilters />

@@ -24,42 +24,37 @@ function valueOrDash(value: number | null, formatter: (value: number) => string)
   return value === null ? '—' : formatter(value);
 }
 
-export function OverviewMetricCard({ label, value, detail, icon: Icon, progress, accent = 'blue' }: {
+export function OverviewMetricCard({ label, value, detail, icon: Icon }: {
   label: string;
   value: string;
   detail: string;
   icon: typeof ChartPie;
-  progress?: number | null;
-  accent?: 'blue' | 'orange';
 }) {
   return (
     <Card className="dashboard-metric analytics-overview-metric gap-0 p-5">
-      <div className="flex items-center justify-between gap-2">
+      <div className="analytics-overview-metric-heading">
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
-        <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        <span className="analytics-overview-metric-icon"><Icon className="size-4" aria-hidden="true" /></span>
       </div>
       <strong className="metric mt-4 block min-w-0 break-words text-3xl font-semibold leading-tight" title={value}>{value}</strong>
       <p className="mt-2 text-sm leading-5 text-muted-foreground">{detail}</p>
-      {progress !== undefined && progress !== null && <div className="analytics-metric-track mt-auto" aria-hidden="true"><span className={accent === 'orange' ? 'analytics-metric-fill is-orange' : 'analytics-metric-fill'} style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} /></div>}
     </Card>
   );
 }
 
 export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
-  const { data, view } = useOverviewKpis(params);
-  if (!data || !view) return null;
-  const statewide = !params.codigo_municipio;
+  const { data } = useOverviewKpis(params);
+  if (!data) return null;
 
   return (
-    <div className="dashboard-metrics analytics-overview-metrics grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Das compras consideradas" icon={ChartPie} progress={data.meMeiPercentage} />
-      <OverviewMetricCard label="Total de compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido em reais" icon={Wallet} />
-      <OverviewMetricCard label={statewide ? "Fornecedores no Cear\u00e1" : "Fornecedores locais"} value={valueOrDash(data.localPercentage, percent)} detail={statewide ? "Compras com fornecedores no estado" : "No município comprador"} icon={MapPin} progress={data.localPercentage} />
-      <OverviewMetricCard label={statewide ? "Fornecedores fora do Cear\u00e1" : "Recursos fora do município"} value={valueOrDash(data.outsidePercentage, percent)} detail="Do valor considerado" icon={ArrowUpRight} progress={data.outsidePercentage} accent="orange" />
+    <div className="dashboard-metrics analytics-overview-metrics" role="group" aria-label="Indicadores principais">
+      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Sobre o total de compras consideradas" icon={ChartPie} />
+      <OverviewMetricCard label="Compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido · reais" icon={Wallet} />
+      <OverviewMetricCard label="Percentual de compras com fornecedores no Ceará" value={valueOrDash(data.localPercentage, percent)} detail="Do total no recorte consultado" icon={MapPin} />
+      <OverviewMetricCard label="Percentual de compras com fornecedores fora do Ceará" value={valueOrDash(data.outsidePercentage, percent)} detail="Do total no recorte consultado" icon={ArrowUpRight} />
     </div>
   );
 }
-
 export function OverviewMunicipalityRanking({ items }: {
   items: OverviewMunicipalityRankingItem[];
 }) {
