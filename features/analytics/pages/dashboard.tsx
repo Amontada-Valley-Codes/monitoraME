@@ -1,7 +1,6 @@
 'use client';
 
-import { CalendarDays, Clock3, Database, Info, RefreshCw, TriangleAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CalendarDays, Clock3, Database, Info, TriangleAlert } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/states';
 import { dateLabel } from '@/shared/lib/format';
@@ -14,6 +13,7 @@ import {
 } from '../components/overview-sections';
 import { usePipelineOverview } from '../pipeline/use-overview';
 import { useOverviewSelection } from '../pipeline/use-overview-selection';
+import { OverviewFilters } from '../components/overview-filters';
 
 function updatedAtLabel(value: string | null): string | null {
   if (!value) return null;
@@ -34,9 +34,27 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-overview analytics-overview">
-      {(status !== 'ready' || !view || view.empty) && (
-        <h1 className="sr-only">Visão geral das compras públicas</h1>
-      )}
+      <div className="analytics-overview-heading">
+        <div className="min-w-0">
+          <h1>Compras públicas no Ceará</h1>
+          <p>Indicadores de ME no exercício selecionado.</p>
+        </div>
+      </div>
+      <div className="analytics-overview-provenance" aria-label="Período e origem dos dados">
+        {view && !view.empty && (
+          <>
+            <span>
+              <CalendarDays aria-hidden="true" />
+              {startDate && endDate
+                ? `${dateLabel(startDate)} – ${dateLabel(endDate)}`
+                : `Exercício ${year}`}
+            </span>
+            <span><Database aria-hidden="true" />Fonte: {view.source}</span>
+            {lastUpdate && <span><Clock3 aria-hidden="true" />Atualizado em {lastUpdate}</span>}
+          </>
+        )}
+        <OverviewFilters />
+      </div>
 
       {status === 'loading' ? (
         <LoadingState />
@@ -80,32 +98,6 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="analytics-overview-heading">
-            <div className="min-w-0">
-              <h1>Compras públicas no Ceará</h1>
-              <p>Indicadores de ME e MEI no exercício selecionado.</p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={retry}
-              className="analytics-overview-refresh min-h-11 gap-2"
-              aria-label="Atualizar dados da visão geral"
-            >
-              <RefreshCw className="size-4" />
-              Atualizar dados
-            </Button>
-          </div>
-
-          <div className="analytics-overview-provenance" aria-label="Período e origem dos dados">
-            <span>
-              <CalendarDays aria-hidden="true" />
-              {startDate && endDate
-                ? `${dateLabel(startDate)} – ${dateLabel(endDate)}`
-                : `Exercício ${year}`}
-            </span>
-            <span><Database aria-hidden="true" />Fonte: {view.source}</span>
-            {lastUpdate && <span><Clock3 aria-hidden="true" />Atualizado em {lastUpdate}</span>}
-          </div>
 
           <OverviewKpis params={params} />
 
@@ -115,8 +107,8 @@ export default function Dashboard() {
           </div>
 
           <div className="analytics-overview-grid analytics-overview-grid-featured analytics-overview-secondary-grid">
-            <OverviewMunicipalityRanking items={view.municipalityRanking} />
             <OverviewExpenses params={params} />
+            <OverviewMunicipalityRanking items={view.municipalityRanking} />
           </div>
         </>
       )}

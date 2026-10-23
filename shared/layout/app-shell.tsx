@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -13,9 +14,9 @@ import {
   ChevronRight,
   Share2,
   MessageCircle,
+  House,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { OverviewFilters } from '@/features/analytics/components/overview-filters';
 import {
   Sidebar,
   SidebarProvider,
@@ -215,7 +216,6 @@ function ShellContent({ children }: { children: ReactNode }) {
           <div className="analytics-topbar-actions flex items-center gap-3">
             {path === '/analitico' && (
               <>
-                <OverviewFilters />
                 <Button variant="outline" size="sm" className="analytics-top-action min-h-11 px-3" aria-label="Compartilhar recorte" onClick={async () => {
                   try {
                     await navigator.clipboard.writeText(window.location.href);
@@ -229,6 +229,12 @@ function ShellContent({ children }: { children: ReactNode }) {
                 </Button>
               </>
             )}
+            <Button asChild variant="outline" size="sm" className="analytics-home-action min-h-11 gap-2 px-3">
+              <Link href="/">
+                <House className="size-4" aria-hidden="true" />
+                <span>Voltar ao início</span>
+              </Link>
+            </Button>
             <Button
               variant="ghost"
               size="icon"

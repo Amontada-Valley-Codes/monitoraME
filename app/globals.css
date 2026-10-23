@@ -1008,8 +1008,6 @@
   line-height: 1.5;
 }
 
-.analytics-overview-refresh { flex: 0 0 auto; }
-
 .analytics-overview-provenance {
   display: flex;
   flex-wrap: wrap;
@@ -1156,6 +1154,7 @@
 .analytics-overview-ranking th,
 .analytics-overview-ranking td {
   padding-inline: .75rem;
+  font-size: .75rem;
 }
 
 .analytics-overview-ranking td {
@@ -1164,9 +1163,7 @@
 }
 
 .analytics-overview-ranking td:first-child,
-.analytics-overview-ranking td:nth-child(3),
-.analytics-overview-ranking td:nth-child(4),
-.analytics-overview-ranking td:nth-child(5) {
+.analytics-overview-ranking td:nth-child(3) {
   font-variant-numeric: tabular-nums;
 }
 
@@ -1196,7 +1193,6 @@
     align-items: flex-start;
   }
   .analytics-overview-heading p { font-size: .875rem; }
-  .analytics-overview-refresh { width: 100%; justify-content: center; }
   .analytics-overview-provenance { gap: .5rem .875rem; }
   .analytics-window .analytics-overview .analytics-overview-metric {
     min-height: 8.25rem;
@@ -1213,7 +1209,6 @@
     margin-left: 0;
     justify-content: space-between;
   }
-  .analytics-topbar-overview .analytics-overview-filters { flex: 0 0 auto; }
 }
 
 @media (max-width: 380px) {

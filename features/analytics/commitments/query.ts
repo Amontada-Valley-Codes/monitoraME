@@ -13,7 +13,7 @@ export const DEFAULT_COMMITMENT_FILTERS: CommitmentListFilters = {
   supplier_origins: [],
   expense_element_codes: [],
   page: 1,
-  page_size: 50,
+  page_size: 20,
   sort_by: 'net_value',
   sort_order: 'desc',
 };
@@ -43,7 +43,6 @@ export function normalizeExpenseElementCode(value: string): string | null {
 
 export function parseCommitmentFilters(params: URLSearchParams): CommitmentListFilters {
   const page = Number(params.get('page'));
-  const pageSize = Number(params.get('page_size'));
   const sortBy = params.get('sort_by');
   const sortOrder = params.get('sort_order');
   const startDate = params.get('start_date');
@@ -66,7 +65,7 @@ export function parseCommitmentFilters(params: URLSearchParams): CommitmentListF
       .filter((value): value is string => value !== null))],
     ...(search ? { search: search.slice(0, 200) } : {}),
     page: Number.isInteger(page) && page > 0 ? page : 1,
-    page_size: pageSize === 20 || pageSize === 100 ? pageSize : 50,
+    page_size: 20,
     sort_by: COMMITMENT_SORT_FIELDS.includes(sortBy as CommitmentSortField)
       ? (sortBy as CommitmentSortField)
       : 'net_value',
