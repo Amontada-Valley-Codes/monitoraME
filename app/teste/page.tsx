@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { Providers } from "@/app/providers";
+import { LeadCtaProvider } from "@/shared/auth/lead-cta-context";
+import { SessionProvider } from "@/shared/auth/session-context";
 import { Landing } from "@/components/teste/teste-landing";
 import "./landing.css";
 
@@ -9,5 +12,13 @@ export const metadata: Metadata = {
 };
 
 export default function TestePage() {
-  return <Landing />;
+  return (
+    <Providers>
+      <SessionProvider>
+        <LeadCtaProvider>
+          <Landing />
+        </LeadCtaProvider>
+      </SessionProvider>
+    </Providers>
+  );
 }

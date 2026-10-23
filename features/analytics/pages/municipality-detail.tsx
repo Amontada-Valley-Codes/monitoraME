@@ -21,6 +21,7 @@ import { useSession } from '@/shared/auth/session-context';
 import { MUNICIPALITIES } from '../data/fixtures';
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from '../components/charts';
 import { OverviewMetricCard } from '../components/overview-sections';
+import { ChartSwitchButton } from '../components/chart-switch-button';
 import { PageHeader } from '../components/page-header';
 import { TceMunicipalitySelect } from '../components/tce-municipality-select';
 import { TCE_MUNICIPALITIES } from '../pipeline/municipalities';
@@ -99,6 +100,7 @@ function MunicipalFilters({ input, initialCode }: { input: MunicipalOverviewInpu
 
 function OverviewPanels({ data, input }: { data: MunicipalOverview; input: MunicipalOverviewInput }) {
   const { accountStatus } = useSession();
+  const [activeDistribution, setActiveDistribution] = useState<'sizes' | 'destinations'>('sizes');
   const [showRegistrationNotice, setShowRegistrationNotice] = useState(true);
   useEffect(() => {
     if (sessionStorage.getItem(REGISTRATION_NOTICE_DISMISSED_KEY) !== 'true') return;
@@ -120,6 +122,11 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
   const evolution = monthsBetween(input.start_date, input.end_date).map((period) => { const row = evolutionByMonth.get(period); const unavailable = missing.has(period); const known = Boolean(row) || published.has(period); return { date: monthDate(period), label: monthLabel(period), total: unavailable || !known ? null : row?.compras_consideradas_centavos ?? 0, mpe: unavailable || !known ? null : row?.microempresas_centavos ?? 0, unavailable }; });
   const totalSizes = sizes.reduce((sum, item) => sum + item.value, 0);
   const totalDestinations = destinations.reduce((sum, item) => sum + item.value, 0);
+  const showingSizes = activeDistribution === 'sizes';
+  const distribution = showingSizes ? sizes : destinations;
+  const distributionTitle = showingSizes ? 'Participa\u00e7\u00e3o por porte empresarial' : 'Destino dos recursos';
+  const nextDistributionTitle = showingSizes ? 'Destino dos recursos' : 'Participa\u00e7\u00e3o por porte';
+  const distributionTotal = showingSizes ? totalSizes : totalDestinations;
   const series = [{ key: 'total', label: 'Compras consideradas', color: 'var(--chart-1)' }, { key: 'mpe', label: 'Microempresas', color: 'var(--size-me)' }];
 
   return <div className="dashboard-overview municipal-overview">
@@ -138,9 +145,17 @@ function OverviewPanels({ data, input }: { data: MunicipalOverview; input: Munic
       <ChartPanel className="analytics-fixed-chart dashboard-primary-chart" title="Evolução das compras consideradas" description="Lacunas representam competências não publicadas; períodos publicados sem movimento aparecem como zero." legend={series.map((item) => ({ label: item.label, color: item.color }))} rows={evolution.map((item) => ({ label: item.label, values: item.unavailable ? ['Dados não publicados', 'Dados não publicados'] : [item.total == null ? '—' : money(item.total), item.mpe == null ? '—' : money(item.mpe)] }))} empty={!evolution.length}><TrendChart data={evolution} series={series} /></ChartPanel>
     </div>
 
-    <div className="mb-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
-      <ChartPanel title="Participação por porte empresarial" rows={sizes.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!sizes.length}><DonutChart data={sizes} total={totalSizes} /></ChartPanel>
-      <ChartPanel title="Destino dos recursos" description="Origem em relação ao município comprador" rows={destinations.map((item) => ({ label: item.name, values: [money(item.value)] }))} empty={!destinations.length}><DonutChart data={destinations} total={totalDestinations} /></ChartPanel>
+    <div className="mb-3">
+      <ChartPanel
+        belowTitleAction={<ChartSwitchButton nextView={nextDistributionTitle} onClick={() => setActiveDistribution(showingSizes ? 'destinations' : 'sizes')} />}
+        description={showingSizes ? undefined : 'Origem em relação ao município comprador'}
+        empty={!distribution.length}
+        key={activeDistribution}
+        rows={distribution.map((item) => ({ label: item.name, values: [money(item.value)] }))}
+        title={distributionTitle}
+      >
+        <DonutChart data={distribution} total={distributionTotal} />
+      </ChartPanel>
     </div>
 
     <div className="mb-3">

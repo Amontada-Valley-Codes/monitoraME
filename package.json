@@ -47,7 +47,7 @@
     "lucide-react": "^1.48.0",
     "motion": "^13.4.4",
     "motion-react": "^0.15.0-alpha.1",
-    "next": "16.4.2",
+    "next": "^16.4.3",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.6.7",
     "react": "19.3.1",

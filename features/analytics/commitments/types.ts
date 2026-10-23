@@ -21,7 +21,7 @@ export interface CommitmentListFilters {
   expense_element_codes: string[];
   search?: string;
   page: number;
-  page_size: 20 | 50 | 100;
+  page_size: 20;
   sort_by: CommitmentSortField;
   sort_order: SortOrder;
 }
