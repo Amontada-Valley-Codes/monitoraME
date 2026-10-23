@@ -14,6 +14,7 @@ NGINX_SOURCE="$RELEASE_DIR/deploy/nginx/monitorame-apps.conf"
 NGINX_SITE="/etc/nginx/sites-available/default"
 NGINX_BACKUP="${NGINX_SITE}.monitorame-backup"
 NGINX_UPDATED=0
+APP_PORT=3002
 
 if [[ ! -f "$WEB_SOURCE/server.js" ]]; then
   echo "Release inválido: não encontrei $WEB_SOURCE/server.js" >&2
@@ -38,6 +39,15 @@ fi
 # Só prossegue se o arquivo default contém o vhost que será atualizado.
 if ! grep -qE '^[[:space:]]*server_name[[:space:]].*monitorame\.amontadavalley\.com\.br([[:space:];]|$)' "$NGINX_SITE"; then
   echo "Não encontrei o server_name do MonitoraME em $NGINX_SITE; nginx não foi alterado." >&2
+  exit 1
+fi
+
+# Nunca assuma uma porta ocupada por outro serviço. Um listener já existente só é
+# permitido se pertencer ao próprio unit do MonitoraME durante um redeploy.
+listener_pid="$(sudo ss -ltnpH "sport = :$APP_PORT" | sed -n 's/.*pid=\([0-9][0-9]*\).*/\1/p' | head -n 1)"
+if [[ -n "$listener_pid" ]] \
+  && ! sudo grep -q '/system.slice/monitorame-web.service' "/proc/$listener_pid/cgroup"; then
+  echo "A porta $APP_PORT já está ocupada por outro serviço (PID $listener_pid); deploy cancelado sem alterar o nginx." >&2
   exit 1
 fi
 
@@ -162,7 +172,7 @@ fi
 
 for attempt in 1 2 3 4 5 6; do
   if sudo systemctl is-active --quiet monitorame-web \
-    && curl --fail --silent --show-error http://127.0.0.1:3000/ --output /dev/null; then
+    && curl --fail --silent --show-error "http://127.0.0.1:$APP_PORT/" --output /dev/null; then
     break
   fi
   echo "Aguardando o frontend iniciar ($attempt/6)..."
@@ -170,7 +180,7 @@ for attempt in 1 2 3 4 5 6; do
 done
 
 if ! sudo systemctl is-active --quiet monitorame-web \
-  || ! curl --fail --silent --show-error http://127.0.0.1:3000/ --output /dev/null; then
+  || ! curl --fail --silent --show-error "http://127.0.0.1:$APP_PORT/" --output /dev/null; then
   rollback
   exit 1
 fi
@@ -200,4 +210,4 @@ if ! curl --fail --silent --show-error -H 'Host: monitorame.amontadavalley.com.b
   exit 1
 fi
 
-echo "Frontend Next.js ativo e nginx encaminhando monitorame.amontadavalley.com.br."
+echo "Frontend Next.js ativo na porta $APP_PORT; nginx encaminha monitorame.amontadavalley.com.br."
