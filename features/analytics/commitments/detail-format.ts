@@ -26,8 +26,9 @@ const SIZE_LABELS: Record<string, string> = {
   MEI: 'Microempreendedor individual',
   ME: 'Microempresa',
   EPP: 'Empresa de pequeno porte',
+  NAO_IDENTIFICADO: 'N\u00e3o identificado',
   OTHER: 'Outros portes',
-  UNKNOWN: 'Não identificado',
+  UNKNOWN: 'N\u00e3o identificado',
 };
 
 const ORIGIN_LABELS: Record<string, string> = {
@@ -37,7 +38,14 @@ const ORIGIN_LABELS: Record<string, string> = {
   ORIGEM_NAO_IDENTIFICADA: 'Origem não identificada',
 };
 
-export const companySizeLabel = (value: string) => SIZE_LABELS[value] ?? value;
+export const companySizeLabel = (value: string) => {
+  const key = value.trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s-]+/g, '_')
+    .toUpperCase();
+  return SIZE_LABELS[key] ?? value;
+};
 export const supplierOriginLabel = (value: string) => ORIGIN_LABELS[value] ?? value;
 
 const CANCELLATION_MODALITY_LABELS: Record<string, string> = {

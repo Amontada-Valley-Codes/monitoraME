@@ -14,6 +14,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { PieCenter } from '@/components/charts/pie-center';
 import { PieChart } from '@/components/charts/pie-chart';
 import { PieSlice } from '@/components/charts/pie-slice';
+import { ChartSwitchButton } from '../components/chart-switch-button';
+import { BarsChart } from '../components/charts';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -203,13 +205,24 @@ function Kpi({ label, value, detail, prominent = false }: { label: string; value
 
 function ExpenseElementsPie({ elements }: { elements: SupplierExpenseElement[] }) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [showBars, setShowBars] = useState(false);
   const chartData = useMemo(() => elements.map((item, index) => ({
     label: `${item.codigo} · ${item.nome}`,
     value: item.valor_considerado_centavos,
     color: EXPENSE_ELEMENT_COLORS[index % EXPENSE_ELEMENT_COLORS.length],
   })), [elements]);
 
-  return <div className="mt-5 grid items-center gap-6 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.2fr)]">
+  return <div className="mt-5">
+    <div className="mb-4 flex justify-end">
+      <ChartSwitchButton nextView={showBars ? 'Ver gráfico de rosca' : 'Ver gráfico de barras'} onClick={() => setShowBars((value) => !value)} />
+    </div>
+    {showBars ? <div className="h-72 min-w-0">
+      <BarsChart
+        data={elements.map((item, index) => ({ name: item.codigo, label: item.nome, value: item.valor_considerado_centavos, color: EXPENSE_ELEMENT_COLORS[index % EXPENSE_ELEMENT_COLORS.length] }))}
+        series={[{ key: 'value', label: 'Valor considerado', color: 'var(--chart-1)' }]}
+        colorKey="color"
+      />
+    </div> : <div className="grid items-center gap-6 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.2fr)]">
     <div className="mx-auto size-56 shrink-0">
       <PieChart
         data={chartData}
@@ -252,6 +265,7 @@ function ExpenseElementsPie({ elements }: { elements: SupplierExpenseElement[] }
         </Button>;
       })}
     </div>
+    </div>}
   </div>;
 }
 

@@ -1,11 +1,13 @@
 'use client';
 
 import { MapPin, ArrowUpRight, HelpCircle } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '../components/page-header';
 import { GlobalFilters } from '../components/global-filters';
 import { useAnalytics } from '../data/context';
 import { ChartPanel } from '@/shared/components/chart-panel';
+import { ChartSwitchButton } from '../components/chart-switch-button';
 import { DonutChart, BarsChart } from '../components/charts';
 import { KpiCard } from '@/shared/components/kpi-card';
 import { DataTable, type Column } from '@/shared/components/data-table';
@@ -15,6 +17,7 @@ import { ExportButton } from '@/shared/components/export-button';
 import { SUPPLIERS } from '../data/fixtures';
 
 export default function Territory() {
+  const [showingUf, setShowingUf] = useState(false);
   const { data, state, filters, reload, reset, setFilters } = useAnalytics();
   const summary = data?.summary;
   const previous = data?.previous;
@@ -38,6 +41,11 @@ export default function Territory() {
 
   const destinations = Array.from(groups.values()).sort((a, b) => b.total - a.total);
   type Row = (typeof destinations)[number];
+  const ufData = ['CE', 'SP', '—'].map((uf) => ({
+    name: uf === '—' ? 'N\u00e3o ident.' : uf,
+    value: destinations.filter((destination) => destination.uf === uf).reduce((sum, destination) => sum + destination.total, 0),
+  }));
+  const nextChartTitle = showingUf ? 'Origem em relação ao comprador' : 'Compras por UF do fornecedor';
 
   const columns: Column<Row>[] = [
     {
@@ -132,46 +140,20 @@ export default function Territory() {
               </div>
 
               {/* Charts Panel Section */}
-              <div className="grid xl:grid-cols-2 gap-6 mb-6">
+              <div className="mb-6">
                 <ChartPanel
-                  title="Origem em relação ao comprador"
+                  belowTitleAction={<ChartSwitchButton nextView={nextChartTitle} onClick={() => setShowingUf((value) => !value)} />}
                   description="Porte: seleção global"
-                  rows={summary.byOrigin.map((origin) => ({
-                    label: origin.name,
-                    values: [money(origin.value)],
-                  }))}
+                  key={showingUf ? 'supplier-uf' : 'supplier-origin'}
+                  legend={showingUf ? [{ label: 'Empenhado líquido', color: 'var(--chart-1)' }] : undefined}
+                  rows={showingUf
+                    ? ufData.map((item) => ({ label: item.name, values: [money(item.value)] }))
+                    : summary.byOrigin.map((origin) => ({ label: origin.name, values: [money(origin.value)] }))}
+                  title={showingUf ? 'Compras por UF do fornecedor' : 'Origem em relação ao comprador'}
                 >
-                  <DonutChart
-                    data={summary.byOrigin}
-                    total={summary.total}
-                    onSelect={(origin) => setFilters({ origin })}
-                  />
-                </ChartPanel>
-
-                <ChartPanel
-                  title="Compras por UF do fornecedor"
-                  description="Porte: seleção global"
-                  legend={[{ label: 'Empenhado líquido', color: 'var(--chart-1)' }]}
-                  rows={['CE', 'SP', '—'].map((uf) => ({
-                    label: uf,
-                    values: [
-                      money(
-                        destinations
-                          .filter((dest) => dest.uf === uf)
-                          .reduce((sum, dest) => sum + dest.total, 0)
-                      ),
-                    ],
-                  }))}
-                >
-                  <BarsChart
-                    data={['CE', 'SP', '—'].map((uf) => ({
-                      name: uf === '—' ? 'Não ident.' : uf,
-                      value: destinations
-                        .filter((dest) => dest.uf === uf)
-                        .reduce((sum, dest) => sum + dest.total, 0),
-                    }))}
-                    series={[{ key: 'value', label: 'Empenhado líquido', color: 'var(--chart-1)' }]}
-                  />
+                  {showingUf
+                    ? <BarsChart data={ufData} series={[{ key: 'value', label: 'Empenhado líquido', color: 'var(--chart-1)' }]} />
+                    : <DonutChart data={summary.byOrigin} total={summary.total} onSelect={(origin) => setFilters({ origin })} />}
                 </ChartPanel>
               </div>
             </>

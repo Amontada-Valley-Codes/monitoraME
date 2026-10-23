@@ -95,9 +95,10 @@ export default function Expenses() {
   const loading = requestState.key !== requestKey;
   const data = loading ? null : requestState.data;
   const error = loading ? null : requestState.error;
+  const totalPages = data ? Math.max(1, Math.ceil(data.pagination.total_items / 20)) : 1;
   useEffect(() => {
-    if (data && data.pagination.total_pages > 0 && filters.page > data.pagination.total_pages) updateFilters({ page: 1 }, false);
-  }, [data, filters.page, updateFilters]);
+    if (data && filters.page > totalPages) updateFilters({ page: 1 }, false);
+  }, [data, filters.page, totalPages, updateFilters]);
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,8 +114,14 @@ export default function Expenses() {
   }
 
   const activeExtendedFilters = filters.company_sizes.length + filters.supplier_origins.length + filters.expense_element_codes.length;
-  const firstItem = data && data.pagination.total_items ? (data.pagination.page - 1) * data.pagination.page_size + 1 : 0;
-  const lastItem = data ? Math.min(data.pagination.page * data.pagination.page_size, data.pagination.total_items) : 0;
+  const firstItem = data && data.pagination.total_items ? (filters.page - 1) * 20 + 1 : 0;
+  const lastItem = data ? Math.min(filters.page * 20, data.pagination.total_items) : 0;
+  const visibleItems = data?.items.slice(0, 20) ?? [];
+  const visiblePages = data
+    ? [...new Set([1, filters.page - 1, filters.page, filters.page + 1, totalPages])]
+      .filter((page) => page >= 1 && page <= totalPages)
+      .sort((left, right) => left - right)
+    : [];
   const viewState = getCommitmentViewState(loading, Boolean(error), data?.items.length ?? 0);
 
   return <>
@@ -130,7 +137,7 @@ export default function Expenses() {
           <div className="relative min-w-0 flex-1"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input key={filters.search ?? ''} name="search" aria-label="Buscar empenho ou fornecedor" className="pl-9" maxLength={200} placeholder="Número do empenho, fornecedor ou identificador" defaultValue={filters.search ?? ''} /></div>
           <Button type="submit">Buscar</Button>
         </form>
-        <div className="flex items-center gap-2"><Label className="whitespace-nowrap text-sm text-muted-foreground">Itens por página</Label><SelectField label="Itens por página" value={String(filters.page_size)} onChange={(value) => updateFilters({ page_size: Number(value) as 20 | 50 | 100 })} options={[20, 50, 100].map((value) => ({ value: String(value), label: String(value) }))} className="w-20" /></div>
+        <p className="self-center text-xs text-muted-foreground sm:pl-2">Até 20 empenhos por página</p>
       </div>
     </section>
 
@@ -145,8 +152,31 @@ export default function Expenses() {
 
     {viewState === 'loading' ? <LoadingState /> : viewState === 'error' && error ? <CommitmentError error={error} onRetry={() => setVersion((value) => value + 1)} /> : viewState === 'empty' ?
       <EmptyState title="Nenhum empenho encontrado" description="Ajuste o período ou os filtros para consultar outros registros." onReset={() => replaceFilters(DEFAULT_COMMITMENT_FILTERS)} /> :
-      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos"><div className="flex flex-wrap items-center justify-between gap-3 border-b bg-card px-5 py-4"><div><h2 className="font-semibold text-foreground">Empenhos encontrados</h2><p className="mt-0.5 text-sm text-muted-foreground">{number(data.pagination.total_items)} registros no recorte selecionado</p></div><p className="text-xs text-muted-foreground">Selecione uma linha para consultar os detalhes</p></div><CommitmentTable items={data.items} sortBy={filters.sort_by} sortOrder={filters.sort_order} onSort={changeSort} onOpen={openDetail} />
-      <div className="flex flex-col items-center justify-between gap-3 border-t bg-muted/20 px-5 py-3 sm:flex-row"><p className="text-sm text-muted-foreground" aria-live="polite">Exibindo {number(firstItem)}–{number(lastItem)} de {number(data.pagination.total_items)}</p><div className="flex items-center gap-2"><span className="mr-1 text-sm text-muted-foreground">Página {number(data.pagination.page)} de {number(Math.max(1, data.pagination.total_pages))}</span><Button variant="outline" size="icon" aria-label="Página anterior" disabled={!data.pagination.has_previous} onClick={() => updateFilters({ page: filters.page - 1 }, false)}><ChevronLeft /></Button><Button variant="outline" size="icon" aria-label="Próxima página" disabled={!data.pagination.has_next} onClick={() => updateFilters({ page: filters.page + 1 }, false)}><ChevronRight /></Button></div></div>
+      data && <section className="panel overflow-hidden" aria-label="Lista de empenhos" aria-busy={loading}>
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b bg-card px-5 py-4">
+          <div>
+            <h2 className="font-semibold text-foreground">Empenhos encontrados</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{number(data.pagination.total_items)} registros no recorte selecionado</p>
+          </div>
+          <p className="text-xs text-muted-foreground">Até 20 empenhos por página · selecione uma linha para ver os detalhes</p>
+        </div>
+        <CommitmentTable items={visibleItems} sortBy={filters.sort_by} sortOrder={filters.sort_order} onSort={changeSort} onOpen={openDetail} />
+        <nav className="flex flex-col items-center justify-between gap-3 border-t bg-muted/20 px-4 py-3 sm:flex-row sm:px-5" aria-label="Paginação dos empenhos">
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            Exibindo <span className="font-medium tabular-nums text-foreground">{number(firstItem)}–{number(lastItem)}</span> de {number(data.pagination.total_items)}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="icon" className="size-9" aria-label="Página anterior" disabled={filters.page <= 1} onClick={() => updateFilters({ page: filters.page - 1 }, false)}><ChevronLeft /></Button>
+            {visiblePages.map((page, index) => {
+              const previous = visiblePages[index - 1];
+              return <span key={page} className="flex items-center gap-1.5">
+                {previous && page - previous > 1 && <span className="px-1 text-sm text-muted-foreground" aria-hidden="true">…</span>}
+                <Button variant={page === filters.page ? 'default' : 'outline'} size="icon" className="size-9 tabular-nums" aria-label={`Página ${page}`} aria-current={page === filters.page ? 'page' : undefined} onClick={() => updateFilters({ page }, false)}>{page}</Button>
+              </span>;
+            })}
+            <Button variant="outline" size="icon" className="size-9" aria-label="Próxima página" disabled={filters.page >= totalPages} onClick={() => updateFilters({ page: filters.page + 1 }, false)}><ChevronRight /></Button>
+          </div>
+        </nav>
       </section>}
   </>;
 }

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChartPanel } from '@/shared/components/chart-panel';
 import { money, number, percent, points } from '@/shared/lib/format';
 import { BarsChart, expenseShortLabel, TrendChart, type Series } from '../components/charts';
+import { ChartSwitchButton } from '../components/chart-switch-button';
 import {
   companySizeLabel,
   formatCompetence,
@@ -148,18 +149,15 @@ export function ComparisonResults({ data }: { data: ComparisonResponse }) {
           value: item.valor_centavos,
           percentage: item.percentual,
         }))}
-      />
-
-      <DualPiePanel
-        title="Destino dos recursos"
-        description="Distribuição percentual de cada recorte conforme a origem do fornecedor"
-        leftLabel={data.left.label}
-        rightLabel={data.right.label}
-        items={data.sections.destino_recursos.map((item) => ({
-          label: supplierOriginLabel(item.destino),
-          value: item.valor_centavos,
-          percentage: item.percentual,
-        }))}
+        alternate={{
+          title: 'Destino dos recursos',
+          description: 'Distribuição percentual de cada recorte conforme a origem do fornecedor',
+          items: data.sections.destino_recursos.map((item) => ({
+            label: supplierOriginLabel(item.destino),
+            value: item.valor_centavos,
+            percentage: item.percentual,
+          })),
+        }}
       />
 
       <ChartPanel
@@ -196,22 +194,31 @@ function DualPiePanel({
   leftLabel,
   rightLabel,
   items,
+  alternate,
 }: {
   title: string;
   description: string;
   leftLabel: string;
   rightLabel: string;
   items: PieComparisonItem[];
+  alternate: { title: string; description: string; items: PieComparisonItem[] };
 }) {
+  const [showAlternate, setShowAlternate] = useState(false);
+  const activeView = showAlternate ? alternate : { title, description, items };
+  const nextView = showAlternate ? title : alternate.title;
+
   return (
     <section className="panel overflow-hidden">
-      <div className="border-b p-5 sm:p-6">
-        <h2 className="text-lg font-semibold">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b p-5 sm:p-6">
+        <div>
+          <h2 className="text-lg font-semibold">{activeView.title}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{activeView.description}</p>
+        </div>
+        <ChartSwitchButton nextView={nextView} onClick={() => setShowAlternate((value) => !value)} />
       </div>
       <div className="grid gap-8 p-5 sm:p-6 lg:grid-cols-2">
-        <SidePie label={leftLabel} side="left" items={items} />
-        <SidePie label={rightLabel} side="right" items={items} />
+        <SidePie key={`${activeView.title}-left`} label={leftLabel} side="left" items={activeView.items} />
+        <SidePie key={`${activeView.title}-right`} label={rightLabel} side="right" items={activeView.items} />
       </div>
     </section>
   );

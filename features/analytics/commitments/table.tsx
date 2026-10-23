@@ -33,7 +33,7 @@ export function CommitmentTable({
   onOpen: (key: string) => void;
 }) {
   const columns = omitSupplier ? COLUMNS.filter((column) => column.field !== 'supplier') : COLUMNS;
-  return <Table className="w-full table-fixed"><TableHeader className="bg-muted/55"><TableRow className="hover:bg-muted/55">{columns.map((column) => {
+  return <Table className="min-w-[960px] w-full table-fixed"><TableHeader className="bg-muted/55"><TableRow className="hover:bg-muted/55">{columns.map((column) => {
     const active = sortBy === column.field;
     return <TableHead key={column.field} aria-sort={active ? sortOrder === 'asc' ? 'ascending' : 'descending' : 'none'} className={`h-12 px-2 text-xs font-semibold tracking-wide text-muted-foreground xl:px-4 ${column.align === 'right' ? 'text-right' : ''}`}>
       <Button variant="ghost" size="sm" className={column.align === 'right' ? '-mr-3 ml-auto text-xs' : '-ml-3 text-xs'} onClick={() => onSort(column.field)}>{column.label}{!active ? <ArrowUpDown className="size-3.5 opacity-45" /> : sortOrder === 'asc' ? <ArrowUp className="size-3.5 text-primary" /> : <ArrowDown className="size-3.5 text-primary" />}</Button>

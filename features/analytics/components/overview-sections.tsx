@@ -1,13 +1,13 @@
 'use client';
 
-import { ArrowLeftRight, ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
+import { ArrowUpRight, ChartPie, MapPin, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { BarsChart, DonutChart, expenseColor, expenseShortLabel, TrendChart } from './charts';
 import { ChartPanel } from '@/shared/components/chart-panel';
+import { ChartSwitchButton } from './chart-switch-button';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { compactMoney, money, number, percent } from '@/shared/lib/format';
+import { compactMoney, money, percent } from '@/shared/lib/format';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { PipelineOverviewParams } from '../pipeline/types';
 import type { OverviewMunicipalityRankingItem } from '../pipeline/view-model';
@@ -48,7 +48,7 @@ export function OverviewKpis({ params }: { params: PipelineOverviewParams }) {
 
   return (
     <div className="dashboard-metrics analytics-overview-metrics" role="group" aria-label="Indicadores principais">
-      <OverviewMetricCard label="Participação de ME e MEI" value={valueOrDash(data.meMeiPercentage, percent)} detail="Sobre o total de compras consideradas" icon={ChartPie} />
+      <OverviewMetricCard label="Participação de ME" value={valueOrDash(data.meMeiPercentage, percent)} detail="Sobre o total de compras consideradas" icon={ChartPie} />
       <OverviewMetricCard label="Compras de ME" value={valueOrDash(data.mePurchasesCents, compactMoney)} detail="Valor líquido · reais" icon={Wallet} />
       <OverviewMetricCard label="Percentual de compras com fornecedores no Ceará" value={valueOrDash(data.localPercentage, percent)} detail="Do total no recorte consultado" icon={MapPin} />
       <OverviewMetricCard label="Percentual de compras com fornecedores fora do Ceará" value={valueOrDash(data.outsidePercentage, percent)} detail="Do total no recorte consultado" icon={ArrowUpRight} />
@@ -65,32 +65,25 @@ export function OverviewMunicipalityRanking({ items }: {
       <div>
         <h2 className="font-semibold">Munic&#237;pios com maior volume de compras de ME</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Dez primeiros por valor l&#237;quido. Percentual calculado sobre o total estadual de ME.
+          Dez municípios com maior participação nas compras de ME.
         </p>
       </div>
       <div className="overflow-x-auto">
         <Table>
-          <caption className="sr-only">Ranking dos dez municipios com maior valor liquido de compras de ME</caption>
+          <caption className="sr-only">Ranking dos dez munic&#237;pios com maior valor l&#237;quido de compras de ME e percentual do total estadual</caption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">Posi&#231;&#227;o</TableHead>
               <TableHead>Munic&#237;pio</TableHead>
-              <TableHead className="text-right">Compras l&#237;quidas de ME</TableHead>
-              <TableHead className="text-right">Empenhos</TableHead>
-              <TableHead className="text-right">Do total estadual</TableHead>
+              <TableHead className="text-right">Percentual</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.map((item) => (
               <TableRow key={item.tceCode}>
-                <TableCell className="font-medium tabular-nums">{item.position}</TableCell>
-                <TableCell>
-                  <span className="font-medium">{item.municipality}</span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">Codigo TCE {item.tceCode}</span>
-                </TableCell>
-                <TableCell className="text-right font-medium tabular-nums">{money(item.purchasesCents)}</TableCell>
-                <TableCell className="text-right tabular-nums">{number(item.commitmentCount)}</TableCell>
-                <TableCell className="text-right tabular-nums">{percent(item.totalMePercentage)}</TableCell>
+                <TableCell className="text-xs font-medium tabular-nums">{item.position}</TableCell>
+                <TableCell className="text-xs font-medium">{item.municipality}</TableCell>
+                <TableCell className="text-right text-xs tabular-nums">{percent(item.totalMePercentage)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -111,7 +104,7 @@ export function OverviewExpenses({ params }: { params: PipelineOverviewParams })
     <ChartPanel
       className="analytics-fixed-chart analytics-overview-panel analytics-overview-expenses"
       title="Elementos de despesas"
-      description="Valores líquidos dos sete elementos de despesa considerados para ME e MEI"
+      description="Valores líquidos dos sete elementos de despesa considerados para ME"
       legend={rows.map((item) => ({ label: item.shortLabel, color: item.color }))}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
       state={status}
@@ -193,22 +186,17 @@ export function OverviewDistribution({ params }: { params: PipelineOverviewParam
   return (
     <ChartPanel
       belowTitleAction={(
-        <Button
-          aria-label={nextTitle}
-          className="min-h-9 gap-2"
+        <ChartSwitchButton
+          nextView={nextTitle}
           disabled={isSwitching}
           onClick={() => {
             setIsSwitching(true);
             setActiveView(showingBusinessSizes ? 'destinations' : 'businessSizes');
           }}
-          variant="outline"
-        >
-          <ArrowLeftRight aria-hidden="true" />
-          <span>{nextTitle}</span>
-        </Button>
+        />
       )}
       className="analytics-overview-panel analytics-overview-donut"
-      description={showingBusinessSizes ? 'Percentual do valor l\u00edquido anual' : 'Origem das compras de ME e MEI'}
+      description={showingBusinessSizes ? 'Percentual do valor l\u00edquido anual' : 'Origem das compras de ME'}
       empty={status === 'ready' && rows.length === 0}
       onRetry={retry}
       rows={rows.map((item) => ({ label: item.name, values: [money(item.value)] }))}
@@ -246,7 +234,7 @@ export function OverviewDistribution({ params }: { params: PipelineOverviewParam
 //       </div>
 
 //       <div className="rounded-2xl border bg-card/85 p-5 shadow-sm">
-//         <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Participação de ME e MEI</p>
+//         <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">Participação de ME</p>
 //         <div className="mt-2 flex items-end justify-between gap-3">
 //           <p className="metric text-4xl font-semibold tracking-tight text-primary sm:text-5xl">{valueOrDash(data.meMeiPercentage, percent)}</p>
 //           {/* <span className="pb-1 text-right text-xs text-muted-foreground">das compras analisadas</span> */}
