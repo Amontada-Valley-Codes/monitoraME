@@ -1,20 +1,70 @@
-## O que mudou
+## Resumo
 
-<!-- Resuma a alteração e indique o perfil/nível de acesso atendido. -->
+<!-- Descreva em poucas linhas o que mudou e por quê. -->
 
-## Como testar
+## Tipo de alteração
 
-<!-- Informe o caminho da tela, dados necessários e passos para reproduzir. -->
+- [ ] Correção
+- [ ] Funcionalidade
+- [ ] Refatoração
+- [ ] Documentação
+- [ ] Infraestrutura / dependências
 
-## Evidências
+## Escopo
 
-<!-- Inclua capturas para alterações visuais e descreva estados de loading, erro e vazio. -->
+- [ ] Frontend
+- [ ] Backend / API
+- [ ] Banco de dados / migração
+- [ ] Integração externa
+- [ ] Outro: <!-- descreva -->
+
+## Frontend
+
+<!-- Preencha quando houver mudança de interface; remova ou deixe em branco quando não se aplicar. -->
+
+- [ ] Comportamento responsivo conferido nos tamanhos relevantes
+- [ ] Estados de carregamento, erro, vazio e falta de permissão tratados quando aplicável
+- [ ] Acessibilidade considerada (teclado, foco, labels e contraste)
+- [ ] Dados de demonstração identificados como simulados
+- [ ] Regras e permissões continuam validadas pelo backend
+- [ ] Links para fontes oficiais e indicação de origem/atualização preservados quando aplicável
+
+**Telas/fluxos afetados:**
+
+<!-- Liste as telas e descreva o comportamento esperado. -->
+
+**Evidências visuais:**
+
+<!-- Adicione capturas ou gravações antes/depois para mudanças visuais. -->
+
+## Dados e integrações
+
+- [ ] Contratos e tipos de API atualizados quando necessário
+- [ ] Não foram duplicadas regras autoritativas de negócio no cliente
+- [ ] Cache e dados privados respeitam o isolamento entre usuários
+- [ ] Mocks e fixtures estão centralizados e claramente identificados, quando usados
+- [ ] Não há envio de proposta ou interação não autorizada com órgãos públicos
+- [ ] Não se aplica
+
+## Validação
+
+<!-- Informe os comandos executados e seus resultados. Não marque verificações que não foram feitas. -->
+
+- [ ] `npm run lint`
+- [ ] Checagem TypeScript
+- [ ] `npm test`
+- [ ] `npm run build`
+- [ ] Verificação manual: <!-- passos e resultado -->
+- [ ] Não se aplica; motivo: <!-- explique -->
 
 ## Checklist
 
-- [ ] Executei lint, checagem de tipos e testes
-- [ ] Validei o layout em telas pequenas e grandes, quando aplicável
-- [ ] Validei navegação por teclado, labels e contraste, quando aplicável
-- [ ] Diferenciei dados reais, simulados e gerados por IA
-- [ ] Não expus tokens, dados pessoais ou respostas privadas em cache/logs
-- [ ] Mantive links, origem e data de atualização dos dados oficiais
+- [ ] Testes adicionados ou atualizados para a lógica alterada
+- [ ] Documentação atualizada quando necessário
+- [ ] Variáveis de ambiente, migrações ou configuração descritas
+- [ ] Alterações compatíveis com os perfis e níveis de acesso afetados
+- [ ] Sem segredos, dados pessoais ou informações sensíveis em código, logs ou evidências
+
+## Referências
+
+<!-- Issue, tarefa ou decisão relacionada. -->

@@ -51,6 +51,8 @@ jobs:
           cp -R public release/web/public
           mkdir -p release/deploy/systemd
           cp deploy/remote-deploy.sh release/deploy/remote-deploy.sh
+          mkdir -p release/deploy/nginx
+          cp deploy/nginx/monitorame-apps.conf release/deploy/nginx/monitorame-apps.conf
           cp deploy/systemd/monitorame-web.service.template release/deploy/systemd/
           tar -czf release.tgz -C release .
       - name: Configurar acesso SSH pelo Cloudflare
